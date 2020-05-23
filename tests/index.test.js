@@ -20,39 +20,39 @@ it('should update when props change', async () => {
 
   expect(wrapper.root.findByType('View').props.style).toEqual({ paddingTop: 5, opacity: 0.9 })
 })
-// it('calls an attr-function with context', () => {
-//   const Comp = styled.View.attrs(p => ({
-//     copy: p.test
-//   }))``
+it('calls an attr-function with context', () => {
+  const Comp = styled.View.attrs(p => ({
+    copy: p.test
+  }))``
 
-//   const test = 'Put that cookie down!'
-//   const wrapper = TestRenderer.create(<Comp test={test} />)
-//   const view = wrapper.root.findByType('View')
+  const test = 'Put that cookie down!'
+  const wrapper = TestRenderer.create(<Comp test={test} />)
+  const view = wrapper.root.findByType('View')
 
-//   expect(view.props).toEqual({
-//     style: [{}],
-//     copy: test,
-//     test
-//   })
-// })
-// it('merges attrs when inheriting SC', () => {
-//   const Parent = styled.View.attrs(() => ({
-//     first: 'first'
-//   }))``
+  expect(view.props).toEqual({
+    style: {},
+    copy: test,
+    test
+  })
+})
+it('merges attrs when inheriting SC', () => {
+  const Parent = styled.View.attrs(() => ({
+    first: 'first'
+  }))``
 
-//   const Child = styled(Parent).attrs(() => ({
-//     second: 'second'
-//   }))``
+  const Child = styled(Parent).attrs(() => ({
+    second: 'second'
+  }))``
 
-//   const wrapper = TestRenderer.create(<Child />)
-//   const view = wrapper.root.findByType('View')
+  const wrapper = TestRenderer.create(<Child />)
+  const view = wrapper.root.findByType('View')
 
-//   expect(view.props).toMatchObject({
-//     style: [{}],
-//     first: 'first',
-//     second: 'second'
-//   })
-// })
+  expect(view.props).toMatchObject({
+    style: {},
+    first: 'first',
+    second: 'second'
+  })
+})
 
 describe('extended CSS support', () => {
   it('should handle vh, vw, vmin, vmax and rem units', () => {
