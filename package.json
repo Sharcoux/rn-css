@@ -9,6 +9,7 @@
     "start": "react-native start",
     "lint": "eslint --fix .",
     "build": "webpack",
+    "release": "release-it",
     "web": "webpack-dev-server --open --mode development"
   },
   "peerDependencies": {
@@ -16,10 +17,6 @@
     "react-native": "0.62.2"
   },
   "devDependencies": {
-    "react": "16.11.0",
-    "react-dom": "^16.13.1",
-    "react-native": "0.62.2",
-    "react-native-web": "^0.12.2",
     "@babel/core": "^7.6.2",
     "@babel/runtime": "^7.6.2",
     "@react-native-community/eslint-config": "^0.0.5",
@@ -45,8 +42,13 @@
     "jest": "^24.9.0",
     "lint-staged": "^10.2.4",
     "metro-react-native-babel-preset": "^0.58.0",
+    "react": "16.11.0",
+    "react-dom": "^16.13.1",
+    "react-native": "0.62.2",
     "react-native-typescript-transformer": "^1.2.13",
+    "react-native-web": "^0.12.2",
     "react-test-renderer": "16.11.0",
+    "release-it": "^13.6.1",
     "ts-jest": "^26.0.0",
     "ts-loader": "^7.0.4",
     "typescript": "^3.9.3",
