@@ -32,7 +32,7 @@ function cssToStyle (css: string) {
         Object.assign(result, sideValue(key, value))
         break
       case 'borderRadius':
-        Object.assign(result, cornerValue(key, value))
+        Object.assign(result, cornerValue('border', value, 'Radius'))
         break
       case 'font':
         Object.assign(result, font(value))

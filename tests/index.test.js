@@ -205,6 +205,7 @@ it('should handle border radius values', async () => {
     `
 
   const wrapper = TestRenderer.create(<Comp />)
+  await act(async () => {})
   await act(async () => {
     wrapper.root.findByType('View').props.onLayout({
       nativeEvent: { layout: { width: 100, height: 100 } }
@@ -212,10 +213,10 @@ it('should handle border radius values', async () => {
   })
 
   expect(wrapper.root.findByType('View').props.style).toEqual({
-    borderRadiusBottomLeft: 0,
-    borderRadiusBottomRight: 0,
-    borderRadiusTopLeft: 0,
-    borderRadiusTopRight: 0,
+    borderBottomLeftRadius: 50,
+    borderBottomRightRadius: 50,
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
     height: 100,
     width: 100
   })

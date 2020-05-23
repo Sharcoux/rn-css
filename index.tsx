@@ -3,7 +3,12 @@ import React from 'react'
 import { name as appName } from './app.json'
 import styled from './src'
 
-const View = styled.View``
+const View = styled.View`
+  background: green;
+  border-radius: 50%;
+  width: 200px;
+  height: 200px;
+`
 const Text = styled.Text<{col: string}>`
   color: ${props => props.col || 'black'}
 `

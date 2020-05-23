@@ -153,12 +153,12 @@ export function sideValue (prefixKey: 'padding' | 'margin' | 'border', value: st
 }
 
 /** Parses a css value for the corner of an element (border-radius) */
-export function cornerValue (prefixKey: 'borderRadius', value: string) {
+export function cornerValue (prefixKey: 'border', value: string, postFix: 'Radius') {
   const [topLeft, topRight = topLeft, bottomRight = topLeft, bottomLeft = topRight] = findNumbers(value).numbers
   return {
-    [prefixKey + 'TopLeft']: topLeft,
-    [prefixKey + 'TopRight']: topRight,
-    [prefixKey + 'BottomLeft']: bottomLeft,
-    [prefixKey + 'BottomRight']: bottomRight
+    [prefixKey + 'TopLeft' + postFix]: topLeft,
+    [prefixKey + 'TopRight' + postFix]: topRight,
+    [prefixKey + 'BottomLeft' + postFix]: bottomLeft,
+    [prefixKey + 'BottomRight' + postFix]: bottomRight
   }
 }

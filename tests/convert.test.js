@@ -16,7 +16,7 @@ describe('CSS style conversion', () => {
     expect(convert('border: 1px solid black')).toEqual({ borderWidth: '1px', borderStyle: 'solid', borderColor: 'black' })
     expect(convert('borderTop: 1px solid black')).toEqual({ borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: 'black' })
     expect(convert('borderWidth: 2px 3% 4rem')).toEqual({ borderTopWidth: '2px', borderBottomWidth: '4rem', borderLeftWidth: '3%', borderRightWidth: '3%' })
-    expect(convert('border-radius: 1px')).toEqual({ borderRadiusTopLeft: '1px', borderRadiusTopRight: '1px', borderRadiusBottomLeft: '1px', borderRadiusBottomRight: '1px' })
+    expect(convert('border-radius: 1px')).toEqual({ borderTopLeftRadius: '1px', borderTopRightRadius: '1px', borderBottomLeftRadius: '1px', borderBottomRightRadius: '1px' })
     expect(convert('padding: 1px')).toEqual({ paddingTop: '1px', paddingBottom: '1px', paddingLeft: '1px', paddingRight: '1px' })
     expect(convert('margin: 1px 2px')).toEqual({ marginTop: '1px', marginBottom: '1px', marginLeft: '2px', marginRight: '2px' })
     expect(convert('font: bold italic 1.2em "Fira Sans", serif;')).toEqual({ fontWeight: 'bold', fontStyle: 'italic', fontSize: '1.2em', fontFamily: '"Fira Sans", serif' })
