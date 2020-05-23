@@ -12,7 +12,7 @@ function buildCSSString<T> (chunks: TemplateStringsArray, functs: any[], props: 
 }
 
 const withStyle = <T extends {style?: any}, >(Component: React.ComponentType<T>) => {
-  const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: ((props: S & T) => any | any)[]) => (props: T & { children?: React.ReactNode }) => {
+  const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: ((props: S & T) => any | any)[]) => (props: S & T & { children?: React.ReactNode }) => {
   // Store the style for mutualization
     const cssString = React.useRef(buildCSSString(chunks, functs, props))
     // const rnStyle = React.useRef<Style>(cssToStyle(cssString.current))
