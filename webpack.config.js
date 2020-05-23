@@ -11,7 +11,7 @@ if (result.error) {
 module.exports = {
   mode: process.env.NODE_ENV || 'development',
   entry: {
-    app: path.resolve(__dirname, 'index.ts')
+    app: path.resolve(__dirname, 'index.tsx')
   },
   output: {
     path: path.resolve(__dirname, 'demo'),

@@ -7,12 +7,12 @@ import { withFontSizeUpdate, withUnits } from './readUnits'
 // We use this to cache the computed styles
 const styleMap: StyleMap = {}
 
-function buildCSSString<T> (chunks: string[], functs: any[], props: T) {
+function buildCSSString<T> (chunks: TemplateStringsArray, functs: any[], props: T) {
   return chunks.map((chunk, i) => ([chunk, functs[i] instanceof Function ? functs[i](props) : functs[i]])).flat().join('')
 }
 
 const withStyle = <T extends {style?: any}, >(Component: React.ComponentType<T>) => {
-  const styledComponent = (chunks: string[], ...functs: ((props: T) => string | string)[]) => (props: T) => {
+  const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: ((props: S & T) => string | string)[]) => (props: T & { children?: React.ReactNode }) => {
   // Store the style for mutualization
     const cssString = React.useRef(buildCSSString(chunks, functs, props))
     // const rnStyle = React.useRef<Style>(cssToStyle(cssString.current))
@@ -54,7 +54,7 @@ const withStyle = <T extends {style?: any}, >(Component: React.ComponentType<T>)
   }
 
   // provide withStyle(Comp).attrs({} | () => {}) feature
-  styledComponent.attrs = (opts: Function | object) => (chunks: string[], ...functs: any[]) => (props: T) => {
+  styledComponent.attrs = (opts: Function | object) => (chunks: TemplateStringsArray, ...functs: any[]) => (props: T) => {
     const attrs = (opts instanceof Function) ? opts(props) : opts
     return styledComponent(chunks, ...functs)({ ...props, ...attrs })
   }
