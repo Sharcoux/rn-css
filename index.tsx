@@ -4,12 +4,14 @@ import { name as appName } from './app.json'
 import styled from './src'
 
 const View = styled.View``
-const Text = styled.Text``
+const Text = styled.Text<{col: string}>`
+  color: ${props => props.col || 'black'}
+`
 
 const App = () => {
   return (
     <View>
-      <Text>Welcome to ReactNativeStyledComponents</Text>
+      <Text col={'red'}>Welcome to ReactNativeStyledComponents</Text>
     </View>
   )
 }
