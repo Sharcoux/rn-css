@@ -36,9 +36,9 @@ export const withFontSizeUpdate = <T extends { rnStyle: Style }, >(Comp: React.C
 }
 
 export const withUnits = <T extends { rnStyle: Style }, >(Comp: React.ComponentType<T>, css: string) => (props: T) => {
-  const useEM = css.match(/\dem\b/)// Do we need em units
-  const useVX = css.match(/\dv([hw]|min|max)\b/)// Do we need vx units
-  const usePct = css.match(/\d%/)// Do we need % units
+  const useEM = css.match(/\b(\d+)(\.\d+)?em\b/) // Do we need em units
+  const useVX = css.match(/\b(\d+)(\.\d+)v([hw]|min|max)\b/) // Do we need vx units
+  const usePct = css.match(/\d%/) // Do we need % units
 
   let FinalComponent = withRNStyle(Comp as React.ComponentType<T & { units: Units }>)
   if (useVX) {

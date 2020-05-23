@@ -3,8 +3,8 @@ import calculate from './cssToRN/calc'
 
 /** Take a css value like 12em and return [12, 'em'] */
 export function parseValue (value: string): [number, string | undefined] {
-  const unitRegexp = /([+-]?\d+(\.\d+)?)([a-z%]+)?/i // Match a single unit
-  const unit = value.match(unitRegexp)
+  // Match a single unit
+  const unit = value.match(/([+-]?\b\d+(\.\d+)?)([a-z]+\b|%)/i)
   return [parseFloat(unit![1]), unit![3] as (string | undefined)]
 }
 
@@ -23,7 +23,7 @@ export function convertValue (key: string, value: string, units: Units): string 
     } else if (['lineHeight'].includes(key)) finalUnits['%'] = units.em / 100
     else finalUnits['%'] = 0.01
   }
-  const convertedValue = value.replace(/([+-]?\d+(\.\d+)?)([a-z%]+)?/ig, occ => {
+  const convertedValue = value.replace(/([+-]?\b\d+(\.\d+)?)([a-z]+\b|%)/ig, occ => {
     const [val, unit] = parseValue(occ)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     if (['deg', 'rad'].includes(unit!)) return occ // We don't want to convert deg and rad units
