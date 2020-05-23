@@ -1,9 +1,11 @@
 import React from 'react'
 import type { Style, Units } from './types'
-import { useWindowDimensions, LayoutChangeEvent } from 'react-native'
+import { useWindowDimensions, LayoutChangeEvent, StyleSheet, TextStyle } from 'react-native'
 import { parseValue, convertValue } from './convertUnits'
 
 const FontSizeContext = React.createContext(16)
+// eslint-disable-next-line
+const ZIndexContext = React.createContext<(z: number) => void>(() => {})
 
 /** Apply the new fontSize to the component before we can calculate em units */
 export const withFontSizeUpdate = <T extends { rnStyle: Style }, >(Comp: React.ComponentType<T>) => (props: T) => {
@@ -36,20 +38,20 @@ export const withFontSizeUpdate = <T extends { rnStyle: Style }, >(Comp: React.C
 }
 
 export const withUnits = <T extends { rnStyle: Style }, >(Comp: React.ComponentType<T>, css: string) => (props: T) => {
-  const useEM = css.match(/\b(\d+)(\.\d+)?em\b/) // Do we need em units
-  const useVX = css.match(/\b(\d+)(\.\d+)v([hw]|min|max)\b/) // Do we need vx units
-  const usePct = css.match(/\d%/) // Do we need % units
+  const useFontSize = css.match(/\b(\d+)(\.\d+)?em\b/) // Do we need em units
+  const useScreenSize = css.match(/\b(\d+)(\.\d+)v([hw]|min|max)\b/) // Do we need vx units
+  const useLayout = css.match(/\d%/) // Do we need % units
 
-  let FinalComponent = withRNStyle(Comp as React.ComponentType<T & { units: Units }>)
-  if (useVX) {
+  let FinalComponent = withRNStyle(Comp as React.ComponentType<T & { units: Units; children?: React.ReactNode }>)
+  if (useScreenSize) {
     FinalComponent = withScreenSize(FinalComponent)
   }
 
-  if (useEM) {
+  if (useFontSize) {
     FinalComponent = withFontSize(FinalComponent)
   }
 
-  if (usePct) {
+  if (useLayout) {
     FinalComponent = withLayout(FinalComponent)
   }
 
@@ -85,7 +87,8 @@ const withLayout = <T extends {units: Units; onLayout?: (event: LayoutChangeEven
 }
 
 /** Mix the calculated RN style within the object style */
-const withRNStyle = <T extends {units: Units; rnStyle: Style}, >(Component: React.ComponentType<T>) => (props: T) => {
+const withRNStyle = <T extends {units: Units; rnStyle: Style; style?: TextStyle; children?: React.ReactNode}>(Component: React.ComponentType<T>) => (props: T) => {
+  const [zIndex, setZIndex] = React.useState(-1)
   const { rnStyle, units, ...others } = props
   const finalStyle: any = {}
   Object.keys(rnStyle).forEach(key => {
@@ -109,8 +112,20 @@ const withRNStyle = <T extends {units: Units; rnStyle: Style}, >(Component: Reac
       finalStyle[key] = convertValue(key, value, units)
     }
   })
-  // We don't want to pollute the component's props
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  return <Component {...others} style={props.style ? [props.style, finalStyle] : finalStyle} />
+
+  // Here, we fix a difference between web and native for zIndex.
+  let style = [finalStyle]
+  if (props.style) style.push(props.style)
+  if (zIndex >= 0) style.push({ zIndex })
+  if (style.length === 1) style = style[0]
+  const updateParentZIndex = React.useContext(ZIndexContext)
+  React.useEffect(() => {
+    const finalZIndex = StyleSheet.flatten(style).zIndex
+    if (finalZIndex) updateParentZIndex(finalZIndex)
+  }, [zIndex, updateParentZIndex])
+
+  return <ZIndexContext.Provider value={setZIndex}>
+    {/* We don't want to pollute the component's props */}
+    <Component {...others as T} style={style} />
+  </ZIndexContext.Provider>
 }

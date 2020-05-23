@@ -13,11 +13,34 @@ const Text = styled.Text<{col: string}>`
   color: ${props => props.col || 'black'}
 `
 
+const Box = styled.View``
+const Popup = styled.View`
+  z-index: 20;
+  position: absolute;
+  top: 100%;
+  background-color: black;
+`
+
 const App = () => {
   return (
-    <View>
-      <Text col={'red'}>Welcome to ReactNativeStyledComponents</Text>
-    </View>
+    <Box>
+      <View>
+        <Text col={'red'}>Welcome to ReactNativeStyledComponents</Text>
+      </View>
+      <Box>
+        <Box>
+          <Box>
+            <Text col={'red'}>Placeholder</Text>
+            <Popup>
+              <Text col={'green'}>Should be over</Text>
+            </Popup>
+          </Box>
+        </Box>
+        <Box>
+          <Text col={'red'}>Placeholder</Text>
+        </Box>
+      </Box>
+    </Box>
   )
 }
 
