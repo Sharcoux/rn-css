@@ -193,6 +193,30 @@ it('should handle calc values', async () => {
     `
 
   const wrapper = TestRenderer.create(<Comp />)
+  await act(async () => {})
 
   expect(wrapper.root.findByType('View').props.style).toEqual({ marginLeft: 140, transform: [{ translateX: 32, translateY: 48 }, { rotate: '36deg' }] })
+})
+it('should handle border radius values', async () => {
+  const Comp = styled.View`
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+    `
+
+  const wrapper = TestRenderer.create(<Comp />)
+  await act(async () => {
+    wrapper.root.findByType('View').props.onLayout({
+      nativeEvent: { layout: { width: 100, height: 100 } }
+    })
+  })
+
+  expect(wrapper.root.findByType('View').props.style).toEqual({
+    borderRadiusBottomLeft: 0,
+    borderRadiusBottomRight: 0,
+    borderRadiusTopLeft: 0,
+    borderRadiusTopRight: 0,
+    height: 100,
+    width: 100
+  })
 })

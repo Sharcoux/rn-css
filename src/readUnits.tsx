@@ -16,6 +16,7 @@ function convertValue (key: string, value: string, units: Units): string | numbe
   if (value.includes('%')) {
     if (['marginTop', 'marginBottom'].includes(key)) finalUnits['%'] = units.height
     else if (['marginLeft', 'marginRight'].includes(key)) finalUnits['%'] = units.width
+    else if (key.startsWith('borderRadius')) finalUnits['%'] = (units.width! + units.height!) / 2
     else if (['width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight', 'top', 'left', 'bottom', 'right'].includes(key)) {
       if (value.startsWith('calc')) {
         if (['width', 'minWidth', 'maxWidth'].includes(key)) finalUnits['%'] = units.width
@@ -28,7 +29,7 @@ function convertValue (key: string, value: string, units: Units): string | numbe
     const [val, unit] = parseValue(occ)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     if (['deg', 'rad'].includes(unit!)) return occ // We don't want to convert deg and rad units
-    return val * (units[unit as keyof Units || 'px']!) + ''
+    return val * (finalUnits[unit as keyof Units || 'px']!) + ''
   })
   if (convertedValue.startsWith('calc(')) return calculate(convertedValue)
   else if (parseFloat(convertedValue) + '' === convertedValue) return parseFloat(convertedValue)
@@ -68,7 +69,7 @@ export const withFontSizeUpdate = <T extends { rnStyle: Style }, >(Comp: React.C
 export const withUnits = <T extends { rnStyle: Style }, >(Comp: React.ComponentType<T>, css: string) => (props: T) => {
   const useEM = css.match(/\dem\b/)// Do we need em units
   const useVX = css.match(/\dv([hw]|min|max)\b/)// Do we need vx units
-  const usePct = css.match(/\d%\b/)// Do we need % units
+  const usePct = css.match(/\d%/)// Do we need % units
 
   let FinalComponent = withRNStyle(Comp as React.ComponentType<T & { units: Units }>)
   if (useVX) {
