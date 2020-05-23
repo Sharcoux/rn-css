@@ -2,6 +2,9 @@ import { AppRegistry, Platform } from 'react-native'
 import React from 'react'
 import * as RN from 'react-native'
 import { name as appName } from './app.json'
+import styled from './src'
+
+const View = styled.View``
 
 AppRegistry.registerComponent(appName, () => App)
 
