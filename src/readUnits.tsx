@@ -11,12 +11,17 @@ function parseValue (value: string): [number, string | undefined] {
   return [parseFloat(unit![1]), unit![3] as (string | undefined)]
 }
 
-function convertValue (key: string, value: string, units: Units) {
+function convertValue (key: string, value: string, units: Units): string | number {
   const finalUnits = { ...units }
-  console.log(key, value, units)
   if (value.includes('%')) {
-    if (['marginTop', 'marginBottom', 'paddingTop', 'paddingBottom'].includes(key)) finalUnits['%'] = units.height
-    else if (['marginLeft', 'marginRight', 'paddingLeft', 'paddingRight'].includes(key)) finalUnits['%'] = units.width
+    if (['marginTop', 'marginBottom'].includes(key)) finalUnits['%'] = units.height
+    else if (['marginLeft', 'marginRight'].includes(key)) finalUnits['%'] = units.width
+    else if (['width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight', 'top', 'left', 'bottom', 'right'].includes(key)) {
+      if (value.startsWith('calc')) {
+        if (['width', 'minWidth', 'maxWidth'].includes(key)) finalUnits['%'] = units.width
+        else if (['height', 'minHeight', 'maxHeight'].includes(key)) finalUnits['%'] = units.height
+      } else return value // width: 100%, height: 100% are supported
+    } else if (['lineHeight'].includes(key)) finalUnits['%'] = units.em / 100
     else finalUnits['%'] = 0.01
   }
   const convertedValue = value.replace(/([+-]?\d+(\.\d+)?)([a-z%]+)?/ig, occ => {
@@ -36,27 +41,22 @@ export const withFontSizeUpdate = <T extends { rnStyle: Style }, >(Comp: React.C
   const [fontSize, fontUnit] = parseValue(rnStyle.fontSize)
   const isRelative = ['rem', 'em', '%'].includes(fontUnit || '')
   // If the font size is expressed with em units, we need to read the current font size value
-  console.log('in', fontSize)
   if (isRelative) {
     return <FontSizeContext.Consumer>
       {fontSizeValue => {
-        console.log('s', fontSizeValue)
         const newSize = fontUnit === 'em' ? fontSizeValue * fontSize
           : fontUnit === 'rem' ? fontSize * 16
             : fontUnit === '%' ? fontSizeValue * (1 + fontSize / 100)
               : fontSize
-        rnStyle.fontSize = newSize + 'px'
-        console.log('n', newSize)
         return <FontSizeContext.Provider value={newSize}>
           {
-            <Comp {...props} rnStyle={rnStyle} />
+            <Comp {...props} rnStyle={{ ...rnStyle, fontSize: newSize + 'px' }} />
           }
         </FontSizeContext.Provider>
       }}
     </FontSizeContext.Consumer>
   } else {
     rnStyle.fontSize = fontSize + 'px'
-    console.log('f', fontSize)
     return <FontSizeContext.Provider value={fontSize}>
       {
         <Comp {...props} rnStyle={rnStyle} />
@@ -122,9 +122,19 @@ const withRNStyle = <T extends {units: Units; rnStyle: Style}, >(Component: Reac
     const value = rnStyle[key]
     // Handle object values
     if (key === 'transform') {
-
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      finalStyle.transform = rnStyle.transform!.map(transformation => {
+        const result = {} as { [trans: string]: string | number }
+        (Object.keys(transformation) as Array<keyof typeof transformation>).forEach(k => (result[k] = convertValue(k, transformation[k]!, units)))
+        return result
+      })
     } else if (key === 'shadowOffset') {
-
+      finalStyle.shadowOffset = {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        width: convertValue(key, rnStyle.shadowOffset!.width, units),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        height: convertValue(key, rnStyle.shadowOffset!.height, units)
+      }
     } else {
       finalStyle[key] = convertValue(key, value, units)
     }

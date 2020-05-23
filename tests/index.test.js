@@ -14,8 +14,9 @@ it('should update when props change', async () => {
 
   expect(wrapper.root.findByType('View').props.style).toEqual({ paddingTop: 5, opacity: 0.5 })
 
-  wrapper.update(<Comp opacity={0.9} />)
-  await act(async () => {})// We wait for the useEffect to happen
+  await act(async () => {
+    wrapper.update(<Comp opacity={0.9} />)
+  })// We wait for the useEffect to happen
 
   expect(wrapper.root.findByType('View').props.style).toEqual({ paddingTop: 5, opacity: 0.9 })
 })
@@ -150,7 +151,9 @@ describe('extended CSS support', () => {
 
     // Emulate a resize
     Dimensions.get = () => ({ width: 200, height })
-    listeners.forEach(listener => listener({ window: Dimensions.get() }))
+    await act(async () => {
+      listeners.forEach(listener => listener({ window: Dimensions.get() }))
+    })// We wait for the useEffect to happen
     // Check that resizing the component works as espected
     const updatedView = wrapper.root.findByType('View')
     expect(updatedView.props.style).toEqual({
@@ -165,10 +168,31 @@ describe('extended CSS support', () => {
     })
 
     // Ensure that the listener has been removed
-    wrapper.unmount()
+    await act(async () => {
+      wrapper.unmount()
+    })// We wait for the useEffect to happen
     expect(listeners.length).toBe(0)
 
     // restore original Dimensions object
     Object.assign(Dimensions, oldDimensions)
   })
+})
+it('should not convert deg and rad', async () => {
+  const Comp = styled.View`
+      transform: rotate(10rad) rotate(10deg);
+    `
+
+  const wrapper = TestRenderer.create(<Comp />)
+
+  expect(wrapper.root.findByType('View').props.style).toEqual({ transform: [{ rotate: '10rad' }, { rotate: '10deg' }] })
+})
+it('should handle calc values', async () => {
+  const Comp = styled.View`
+      transform: translate(2em, 3em) rotate(36deg);
+      marginLeft: calc(10em - 20px);
+    `
+
+  const wrapper = TestRenderer.create(<Comp />)
+
+  expect(wrapper.root.findByType('View').props.style).toEqual({ marginLeft: 140, transform: [{ translateX: 32, translateY: 48 }, { rotate: '36deg' }] })
 })

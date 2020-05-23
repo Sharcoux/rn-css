@@ -16,7 +16,7 @@ const withStyle = <T extends {style?: any}, >(Component: React.ComponentType<T>)
   const cssString = React.useRef(buildCSSString(chunks, functs, props))
   // const rnStyle = React.useRef<Style>(cssToStyle(cssString.current))
   const [rnStyle, setRNStyle] = React.useState<Style>(cssToStyle(cssString.current))
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     // Build the css string with the context
     const css = buildCSSString(chunks, functs, props)
     cssString.current = css

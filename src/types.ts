@@ -17,6 +17,10 @@ export type Units = {
 export type Style = {
   [key: string]: string;
 } & {
+  shadowOffset?: {
+    width: string;
+    height: string;
+  };
   transform?: Transform[];
 }
 
