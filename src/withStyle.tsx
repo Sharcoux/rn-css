@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import React from 'react'
 import type { StyleMap, Style } from './types'
 import cssToStyle from './cssToRN'
@@ -12,7 +13,7 @@ function buildCSSString<T> (chunks: TemplateStringsArray, functs: ((props: T) =>
 }
 
 const withStyle = <T extends {style?: any}, >(Component: React.ComponentType<T>) => {
-  const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: ((props: S & T) => any | any)[]) => (props: S & T & { children?: React.ReactNode }) => {
+  const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: ((props: S & T) => any | any)[]) => React.forwardRef<typeof Component, S & T & { children?: React.ReactNode }>((props: S & T & { children?: React.ReactNode }, ref) => {
   // Store the style for mutualization
     const cssString = React.useRef(buildCSSString(chunks, functs, props))
     // const rnStyle = React.useRef<Style>(cssToStyle(cssString.current))
@@ -50,8 +51,8 @@ const withStyle = <T extends {style?: any}, >(Component: React.ComponentType<T>)
     if (fontSize) FinalComponent = withFontSizeUpdate(FinalComponent)
 
     // return <FinalComponent {...props} rnStyle={rnStyle.current} />
-    return <FinalComponent {...props} rnStyle={rnStyle} />
-  }
+    return <FinalComponent ref={ref} {...props} rnStyle={rnStyle} />
+  })
 
   // provide withStyle(Comp).attrs({} | () => {}) feature
   styledComponent.attrs = (opts: ((prop: T) => any) | any) => (chunks: TemplateStringsArray, ...functs: (((prop: T) => any) | any)[]) => (props: T) => {
