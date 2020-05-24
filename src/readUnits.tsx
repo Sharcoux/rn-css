@@ -37,25 +37,29 @@ export const withFontSizeUpdate = <T extends { rnStyle: Style }, >(Comp: React.C
   }
 }
 
-export const withUnits = <T extends { rnStyle: Style }, >(Comp: React.ComponentType<T>, css: string) => (props: T) => {
-  const useFontSize = css.match(/\b(\d+)(\.\d+)?em\b/) // Do we need em units
-  const useScreenSize = css.match(/\b(\d+)(\.\d+)v([hw]|min|max)\b/) // Do we need vx units
-  const useLayout = css.match(/\d%/) // Do we need % units
+export const withUnits = <T extends { rnStyle: Style }, >(Comp: React.ComponentType<T>, css: string) => {
+  const FinalComponent = React.useMemo(() => {
+    const useFontSize = css.match(/\b(\d+)(\.\d+)?em\b/) // Do we need em units
+    const useScreenSize = css.match(/\b(\d+)(\.\d+)v([hw]|min|max)\b/) // Do we need vx units
+    const useLayout = css.match(/\d%/) // Do we need % units
 
-  let FinalComponent = withRNStyle(Comp as React.ComponentType<T & { units: Units; children?: React.ReactNode }>)
-  if (useScreenSize) {
-    FinalComponent = withScreenSize(FinalComponent)
-  }
+    let FinalComponent = withRNStyle(Comp as React.ComponentType<T & { units: Units; children?: React.ReactNode }>)
+    if (useScreenSize) {
+      FinalComponent = withScreenSize(FinalComponent)
+    }
 
-  if (useFontSize) {
-    FinalComponent = withFontSize(FinalComponent)
-  }
+    if (useFontSize) {
+      FinalComponent = withFontSize(FinalComponent)
+    }
 
-  if (useLayout) {
-    FinalComponent = withLayout(FinalComponent)
-  }
+    if (useLayout) {
+      FinalComponent = withLayout(FinalComponent)
+    }
+    return FinalComponent
+  }, [css, Comp])
 
-  return <FinalComponent units={{ rem: 16, px: 1, pt: 72 / 96, in: 96, pc: 9, em: 16 }} {...props} />
+  const StyledComponent = (props: T) => <FinalComponent units={{ rem: 16, px: 1, pt: 72 / 96, in: 96, pc: 9, em: 16 }} {...props} />
+  return StyledComponent
 }
 
 /** HOC that will apply the screen size to the styles defined with vmin, vmax, vw, vh units */
@@ -81,14 +85,14 @@ const withLayout = <T extends {units: Units; onLayout?: (event: LayoutChangeEven
   const updateLayout = React.useCallback((event: LayoutChangeEvent) => {
     if (props.onLayout) props.onLayout(event)
     const { width, height } = event.nativeEvent.layout
-    setLayout({ width, height })
+    if (width !== layout.width || height !== layout.height) setLayout({ width, height })
   }, [props.onLayout])
   return <Comp {...props} onLayout={updateLayout} units={{ ...props.units, ...layout }} />
 }
 
 /** Mix the calculated RN style within the object style */
 const withRNStyle = <T extends {units: Units; rnStyle: Style; style?: TextStyle; children?: React.ReactNode}>(Component: React.ComponentType<T>) => (props: T) => {
-  const [zIndex, setZIndex] = React.useState(-1)
+  const [zIndex, setZIndex] = React.useState()
   const { rnStyle, units, ...others } = props
   const finalStyle: any = {}
   Object.keys(rnStyle).forEach(key => {
@@ -116,15 +120,19 @@ const withRNStyle = <T extends {units: Units; rnStyle: Style; style?: TextStyle;
   // Here, we fix a difference between web and native for zIndex.
   let style = [finalStyle]
   if (props.style) style.push(props.style)
-  if (zIndex >= 0) style.push({ zIndex })
+  if (zIndex) style.push({ zIndex })
   if (style.length === 1) style = style[0]
   const updateParentZIndex = React.useContext(ZIndexContext)
+  const updateZIndex = React.useCallback(z => {
+    updateParentZIndex(z)
+    setZIndex(z)
+  }, [updateParentZIndex])
   React.useEffect(() => {
     const finalZIndex = StyleSheet.flatten(style).zIndex
-    if (finalZIndex) updateParentZIndex(finalZIndex)
-  }, [zIndex, updateParentZIndex])
+    if (finalZIndex !== zIndex) updateZIndex(finalZIndex)
+  }, [style, updateParentZIndex])
 
-  return <ZIndexContext.Provider value={setZIndex}>
+  return <ZIndexContext.Provider value={updateZIndex}>
     {/* We don't want to pollute the component's props */}
     <Component {...others as T} style={style} />
   </ZIndexContext.Provider>
