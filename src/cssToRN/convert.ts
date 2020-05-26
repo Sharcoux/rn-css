@@ -16,13 +16,14 @@ function findNumbers (value: string) {
 }
 
 /** Parse a css value for border */
-export function border (prefixKey: 'border' | 'borderLeft' | 'borderRight' | 'borderTop' | 'borderBottom', value: string) {
+export function border (prefixKey: 'border' | 'borderLeft' | 'borderRight' | 'borderTop' | 'borderBottom', value: string): { [x:string]: string } {
   const values = value.split(/\s+/mg)
   const result = {
     [prefixKey + 'Width']: '0',
     [prefixKey + 'Color']: 'black',
     [prefixKey + 'Style']: 'solid'
   }
+  if (value === 'none') return result
   values.forEach((value: string) => {
     if (['solid', 'dotted', 'dashed'].includes(value)) result[prefixKey + 'Style'] = value
     else if (isNumber(value)) result[prefixKey + 'Width'] = value
@@ -35,8 +36,8 @@ export function shadow (prefix: 'textShadow' | 'shadow', value: string): { [x:st
   if (value === 'none') return shadow(prefix, '0 0 0 black')
   const { nonNumbers, numbers } = findNumbers(value)
   return {
-    [prefix + 'Offset']: { width: numbers[0] || 0, height: numbers[1] || 0 },
-    [prefix + 'Radius']: numbers[2] || 0,
+    [prefix + 'Offset']: { width: numbers[0] || '0', height: numbers[1] || '0' },
+    [prefix + 'Radius']: numbers[2] || '0',
     [prefix + 'Color']: nonNumbers[0] || 'black'
   }
 }
@@ -74,7 +75,7 @@ export function textDecoration (value: string) {
     textDecorationColor: 'black'
   }
   values.forEach(value => {
-    if (['solid', 'double', 'dotted', 'dashed'].includes(value)) result.textDecorationStyle = value
+    if (['none', 'solid', 'double', 'dotted', 'dashed'].includes(value)) result.textDecorationStyle = value
     else result.textDecorationColor = value
   })
   return result
@@ -143,7 +144,8 @@ export function font (value: string) {
 }
 
 /** Parses a css value for the side of an element (border-width, margin, padding) */
-export function sideValue (prefixKey: 'padding' | 'margin' | 'border', value: string, postFix: 'Width' | '' = '') {
+export function sideValue (prefixKey: 'padding' | 'margin' | 'border', value: string, postFix: 'Width' | '' = ''): { [x: string]: string} {
+  if (value === 'none') return sideValue(prefixKey, '0', postFix)
   const [top, left = top, bottom = top, right = left] = findNumbers(value).numbers
   return {
     [prefixKey + 'Top' + postFix]: top,
