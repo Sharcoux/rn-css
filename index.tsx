@@ -21,11 +21,22 @@ const Popup = styled.View`
   background-color: black;
 `
 
+const Hoverable = styled.View`
+  width: 100px;
+  height: 100px;
+  background: red;
+  &:hover {
+    background: blue;
+  }
+`
+
 const App = () => {
+  const ref = React.createRef<typeof Text>()
+  React.useLayoutEffect(() => console.log(ref), [])
   return (
     <Box>
       <View>
-        <Text col={'red'}>Welcome to ReactNativeStyledComponents</Text>
+        <Text ref={ref} col={'red'}>Welcome to ReactNativeStyledComponents</Text>
       </View>
       <Box>
         <Box>
@@ -40,6 +51,9 @@ const App = () => {
           <Text col={'red'}>Placeholder</Text>
         </Box>
       </Box>
+      <Hoverable>
+        <Text col='white'>Hover me !</Text>
+      </Hoverable>
     </Box>
   )
 }

@@ -3,13 +3,24 @@ import { sideValue, border, cornerValue, font, textDecoration, shadow, placeCont
 
 function kebab2camel (string: string) {
   return string.replace(/-./g, x => x.toUpperCase()[1])
-};
+}
 
 function stripSpaces (string: string) {
   return string.replace(/calc\(.*?\)/mg, res => res.replace(/\s/g, ''))
 }
 
 function cssToStyle (css: string) {
+  const result: Style = {}
+  // Find hover
+  const cssWithoutHover = css.replace(/&:hover\s*{(.*?)}/gmis, res => {
+    result.hover = cssChunkToStyle(res.substring(0, res.length - 1).replace(/&:hover\s*{/mis, ''))
+    return ''
+  })
+  Object.assign(result, cssChunkToStyle(cssWithoutHover))
+  return result
+}
+
+function cssChunkToStyle (css: string) {
   const result: Style = {}
   css.split(/\s*;\s*/mg).forEach((entry: string) => {
     const [rawKey, rawValue] = entry.split(':')

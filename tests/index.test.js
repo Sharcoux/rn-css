@@ -221,3 +221,37 @@ it('should handle border radius values', async () => {
     width: 100
   })
 })
+it('should handle hover', async () => {
+  const Comp = styled.View`
+      width: 100px;
+      height: 100px;
+      &:hover {
+        width: 200px;
+        height: 200px;
+      }
+    `
+
+  const wrapper = TestRenderer.create(<Comp />)
+  await act(async () => {})
+  await act(async () => {
+    wrapper.root.findByType('View').props.onMouseEnter()
+  })
+
+  expect(wrapper.root.findByType('View').props.style).toEqual({
+    height: 200,
+    width: 200
+  })
+})
+it('Should merge the inline css within rnCSS prop', async () => {
+  const Comp = styled.View`
+    width: 100px;
+  `
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp rnCSS="color:blue;width:200px;"/>)
+  })
+  expect(wrapper.root.findByType('View').props.style).toEqual({
+    color: 'blue',
+    width: 200
+  })
+})

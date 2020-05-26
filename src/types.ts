@@ -22,6 +22,7 @@ export type Style = {
     height: string;
   };
   transform?: Transform[];
+  hover?: Style;
 }
 
 export type Transform = {
