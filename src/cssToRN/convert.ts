@@ -31,7 +31,8 @@ export function border (prefixKey: 'border' | 'borderLeft' | 'borderRight' | 'bo
   return result
 }
 
-export function shadow (prefix: 'textShadow' | 'shadow', value: string) {
+export function shadow (prefix: 'textShadow' | 'shadow', value: string): { [x:string]: any } {
+  if (value === 'none') return shadow(prefix, '0 0 0 black')
   const { nonNumbers, numbers } = findNumbers(value)
   return {
     [prefix + 'Offset']: { width: numbers[0] || 0, height: numbers[1] || 0 },

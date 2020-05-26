@@ -32,6 +32,7 @@ module.exports = {
     '@typescript-eslint/no-use-before-define': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-non-null-assertion': 'warn',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
     'linebreak-style': ['error', 'unix']
   }
 }
