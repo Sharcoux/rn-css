@@ -36,7 +36,7 @@ export const withUnits = <Props, >(Comp: React.ComponentType<Props>, css: string
     return FinalComponent
   }, [css, Comp])
 
-  return forwardRef<typeof Comp, Props>((props: Props, ref) => <FinalComponent ref={ref} units={{ rem: 16, px: 1, pt: 72 / 96, in: 96, pc: 9, em: 16 }} {...props} />)
+  return forwardRef<typeof Comp, Props>((props: Props, ref) => <FinalComponent ref={ref} units={{ rem: 16, px: 1, pt: 72 / 96, in: 96, pc: 9, em: 16, cm: 96 / 2.54, mm: 96 / 25.4 }} {...props} />)
 }
 
 /** Mix the calculated RN style within the object style */
@@ -46,10 +46,6 @@ const withRNStyle = <Props extends {units: Units; }, >(Comp: React.ComponentType
   const finalStyle: any = {}
   Object.keys(rnStyle).forEach(key => {
     const value = rnStyle[key]
-    if (!(Object(value) instanceof String)) {
-      console.log(`Failed to parse CSS instruction: ${key}=${value}. We expect a string, but ${value} was of type ${typeof value}.`)
-      return
-    }
     // Handle object values
     if (key === 'transform') {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

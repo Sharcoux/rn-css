@@ -1,10 +1,10 @@
 # RN-CSS
 
-This lib brings CSS units to react-native with the same API as [styled-components](https://github.com/styled-components/styled-components). You can check there for more documentation
+This lib brings CSS to react-native with the same API as [styled-components](https://github.com/styled-components/styled-components). You can check there for more documentation
 
 ## Supported units:
 
-calc, px, pc, em, vh, vw, vmin, vmax
+calc, px, pc, cm, mm, em, vh, vw, vmin, vmax
 
 ### percentage support:
 
