@@ -46,6 +46,10 @@ const withRNStyle = <Props extends {units: Units; }, >(Comp: React.ComponentType
   const finalStyle: any = {}
   Object.keys(rnStyle).forEach(key => {
     const value = rnStyle[key]
+    if (!(Object(value) instanceof String)) {
+      console.log(`Failed to parse CSS instruction: ${key}=${value}. We expect a string, but ${value} was of type ${typeof value}.`)
+      return
+    }
     // Handle object values
     if (key === 'transform') {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -57,9 +61,9 @@ const withRNStyle = <Props extends {units: Units; }, >(Comp: React.ComponentType
     } else if (key === 'shadowOffset') {
       finalStyle.shadowOffset = {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        width: convertValue(key, rnStyle.shadowOffset!.width, units),
+        width: convertValue(key, rnStyle.shadowOffset!.width || '0', units),
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        height: convertValue(key, rnStyle.shadowOffset!.height, units)
+        height: convertValue(key, rnStyle.shadowOffset!.height || '0', units)
       }
     } else {
       finalStyle[key] = convertValue(key, value, units)
