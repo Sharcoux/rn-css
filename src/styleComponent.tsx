@@ -17,6 +17,7 @@ type OptionalProps = {
   onMouseEnter?: (event: MouseEvent) => void;
   onMouseLeave?: (event: MouseEvent) => void;
   onLayout?: (event: LayoutChangeEvent) => void
+  children?: React.ReactNode;
   style?: StyleProp<any>;
 }
 
@@ -25,7 +26,7 @@ function buildCSSString<T extends { rnCSS?: string }> (chunks: TemplateStringsAr
   if (props.rnCSS) computedString += props.rnCSS.replace(/=/gm, ':') + ';'
   return computedString
 }
-const styled = <Props extends { children: React.ReactNode }, >(Component: React.ComponentType<Props>) => {
+const styled = <Props, >(Component: React.ComponentType<Props>) => {
   const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
     const ForwardRefComponent = React.forwardRef<React.ComponentType<S & Props & OptionalProps>, S & Props & OptionalProps>((props: S & Props & OptionalProps, ref) => {
       const units = React.useRef<Units>({ em: 16, vw: 1, vh: 1, vmin: 1, vmax: 1, width: 1, height: 1, rem: 16, px: 1, pt: 72 / 96, in: 96, pc: 9, cm: 96 / 2.54, mm: 96 / 25.4 })
@@ -103,17 +104,17 @@ const styled = <Props extends { children: React.ReactNode }, >(Component: React.
         return <Component ref={ref} {...props} {...newProps} />
       }
     })
-    return ForwardRefComponent as unknown as React.ForwardRefExoticComponent<Props & S & OptionalProps>
+    return ForwardRefComponent as React.ForwardRefExoticComponent<Props & S & OptionalProps & { ref?: React.Ref<typeof Component> }>
   }
 
   // provide withStyle(Comp).attrs({} | () => {}) feature
-  styledComponent.attrs = (opts: Primitive | Functs<Props>) => <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
+  styledComponent.attrs = (opts: Props | Functs<Props>) => <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
     const ForwardRefComponent = React.forwardRef<typeof Component, S & Props>((props: Props & S, ref) => {
       const attrs = (opts instanceof Function) ? opts(props) : opts
       const ComponentWithAttrs = styledComponent(chunks, ...functs)
       return <ComponentWithAttrs ref={ref} {...props} {...attrs} />
     })
-    return ForwardRefComponent as unknown as React.ForwardRefExoticComponent<Props & S & OptionalProps>
+    return ForwardRefComponent as React.ForwardRefExoticComponent<Props & S & OptionalProps & { ref?: React.Ref<typeof Component> }>
   }
 
   return styledComponent

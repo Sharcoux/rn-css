@@ -51,10 +51,11 @@ const Button = () => {
 }
 
 const App = () => {
-  const ref = React.createRef<Text>()
+  const ref = React.createRef<typeof Text>()
+  const ref2 = React.createRef<typeof Box>()
   React.useLayoutEffect(() => console.log(ref), [])
   return (
-    <Box>
+    <Box ref={ref2}>
       <View>
         <Text ref={ref} col={'red'}>Welcome to ReactNativeStyledComponents</Text>
       </View>
