@@ -83,7 +83,7 @@ describe('extended CSS support', () => {
       borderWidth: 16
     })
   })
-  it('should handle em units', () => {
+  it('should handle em units', async () => {
     const Comp = styled(View)`
         width: 10em;
         font-size: 2em;
@@ -93,13 +93,16 @@ describe('extended CSS support', () => {
         font-size: 3em;
       `
 
-    const wrapper = TestRenderer.create(<Comp><Child>test</Child></Comp>)
+    let wrapper
+    await act(async () => {
+      wrapper = TestRenderer.create(<Comp><Child>test</Child></Comp>)
+    })
     const view = wrapper.root.findByType('View')
     const text = wrapper.root.findByType('Text')
     expect(view.props.style).toEqual({ fontSize: 16 * 2, width: 16 * 2 * 10 })
     expect(text.props.style).toEqual({ fontSize: 16 * 6, height: 16 * 6 * 20 })
   })
-  it('should cache the value correctly', () => {
+  it('should cache the value correctly', async () => {
     const Comp = styled(View)`
         width: 10em;
         font-size: 2em;
@@ -109,7 +112,10 @@ describe('extended CSS support', () => {
         font-size: 2em;
       `
 
-    const wrapper = TestRenderer.create(<Comp><Child>test</Child></Comp>)
+    let wrapper
+    await act(async () => {
+      wrapper = TestRenderer.create(<Comp><Child>test</Child></Comp>)
+    })
     const view = wrapper.root.findByType('View')
     const text = wrapper.root.findByType('Text')
     expect(view.props.style).toEqual({ fontSize: 16 * 2, width: 16 * 2 * 10 })
@@ -133,7 +139,10 @@ describe('extended CSS support', () => {
     Dimensions.get = () => ({ width, height })
 
     // Check that the new Dimension object is working as expected
-    const wrapper = TestRenderer.create(<Comp />)
+    let wrapper
+    await act(async () => {
+      wrapper = TestRenderer.create(<Comp />)
+    })
     const view = wrapper.root.findByType('View')
     expect(view.props.style).toEqual({
       width: vw,
@@ -186,16 +195,25 @@ it('should not convert deg and rad', async () => {
 
   expect(wrapper.root.findByType('View').props.style).toEqual({ transform: [{ rotate: '10rad' }, { rotate: '10deg' }] })
 })
-it('should handle calc values', async () => {
+it('should handle maths values', async () => {
   const Comp = styled.View`
       transform: translate(2em, 3em) rotate(36deg);
       marginLeft: calc(10em - 20px);
+      width: min(10em, 20px);
+      height: max(10em, 20px);
     `
 
-  const wrapper = TestRenderer.create(<Comp />)
-  await act(async () => {})
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp />)
+  })
 
-  expect(wrapper.root.findByType('View').props.style).toEqual({ marginLeft: 140, transform: [{ translateX: 32, translateY: 48 }, { rotate: '36deg' }] })
+  expect(wrapper.root.findByType('View').props.style).toEqual({
+    marginLeft: 140,
+    transform: [{ translateX: 32, translateY: 48 }, { rotate: '36deg' }],
+    height: 160,
+    width: 20
+  })
 })
 it('should handle border radius values', async () => {
   const Comp = styled.View`
@@ -204,8 +222,10 @@ it('should handle border radius values', async () => {
       border-radius: 50%;
     `
 
-  const wrapper = TestRenderer.create(<Comp />)
-  await act(async () => {})
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp />)
+  })
   await act(async () => {
     wrapper.root.findByType('View').props.onLayout({
       nativeEvent: { layout: { width: 100, height: 100 } }
@@ -231,8 +251,10 @@ it('should handle hover', async () => {
       }
     `
 
-  const wrapper = TestRenderer.create(<Comp />)
-  await act(async () => {})
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp />)
+  })
   await act(async () => {
     wrapper.root.findByType('View').props.onMouseEnter()
   })

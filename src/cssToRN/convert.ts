@@ -1,8 +1,8 @@
 import type { Style } from '../types'
 
-/** Check if the value is a number. Numbers start with a digit, a decimal point or calc( */
+/** Check if the value is a number. Numbers start with a digit, a decimal point or calc(, max( ou min( */
 function isNumber (value: string) {
-  return value.match(/^[+-]?(\.\d|\d|calc\()/mg)
+  return value.match(/^[+-]?(\.\d|\d|calc\(|max\(|min\()/mg)
 }
 
 /** Split the value into numbers values and non numbers values */

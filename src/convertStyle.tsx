@@ -5,7 +5,6 @@ import { convertValue } from './convertUnits'
 
 /** Mix the calculated RN style within the object style */
 const convertStyle = <T, >(propsStyle: StyleProp<T> | undefined, rnStyle: Style, units: Units): StyleProp<T> => {
-  console.log('convert')
   /** This is the result of the convertions from css style into RN style */
   const convertedStyle: TextStyle = {}
   Object.keys(rnStyle).forEach(key => {

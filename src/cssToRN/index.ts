@@ -6,7 +6,7 @@ function kebab2camel (string: string) {
 }
 
 function stripSpaces (string: string) {
-  return string.replace(/calc\(.*?\)/mg, res => res.replace(/\s/g, ''))
+  return string.replace(/(calc|max|min)\(.*?\)/mg, res => res.replace(/\s/g, ''))
 }
 
 function cssToStyle (css: string) {

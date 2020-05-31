@@ -26,10 +26,6 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       style?: StyleProp<any>;
     }
     return React.forwardRef<React.ComponentType<ComponentProps>, ComponentProps>((props: ComponentProps, ref) => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      React.useEffect(() => console.log('mount') || (() => console.log('unmount')), [])
-
       const units = React.useRef<Units>({ em: 16, vw: 1, vh: 1, vmin: 1, vmax: 1, width: 1, height: 1, rem: 16, px: 1, pt: 72 / 96, in: 96, pc: 9, cm: 96 / 2.54, mm: 96 / 25.4 })
 
       // Store the style for mutualization
@@ -63,21 +59,20 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       const [needsFontSize, setNeedsFontSize] = React.useState(false)
       const [needsScreenSize, setNeedsScreenSize] = React.useState(false)
       const [needsLayout, setNeedsLayout] = React.useState(false)
-      const [needsHover, setNeedsHover] = React.useState(false)
+      // const [needsHover, setNeedsHover] = React.useState(false)
       React.useEffect(() => {
         const css = cssString.current
         setNeedsFontSize(!!css.match(/\b(\d+)(\.\d+)?em\b/)) // Do we need em units
         setNeedsScreenSize(!!css.match(/\b(\d+)(\.\d+)?v([hw]|min|max)\b/)) // Do we need vx units
         setNeedsLayout(!!css.match(/\d%/)) // Do we need % units
-        setNeedsHover(!!css.match(/&:hover/)) // Do we need to track the mouse
+        // setNeedsHover(!!css.match(/&:hover/)) // Do we need to track the mouse
       }, [cssString.current])
 
       const finalStyle = React.useRef<Style>({ ...rnStyle })
       // Read all the data we might need
       const { onMouseEnter, onMouseLeave, style: hoverStyle } = useHover(rnStyle, props.onMouseEnter, props.onMouseLeave)
-      if (needsHover) {
-        finalStyle.current = hoverStyle
-      }
+      finalStyle.current = hoverStyle
+
       const { em } = useFontSize(finalStyle.current.fontSize, units.current.rem)
       if (needsFontSize) {
         if (units.current.em !== em) units.current = { ...units.current, em }
@@ -93,9 +88,12 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       }
 
       let style = React.useMemo(() => convertStyle(props.style, finalStyle.current, units.current), [props.style, finalStyle.current, units.current])
-      style = [style, { zIndex: useZIndex(StyleSheet.flatten(style).zIndex) }]
+      const zIndex = useZIndex(StyleSheet.flatten(style).zIndex)
+      style = zIndex ? [style, { zIndex }] : style
       const newProps = { style, onMouseEnter, onMouseLeave, onLayout }
-      if (em !== 16) {
+
+      const currentFontSize = React.useContext(FontSizeContext)
+      if (em !== currentFontSize) {
         return <FontSizeContext.Provider value={em}>
           <Component ref={ref} {...props} {...newProps} />
         </FontSizeContext.Provider>

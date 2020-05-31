@@ -22,7 +22,7 @@ type Node = Group | Operator;
 type Element = Node | Value;
 
 /** Evaluate the string operation without relying on eval */
-export default function calculate (string: string) {
+export function calculate (string: string) {
   function applyOperator (left: number, op: Operator['operation'], right: number): number {
     if (op === '+') return left + right
     else if (op === '-') return left - right
@@ -80,4 +80,13 @@ export default function calculate (string: string) {
     else if ('+*-/'.includes(char)) addOperator(char as Operator['operation'])
   })
   return evaluate(rootNode)
+}
+
+export function min (string: string) {
+  const values = string.split(',').map(val => parseFloat(val.trim()))
+  return Math.min(...values)
+}
+export function max (string: string) {
+  const values = string.split(',').map(val => parseFloat(val.trim()))
+  return Math.max(...values)
 }
