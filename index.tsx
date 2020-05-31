@@ -40,6 +40,15 @@ const HoverableText = styled.Text`
     fontSize: 2em
   }
 `
+const Options = styled.FlatList<string>`
+  position: absolute;
+  top: 100%;
+  z-index: 1;
+`
+
+const FlatList = () => {
+  return <Options data={['teset']} renderItem={({ item }) => (<Text col={'blue'}>{item}</Text>)}/>
+}
 
 const Touchable = styled.TouchableOpacity<{pressed: boolean}>`
   background-color: ${props => props.pressed ? 'blue' : 'red'};
@@ -82,6 +91,7 @@ const App = () => {
       </Hoverable>
       <HoverableText>Hover me !</HoverableText>
       <Button />
+      <FlatList />
     </Box>
   )
 }

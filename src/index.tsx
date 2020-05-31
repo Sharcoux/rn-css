@@ -1,6 +1,6 @@
 import React from 'react'
 import * as RN from 'react-native'
-import styledComponent from './styleComponent'
+import styledComponent, { styledFlatList, styledSectionList, styledVirtualizedList } from './styleComponent'
 
 const styled = <T, >(Component: React.ComponentType<T>) => styledComponent<T>(Component)
 
@@ -31,8 +31,8 @@ styled.TouchableOpacity = styled(RN.TouchableOpacity)
 styled.TouchableWithoutFeedback = styled(RN.TouchableWithoutFeedback)
 styled.View = styled(RN.View)
 styled.ViewPagerAndroid = styled(RN.ViewPagerAndroid)
-styled.FlatList = styled(RN.FlatList)
-styled.SectionList = styled(RN.SectionList)
-styled.VirtualizedList = styled(RN.VirtualizedList)
+styled.FlatList = styledFlatList
+styled.SectionList = styledSectionList
+styled.VirtualizedList = styledVirtualizedList
 
 export default styled

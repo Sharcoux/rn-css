@@ -5,7 +5,7 @@ import cssToStyle from './cssToRN'
 import calculHash from './generateHash'
 import { useLayout, useScreenSize, useFontSize, useHover, FontSizeContext, useZIndex } from './features'
 import convertStyle from './convertStyle'
-import { LayoutChangeEvent, StyleProp, StyleSheet } from 'react-native'
+import { LayoutChangeEvent, StyleProp, StyleSheet, FlatList, FlatListProps, SectionList, SectionListProps, VirtualizedList, VirtualizedListProps } from 'react-native'
 
 // We use this to cache the computed styles
 const styleMap: StyleMap = {}
@@ -20,7 +20,6 @@ type OptionalProps = {
   children?: React.ReactNode;
   style?: StyleProp<any>;
 }
-
 function buildCSSString<T extends { rnCSS?: string }> (chunks: TemplateStringsArray, functs: (Primitive | Functs<T>)[], props: T) {
   let computedString = chunks.map((chunk, i) => ([chunk, (functs[i] instanceof Function) ? (functs[i] as Functs<T>)(props) : functs[i]])).flat().join('')
   if (props.rnCSS) computedString += props.rnCSS.replace(/=/gm, ':') + ';'
@@ -121,3 +120,7 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
 }
 
 export default styled
+
+export const styledFlatList = <Type, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<FlatListProps<Type>>)[]) => styled<FlatListProps<Type>>(FlatList)(chunks, ...functs)
+export const styledSectionList = <Type, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<SectionListProps<Type>>)[]) => styled<SectionListProps<Type>>(SectionList)(chunks, ...functs)
+export const styledVirtualizedList = <Type, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<VirtualizedListProps<Type>>)[]) => styled<VirtualizedListProps<Type>>(VirtualizedList)(chunks, ...functs)
