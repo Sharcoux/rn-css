@@ -3,6 +3,8 @@ import React from 'react'
 import { name as appName } from './app.json'
 import styled from './src'
 
+const value = 100
+
 const View = styled.View`
   background: green;
   border-radius: 50%;
@@ -14,7 +16,7 @@ const Text = styled.Text<{col: string}>`
 `
 
 const Box = styled.View`
-  width: 100em;
+  width: ${value}em;
   max-width: 50vw;
 `
 const Popup = styled.View`
@@ -49,7 +51,7 @@ const Button = () => {
 }
 
 const App = () => {
-  const ref = React.createRef<typeof Text>()
+  const ref = React.createRef<Text>()
   React.useLayoutEffect(() => console.log(ref), [])
   return (
     <Box>

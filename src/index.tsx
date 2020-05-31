@@ -2,6 +2,8 @@ import React from 'react'
 import * as RN from 'react-native'
 import styledComponent from './styleComponent'
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 const styled = <T, >(Component: React.ComponentType<T>) => styledComponent<T>(Component)
 
 styled.ActivityIndicator = styled(RN.ActivityIndicator)

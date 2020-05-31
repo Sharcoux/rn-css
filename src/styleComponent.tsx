@@ -10,22 +10,24 @@ import { LayoutChangeEvent, StyleProp, StyleSheet } from 'react-native'
 // We use this to cache the computed styles
 const styleMap: StyleMap = {}
 
-function buildCSSString<T extends { rnCSS?: string }> (chunks: TemplateStringsArray, functs: ((props: T & { rnCSS?: string }) => any | any)[], props: T) {
-  let computedString = chunks.map((chunk, i) => ([chunk, functs[i] instanceof Function ? functs[i](props) : functs[i]])).flat().join('')
+type Primitive = number | string | null | undefined | boolean
+type Functs<T> = (arg: T & { rnCSS?: string}) => Primitive
+type OptionalProps = {
+  rnCSS?: string;
+  onMouseEnter?: (event: MouseEvent) => void;
+  onMouseLeave?: (event: MouseEvent) => void;
+  onLayout?: (event: LayoutChangeEvent) => void
+  style?: StyleProp<any>;
+}
+
+function buildCSSString<T extends { rnCSS?: string }> (chunks: TemplateStringsArray, functs: (Primitive | Functs<T>)[], props: T) {
+  let computedString = chunks.map((chunk, i) => ([chunk, (functs[i] instanceof Function) ? (functs[i] as Functs<T>)(props) : functs[i]])).flat().join('')
   if (props.rnCSS) computedString += props.rnCSS.replace(/=/gm, ':') + ';'
   return computedString
 }
-const styled = <Props, >(Component: React.ComponentType<Props>) => {
-  const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: ((props: S & Props & { rnCSS?: string }) => any | any)[]) => {
-    type ComponentProps = S & Props & {
-      rnCSS?: string;
-      children?: React.ReactNode;
-      onMouseEnter?: (event: MouseEvent) => void;
-      onMouseLeave?: (event: MouseEvent) => void;
-      onLayout?: (event: LayoutChangeEvent) => void
-      style?: StyleProp<any>;
-    }
-    return React.forwardRef<React.ComponentType<ComponentProps>, ComponentProps>((props: ComponentProps, ref) => {
+const styled = <Props extends { children: React.ReactNode }, >(Component: React.ComponentType<Props>) => {
+  const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
+    const ForwardRefComponent = React.forwardRef<React.ComponentType<S & Props & OptionalProps>, S & Props & OptionalProps>((props: S & Props & OptionalProps, ref) => {
       const units = React.useRef<Units>({ em: 16, vw: 1, vh: 1, vmin: 1, vmax: 1, width: 1, height: 1, rem: 16, px: 1, pt: 72 / 96, in: 96, pc: 9, cm: 96 / 2.54, mm: 96 / 25.4 })
 
       // Store the style for mutualization
@@ -101,14 +103,18 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
         return <Component ref={ref} {...props} {...newProps} />
       }
     })
+    return ForwardRefComponent as unknown as React.ForwardRefExoticComponent<Props & S & OptionalProps>
   }
 
   // provide withStyle(Comp).attrs({} | () => {}) feature
-  styledComponent.attrs = (opts: ((prop: Props) => any) | any) => <S, >(chunks: TemplateStringsArray, ...functs: (((prop: Props & S & { rnCSS?: string }) => any) | any)[]) => React.forwardRef<React.ComponentType<S & Props & {children?: React.ReactNode }>, S & Props & { children?: React.ReactNode }>((props: Props & S, ref) => {
-    const attrs = (opts instanceof Function) ? opts(props) : opts
-    const ComponentWithAttrs = styledComponent(chunks, ...functs)
-    return <ComponentWithAttrs {...props} {...attrs} ref={ref} />
-  })
+  styledComponent.attrs = (opts: Primitive | Functs<Props>) => <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
+    const ForwardRefComponent = React.forwardRef<typeof Component, S & Props>((props: Props & S, ref) => {
+      const attrs = (opts instanceof Function) ? opts(props) : opts
+      const ComponentWithAttrs = styledComponent(chunks, ...functs)
+      return <ComponentWithAttrs ref={ref} {...props} {...attrs} />
+    })
+    return ForwardRefComponent as unknown as React.ForwardRefExoticComponent<Props & S & OptionalProps>
+  }
 
   return styledComponent
 }
