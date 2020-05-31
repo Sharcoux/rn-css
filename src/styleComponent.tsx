@@ -58,13 +58,13 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
         }
       }, [props])
 
-      const [needsFontSize, setNeedsFontSize] = React.useState(false)
+      // const [needsFontSize, setNeedsFontSize] = React.useState(false)
       const [needsScreenSize, setNeedsScreenSize] = React.useState(false)
       const [needsLayout, setNeedsLayout] = React.useState(false)
       // const [needsHover, setNeedsHover] = React.useState(false)
       React.useEffect(() => {
         const css = cssString.current
-        setNeedsFontSize(!!css.match(/\b(\d+)(\.\d+)?em\b/)) // Do we need em units
+        // setNeedsFontSize(!!css.match(/\b(\d+)(\.\d+)?em\b/)) // Do we need em units
         setNeedsScreenSize(!!css.match(/\b(\d+)(\.\d+)?v([hw]|min|max)\b/)) // Do we need vx units
         setNeedsLayout(!!css.match(/\d%/)) // Do we need % units
         // setNeedsHover(!!css.match(/&:hover/)) // Do we need to track the mouse
@@ -72,18 +72,23 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
 
       const finalStyle = React.useRef<Style>({ ...rnStyle })
       // Read all the data we might need
+
+      // Handle hover
       const { onMouseEnter, onMouseLeave, style: hoverStyle } = useHover(rnStyle, props.onMouseEnter, props.onMouseLeave)
       finalStyle.current = hoverStyle
 
+      // Handle em units
       const { em } = useFontSize(finalStyle.current.fontSize, units.current.rem)
-      if (needsFontSize) {
-        if (units.current.em !== em) units.current = { ...units.current, em }
-        if (rnStyle.fontSize) finalStyle.current.fontSize = em + 'px'
-      }
-      const { width, height, onLayout } = useLayout(needsLayout, props.onLayout)
+      if (units.current.em !== em) units.current = { ...units.current, em }
+      if (finalStyle.current.fontSize) finalStyle.current.fontSize = em + 'px'
+
+      // Handle layout data needed for % units
+      const { width, height, onLayout } = useLayout(props.onLayout)
       if (needsLayout && (units.current.width !== width || units.current.height !== height)) {
         units.current = { ...units.current, width, height }
       }
+
+      // Handle screen size needed for vw and wh units
       const { vw, vh, vmin, vmax } = useScreenSize()
       if (needsScreenSize && (units.current.vw !== vw || units.current.vh !== vh || units.current.vmin !== vmin || units.current.vmax !== vmax)) {
         units.current = { ...units.current, vw, vh, vmin, vmax }

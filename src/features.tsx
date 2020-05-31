@@ -34,14 +34,14 @@ export const useHover = (rnStyle: Style, onMouseEnter?: (event: MouseEvent) => v
 }
 
 /** HOC that will apply the font size to the styles defined with em units */
-export const useLayout = (needsLayout: boolean, onLayout?: (event: LayoutChangeEvent) => void) => {
+export const useLayout = (onLayout?: (event: LayoutChangeEvent) => void) => {
   const [layout, setLayout] = React.useState({ width: 0, height: 0 })
   const updateLayout = React.useCallback((event: LayoutChangeEvent) => {
     if (onLayout) onLayout(event)
     const { width, height } = event.nativeEvent.layout
     if (width !== layout.width || height !== layout.height) setLayout({ width, height })
   }, [onLayout])
-  return { onLayout: needsLayout ? updateLayout : onLayout, ...layout }
+  return { onLayout: updateLayout, ...layout }
 }
 
 /** Apply the new fontSize to the component before we can calculate em units */

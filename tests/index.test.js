@@ -10,7 +10,10 @@ it('should update when props change', async () => {
       opacity: ${p => p.opacity || 0};
     `
 
-  const wrapper = TestRenderer.create(<Comp opacity={0.5} />)
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp opacity={0.5} />)
+  })
 
   expect(wrapper.root.findByType('View').props.style).toEqual({ paddingTop: 5, opacity: 0.5 })
 
@@ -20,16 +23,19 @@ it('should update when props change', async () => {
 
   expect(wrapper.root.findByType('View').props.style).toEqual({ paddingTop: 5, opacity: 0.9 })
 })
-it('calls an attr-function with context', () => {
+it('calls an attr-function with context', async () => {
   const Comp = styled.View.attrs(p => ({
     copy: p.test
   }))``
 
   const test = 'Put that cookie down!'
-  const wrapper = TestRenderer.create(<Comp test={test} />)
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp test={test} />)
+  })
   const view = wrapper.root.findByType('View')
 
-  expect(view.props).toEqual({
+  expect(view.props).toMatchObject({
     style: {},
     copy: test,
     test
