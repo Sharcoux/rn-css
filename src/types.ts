@@ -25,6 +25,7 @@ export type Style = {
   };
   transform?: Transform[];
   hover?: Style;
+  media?: Style[];
 }
 
 export type Transform = {
