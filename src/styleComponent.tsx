@@ -121,6 +121,6 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
 
 export default styled
 
-export const styledFlatList = <Type, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<FlatListProps<Type>>)[]) => styled<FlatListProps<Type>>(FlatList)(chunks, ...functs)
-export const styledSectionList = <Type, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<SectionListProps<Type>>)[]) => styled<SectionListProps<Type>>(SectionList)(chunks, ...functs)
-export const styledVirtualizedList = <Type, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<VirtualizedListProps<Type>>)[]) => styled<VirtualizedListProps<Type>>(VirtualizedList)(chunks, ...functs)
+export const styledFlatList = <Type, S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & FlatListProps<Type>>)[]) => styled<FlatListProps<Type>>(FlatList)(chunks, ...functs)
+export const styledSectionList = <Type, S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs< S & SectionListProps<Type>>)[]) => styled<SectionListProps<Type>>(SectionList)(chunks, ...functs)
+export const styledVirtualizedList = <Type, S >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & VirtualizedListProps<Type>>)[]) => styled<VirtualizedListProps<Type>>(VirtualizedList)(chunks, ...functs)

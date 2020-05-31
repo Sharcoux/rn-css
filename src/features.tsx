@@ -30,7 +30,7 @@ export const useHover = (rnStyle: Style, onMouseEnter?: (event: MouseEvent) => v
     if (onMouseLeave) onMouseLeave(event)
     setHover(false)
   }, [onMouseLeave])
-  return { style, onMouseEnter: rnStyle.hover ? hoverStart : undefined, onMouseLeave: rnStyle.hover ? hoverStop : undefined }
+  return { style, onMouseEnter: rnStyle.hover ? hoverStart : onMouseEnter, onMouseLeave: rnStyle.hover ? hoverStop : onMouseLeave }
 }
 
 /** HOC that will apply the font size to the styles defined with em units */
@@ -41,7 +41,7 @@ export const useLayout = (needsLayout: boolean, onLayout?: (event: LayoutChangeE
     const { width, height } = event.nativeEvent.layout
     if (width !== layout.width || height !== layout.height) setLayout({ width, height })
   }, [onLayout])
-  return { onLayout: needsLayout ? updateLayout : undefined, ...layout }
+  return { onLayout: needsLayout ? updateLayout : onLayout, ...layout }
 }
 
 /** Apply the new fontSize to the component before we can calculate em units */
