@@ -1,8 +1,8 @@
 import React from 'react'
 import * as RN from 'react-native'
-import withStyle from './withStyle'
+import styledComponent from './styleComponent'
 
-const styled = <T, >(Component: React.ComponentType<T>) => withStyle<T>(Component)
+const styled = <T, >(Component: React.ComponentType<T>) => styledComponent<T>(Component)
 
 styled.ActivityIndicator = styled(RN.ActivityIndicator)
 styled.Button = styled(RN.Button)

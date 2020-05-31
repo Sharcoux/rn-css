@@ -10,6 +10,8 @@ export type Units = {
   pt: number;
   pc: number;
   in: number;
+  cm: number;
+  mm: number;
   width?: number;
   height?: number;
 }

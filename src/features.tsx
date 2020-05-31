@@ -1,75 +1,72 @@
 /* eslint-disable react/display-name */
-import React from 'react'
-import type { Units } from './types'
-import { useWindowDimensions, LayoutChangeEvent } from 'react-native'
+import React, { MouseEvent } from 'react'
+import type { Style } from './types'
+import { useWindowDimensions, LayoutChangeEvent, Platform } from 'react-native'
 import { parseValue } from './convertUnits'
 
-const FontSizeContext = React.createContext(16)
+export const FontSizeContext = React.createContext(16)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+export const zIndexContext = React.createContext((_zIndex: number) => {})
 
 /** HOC that will apply the screen size to the styles defined with vmin, vmax, vw, vh units, and handle media queries constraints */
-export const withScreenSize = <Props extends {units: Units}>(Comp: React.ComponentType<Props>) => React.forwardRef<typeof Comp, Props>((props: Props, ref) => {
+export const useScreenSize = () => {
   const { width, height } = useWindowDimensions()
-  const Result = Comp as React.ComponentType<Props>
-  return <Result {...props} ref={ref} units={{ ...props.units, vw: width / 100, vh: height / 100, vmin: Math.min(width, height) / 100, vmax: Math.max(width, height) / 100 }}/>
-})
+  return { vw: width / 100, vh: height / 100, vmin: Math.min(width, height) / 100, vmax: Math.max(width, height) / 100 }
+}
 
 /** HOC that will apply the style reserved for hover state if needed */
-export const withHover = <Props extends { rnStyle: any }>(Comp: React.ComponentType<Props>) => React.forwardRef<typeof Comp, Props>((props: Props, ref) => {
-  const { rnStyle } = props
+export const useHover = (rnStyle: Style, onMouseEnter?: (event: MouseEvent) => void, onMouseLeave?: (event: MouseEvent) => void) => {
   const [hover, setHover] = React.useState(false)
-  const style = (hover && rnStyle.hover) ? { ...rnStyle, ...rnStyle.hover } : { ...rnStyle }
-  delete style.hover
-  const Result = Comp as React.ComponentType<Props>
-  return <Result {...props} ref={ref} rnStyle={style} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} />
-})
+  const style: Style = React.useMemo(() => {
+    const style = (hover && rnStyle.hover) ? { ...rnStyle, ...rnStyle.hover } : { ...rnStyle }
+    delete style.hover
+    return style
+  }, [rnStyle, hover])
+  const hoverStart = React.useCallback((event: MouseEvent) => {
+    if (onMouseEnter) onMouseEnter(event)
+    setHover(true)
+  }, [onMouseEnter])
+  const hoverStop = React.useCallback((event: MouseEvent) => {
+    if (onMouseLeave) onMouseLeave(event)
+    setHover(false)
+  }, [onMouseLeave])
+  return { style, onMouseEnter: rnStyle.hover ? hoverStart : undefined, onMouseLeave: rnStyle.hover ? hoverStop : undefined }
+}
 
 /** HOC that will apply the font size to the styles defined with em units */
-export const withFontSize = <Props extends {units: Units}>(Comp: React.ComponentType<Props>) => React.forwardRef<typeof Comp, Props>((props: Props, ref) => {
-  return (
-    <FontSizeContext.Consumer>
-      {em => {
-        const Result = Comp as React.ComponentType<Props>
-        return <Result {...props} ref={ref} units={{ ...props.units, em }} />
-      }}
-    </FontSizeContext.Consumer>
-  )
-})
-
-/** HOC that will apply the font size to the styles defined with em units */
-export const withLayout = <Props extends {units: Units; onLayout?: (event: LayoutChangeEvent) => void}>(Comp: React.ComponentType<Props>) => React.forwardRef<typeof Comp, Props>((props: Props, ref) => {
+export const useLayout = (needsLayout: boolean, onLayout?: (event: LayoutChangeEvent) => void) => {
   const [layout, setLayout] = React.useState({ width: 0, height: 0 })
   const updateLayout = React.useCallback((event: LayoutChangeEvent) => {
-    if (props.onLayout) props.onLayout(event)
+    if (onLayout) onLayout(event)
     const { width, height } = event.nativeEvent.layout
     if (width !== layout.width || height !== layout.height) setLayout({ width, height })
-  }, [props.onLayout])
-  const Result = Comp as React.ComponentType<Props>
-  return <Result {...props} ref={ref} onLayout={updateLayout} units={{ ...props.units, ...layout }} />
-})
+  }, [onLayout])
+  return { onLayout: needsLayout ? updateLayout : undefined, ...layout }
+}
 
 /** Apply the new fontSize to the component before we can calculate em units */
-export const withFontSizeUpdate = <Props extends { rnStyle: any }, >(Comp: React.ComponentType<Props>) => React.forwardRef<typeof Comp, Props>((props: Props, ref) => {
-  const rnStyle = props.rnStyle
-  const [fontSize, fontUnit] = parseValue(rnStyle.fontSize)
+export const useFontSize = (setFontSize?: string, rem = 16): { em: number } => {
+  const em = React.useContext(FontSizeContext)
+  if (!setFontSize) return { em }
+  const [fontSize, fontUnit] = parseValue(setFontSize)
   const isRelative = ['rem', 'em', '%'].includes(fontUnit || '')
-  // If the font size is expressed with em units, we need to read the current font size value
-  const Result = Comp as React.ComponentType<Props>
   if (isRelative) {
-    return <FontSizeContext.Consumer>
-      {fontSizeValue => {
-        const newSize = fontUnit === 'em' ? fontSizeValue * fontSize
-          : fontUnit === 'rem' ? fontSize * 16
-            : fontUnit === '%' ? fontSizeValue * (1 + fontSize / 100)
-              : fontSize
-        return <FontSizeContext.Provider value={newSize}>
-          <Result {...props} ref={ref} rnStyle={{ ...rnStyle, fontSize: newSize + 'px' }} />
-        </FontSizeContext.Provider>
-      }}
-    </FontSizeContext.Consumer>
+    const newSize = fontUnit === 'em' ? em * fontSize
+      : fontUnit === 'rem' ? fontSize * rem
+        : fontUnit === '%' ? em * (1 + fontSize / 100)
+          : fontSize
+    return { em: newSize }
   } else {
-    rnStyle.fontSize = fontSize + 'px'
-    return <FontSizeContext.Provider value={fontSize}>
-      <Result {...props} ref={ref} rnStyle={{ ...rnStyle }} />
-    </FontSizeContext.Provider>
+    return { em: fontSize }
   }
-})
+}
+
+export const useZIndex = (zIndexFromStyle: number) => {
+  const [zIndex, setZIndex] = React.useState<number>()
+  const updateParentZIndex = React.useContext(zIndexContext)
+  React.useEffect(() => {
+    setZIndex(zIndexFromStyle)
+    if (Platform.OS === 'ios' && zIndexFromStyle && zIndexFromStyle !== zIndex) updateParentZIndex(zIndexFromStyle)
+  }, [zIndexFromStyle, updateParentZIndex])
+  return Platform.OS === 'web' ? (zIndex || 'auto') : zIndex
+}

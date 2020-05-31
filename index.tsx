@@ -13,7 +13,10 @@ const Text = styled.Text<{col: string}>`
   color: ${props => props.col || 'black'}
 `
 
-const Box = styled.View``
+const Box = styled.View`
+  width: 100em;
+  max-width: 50vw;
+`
 const Popup = styled.View`
   z-index: 20;
   position: absolute;
@@ -29,6 +32,21 @@ const Hoverable = styled.View`
     background: blue;
   }
 `
+
+const HoverableText = styled.Text`
+  &:hover {
+    fontSize: 2em
+  }
+`
+
+const Touchable = styled.TouchableOpacity<{pressed: boolean}>`
+  background-color: ${props => props.pressed ? 'blue' : 'red'};
+`
+
+const Button = () => {
+  const [pressed, setPressed] = React.useState(false)
+  return <Touchable pressed={pressed} onPress={() => setPressed(!pressed)}><Text col={'black'}>Press Me!</Text></Touchable>
+}
 
 const App = () => {
   const ref = React.createRef<typeof Text>()
@@ -54,6 +72,8 @@ const App = () => {
       <Hoverable>
         <Text col='white'>Hover me !</Text>
       </Hoverable>
+      <HoverableText>Hover me !</HoverableText>
+      <Button />
     </Box>
   )
 }
