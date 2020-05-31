@@ -1,4 +1,4 @@
-import { AppRegistry, Platform } from 'react-native'
+import { AppRegistry, Platform, TouchableOpacity, TouchableOpacityProps } from 'react-native'
 import React from 'react'
 import { name as appName } from './app.json'
 import styled from './src'
@@ -45,13 +45,18 @@ const Touchable = styled.TouchableOpacity<{pressed: boolean}>`
   background-color: ${props => props.pressed ? 'blue' : 'red'};
 `
 
+const Forward = React.forwardRef<typeof TouchableOpacity, TouchableOpacityProps>((props: TouchableOpacityProps, ref) => {
+  return <Touchable ref={ref} {...props} pressed={true} />
+})
+Forward.displayName = 'Forward'
+
 const Button = () => {
   const [pressed, setPressed] = React.useState(false)
   return <Touchable pressed={pressed} onPress={() => setPressed(!pressed)}><Text col={'black'}>Press Me!</Text></Touchable>
 }
 
 const App = () => {
-  const ref = React.createRef<typeof Text>()
+  const ref = React.createRef<Text>()
   const ref2 = React.createRef<typeof Box>()
   React.useLayoutEffect(() => console.log(ref), [])
   return (

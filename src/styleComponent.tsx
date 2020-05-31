@@ -104,7 +104,7 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
         return <Component ref={ref} {...props} {...newProps} />
       }
     })
-    return ForwardRefComponent as React.ForwardRefExoticComponent<Props & S & OptionalProps & { ref?: React.Ref<typeof Component> }>
+    return ForwardRefComponent as React.ForwardRefExoticComponent<Props & S & OptionalProps & { ref?: React.Ref<any> }>
   }
 
   // provide withStyle(Comp).attrs({} | () => {}) feature
@@ -114,7 +114,7 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       const ComponentWithAttrs = styledComponent(chunks, ...functs)
       return <ComponentWithAttrs ref={ref} {...props} {...attrs} />
     })
-    return ForwardRefComponent as React.ForwardRefExoticComponent<Props & S & OptionalProps & { ref?: React.Ref<typeof Component> }>
+    return ForwardRefComponent as React.ForwardRefExoticComponent<Props & S & OptionalProps & { ref?: React.Ref<any> }>
   }
 
   return styledComponent
