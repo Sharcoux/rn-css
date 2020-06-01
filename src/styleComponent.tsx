@@ -126,6 +126,9 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
 
 export default styled
 
-export const styledFlatList = <Type, S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & FlatListProps<Type>>)[]) => styled<FlatListProps<Type>>(FlatList)(chunks, ...functs)
-export const styledSectionList = <Type, S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs< S & SectionListProps<Type>>)[]) => styled<SectionListProps<Type>>(SectionList)(chunks, ...functs)
-export const styledVirtualizedList = <Type, S >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & VirtualizedListProps<Type>>)[]) => styled<VirtualizedListProps<Type>>(VirtualizedList)(chunks, ...functs)
+export const styledFlatList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Type, >(props: S & FlatListProps<Type> & OptionalProps) => styled<FlatListProps<Type>>(FlatList)(chunks, ...functs)(props)
+styledFlatList.attrs = <Props, >(opts: FlatListProps<Props> | Functs<FlatListProps<Props>>) => <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => styled<FlatListProps<Props>>(FlatList).attrs(opts)(chunks, ...functs)
+export const styledSectionList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Type, >(props: S & SectionListProps<Type> & OptionalProps) => styled<SectionListProps<Type>>(SectionList)(chunks, ...functs)(props)
+styledSectionList.attrs = <Props, >(opts: SectionListProps<Props> | Functs<SectionListProps<Props>>) => <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => styled<SectionListProps<Props>>(SectionList).attrs(opts)(chunks, ...functs)
+export const styledVirtualizedList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Type, >(props: S & VirtualizedListProps<Type> & OptionalProps) => styled<VirtualizedListProps<Type>>(VirtualizedList)(chunks, ...functs)(props)
+styledVirtualizedList.attrs = <Props, >(opts: VirtualizedListProps<Props> | Functs<VirtualizedListProps<Props>>) => <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => styled<VirtualizedListProps<Props>>(VirtualizedList).attrs(opts)(chunks, ...functs)

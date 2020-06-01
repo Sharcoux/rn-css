@@ -3,7 +3,7 @@ module.exports = {
     browser: true,
     es6: true
   },
-  ignorePatterns: ['dist'],
+  ignorePatterns: ['dist', 'demo'],
   extends: [
     'plugin:react/recommended',
     'standard',

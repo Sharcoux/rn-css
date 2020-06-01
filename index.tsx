@@ -40,7 +40,7 @@ const HoverableText = styled.Text`
     fontSize: 2em
   }
 `
-const Options = styled.FlatList<string, unknown>`
+const Options = styled.FlatList`
   position: absolute;
   top: 100%;
   z-index: 1;
