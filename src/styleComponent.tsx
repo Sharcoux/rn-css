@@ -112,7 +112,7 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
   }
 
   // provide withStyle(Comp).attrs({} | () => {}) feature
-  styledComponent.attrs = (opts: Props | Functs<Props>) => <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
+  styledComponent.attrs = (opts: Props | ((props: Props) => Props)) => <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
     const ForwardRefComponent = React.forwardRef<typeof Component, S & Props>((props: Props & S, ref) => {
       const attrs = (opts instanceof Function) ? opts(props) : opts
       const ComponentWithAttrs = styledComponent(chunks, ...functs)
@@ -127,8 +127,8 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
 export default styled
 
 export const styledFlatList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Type, >(props: S & FlatListProps<Type> & OptionalProps) => styled<FlatListProps<Type>>(FlatList)(chunks, ...functs)(props)
-styledFlatList.attrs = <Props, >(opts: FlatListProps<Props> | Functs<FlatListProps<Props>>) => <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => styled<FlatListProps<Props>>(FlatList).attrs(opts)(chunks, ...functs)
+styledFlatList.attrs = <Props, >(opts: FlatListProps<Props> | ((props: FlatListProps<Props>) => FlatListProps<Props>)) => <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => styled<FlatListProps<Props>>(FlatList).attrs(opts)(chunks, ...functs)
 export const styledSectionList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Type, >(props: S & SectionListProps<Type> & OptionalProps) => styled<SectionListProps<Type>>(SectionList)(chunks, ...functs)(props)
-styledSectionList.attrs = <Props, >(opts: SectionListProps<Props> | Functs<SectionListProps<Props>>) => <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => styled<SectionListProps<Props>>(SectionList).attrs(opts)(chunks, ...functs)
+styledSectionList.attrs = <Props, >(opts: SectionListProps<Props> | ((props: SectionListProps<Props>) => SectionListProps<Props>)) => <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => styled<SectionListProps<Props>>(SectionList).attrs(opts)(chunks, ...functs)
 export const styledVirtualizedList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Type, >(props: S & VirtualizedListProps<Type> & OptionalProps) => styled<VirtualizedListProps<Type>>(VirtualizedList)(chunks, ...functs)(props)
-styledVirtualizedList.attrs = <Props, >(opts: VirtualizedListProps<Props> | Functs<VirtualizedListProps<Props>>) => <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => styled<VirtualizedListProps<Props>>(VirtualizedList).attrs(opts)(chunks, ...functs)
+styledVirtualizedList.attrs = <Props, >(opts: VirtualizedListProps<Props> | ((props: VirtualizedListProps<Props>) => VirtualizedListProps<Props>)) => <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => styled<VirtualizedListProps<Props>>(VirtualizedList).attrs(opts)(chunks, ...functs)
