@@ -40,7 +40,7 @@ const HoverableText = styled.Text`
     fontSize: 2em
   }
 `
-const Options = styled.FlatList`
+const Options = styled.FlatList.attrs<{pressed: boolean}>(props => ({ pressed: props.pressed }))`
   position: absolute;
   top: 100%;
   z-index: 1;
@@ -54,7 +54,7 @@ const ColorCircle = styled.TouchableOpacity<{color: string; size?: number}>`
 `
 
 const FlatList = () => {
-  return <Options data={['teset']} renderItem={({ item }) => (<Text col={'blue'}>{item}</Text>)}/>
+  return <Options data={['teset']} pressed renderItem={({ item }) => (<Text col={'blue'}>{item}</Text>)}/>
 }
 
 const Touchable = styled.TouchableOpacity<{pressed: boolean}>`
