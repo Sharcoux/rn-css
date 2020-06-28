@@ -71,12 +71,17 @@ export function placeContent (value: string) {
 export function textDecoration (value: string) {
   const values = value.split(/\s+/mg)
   const result = {
+    textDecorationLine: 'none',
     textDecorationStyle: 'solid',
     textDecorationColor: 'black'
   }
   values.forEach(value => {
     if (['none', 'solid', 'double', 'dotted', 'dashed'].includes(value)) result.textDecorationStyle = value
-    else result.textDecorationColor = value
+    else if (['none', 'underline', 'line-through'].includes(value)) {
+      // To accept 'underline line-throught' as a value, we need to concatenate
+      if (result.textDecorationLine !== 'none') result.textDecorationLine += ' ' + value
+      else result.textDecorationLine = value
+    } else result.textDecorationColor = value
   })
   return result
 }
