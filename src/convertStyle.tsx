@@ -30,7 +30,7 @@ const convertStyle = <T, >(propsStyle: StyleProp<T> | undefined, rnStyle: Style,
       convertedStyle[key] = convertValue(key, value, units)
     }
   })
-  return (propsStyle ? [propsStyle, convertedStyle] : convertedStyle) as StyleProp<T>
+  return (propsStyle ? [convertedStyle, propsStyle] : convertedStyle) as StyleProp<T>
 }
 
 export default convertStyle
