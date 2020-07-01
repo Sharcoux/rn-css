@@ -17,8 +17,8 @@ export function convertValue (key: string, value: string, units: Units): string 
   }
   const finalUnits = { ...units }
   if (value.includes('%')) {
-    if (['marginTop', 'marginBottom'].includes(key)) finalUnits['%'] = units.height! / 100
-    else if (['marginLeft', 'marginRight'].includes(key)) finalUnits['%'] = units.width! / 100
+    if (['marginTop', 'marginBottom', 'translateY'].includes(key)) finalUnits['%'] = units.height! / 100
+    else if (['marginLeft', 'marginRight', 'translateX'].includes(key)) finalUnits['%'] = units.width! / 100
     else if (key.startsWith('border') && key.endsWith('Radius')) finalUnits['%'] = (units.width! + units.height!) / 200
     else if (['width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight', 'top', 'left', 'bottom', 'right'].includes(key)) {
       if (value.startsWith('calc') || value.startsWith('max') || value.startsWith('min')) {

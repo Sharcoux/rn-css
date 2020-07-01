@@ -283,3 +283,25 @@ it('Should merge the inline css within rnCSS prop', async () => {
     width: 200
   })
 })
+it('Should accept % in transform', async () => {
+  const Comp = styled.View`
+    transform: translate(2%, 3%);
+  `
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp />)
+  })
+  await act(async () => {
+    wrapper.root.findByType('View').props.onLayout({
+      nativeEvent: { layout: { width: 1000, height: 100 } }
+    })
+  })
+  expect(wrapper.root.findByType('View').props.style).toEqual({
+    transform: [
+      {
+        translateX: 20,
+        translateY: 3
+      }
+    ]
+  })
+})
