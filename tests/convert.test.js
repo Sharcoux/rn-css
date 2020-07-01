@@ -18,6 +18,7 @@ describe('CSS style conversion', () => {
     expect(convert('borderWidth: 2px 3% 4rem')).toEqual({ borderTopWidth: '2px', borderBottomWidth: '4rem', borderLeftWidth: '3%', borderRightWidth: '3%' })
     expect(convert('border-radius: 1px')).toEqual({ borderTopLeftRadius: '1px', borderTopRightRadius: '1px', borderBottomLeftRadius: '1px', borderBottomRightRadius: '1px' })
     expect(convert('padding: 1px')).toEqual({ paddingTop: '1px', paddingBottom: '1px', paddingLeft: '1px', paddingRight: '1px' })
+    expect(convert('padding: 1px 2px 3px 4px')).toEqual({ paddingTop: '1px', paddingRight: '2px', paddingBottom: '3px', paddingLeft: '4px' })
     expect(convert('margin: 1px 2px')).toEqual({ marginTop: '1px', marginBottom: '1px', marginLeft: '2px', marginRight: '2px' })
     expect(convert('font: bold italic 1.2em "Fira Sans", serif;')).toEqual({ fontWeight: 'bold', fontStyle: 'italic', fontSize: '1.2em', fontFamily: '"Fira Sans", serif' })
     expect(convert('box-shadow: 2px 3px 4px blue')).toEqual({ shadowOffset: { width: '2px', height: '3px' }, shadowRadius: '4px', shadowColor: 'blue' })

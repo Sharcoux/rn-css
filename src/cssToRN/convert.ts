@@ -151,7 +151,7 @@ export function font (value: string) {
 /** Parses a css value for the side of an element (border-width, margin, padding) */
 export function sideValue (prefixKey: 'padding' | 'margin' | 'border', value: string, postFix: 'Width' | '' = ''): { [x: string]: string} {
   if (value === 'none') return sideValue(prefixKey, '0', postFix)
-  const [top, left = top, bottom = top, right = left] = findNumbers(value).numbers
+  const [top, right = top, bottom = top, left = right] = findNumbers(value).numbers
   return {
     [prefixKey + 'Top' + postFix]: top,
     [prefixKey + 'Left' + postFix]: left,
