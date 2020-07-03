@@ -40,7 +40,7 @@ export const useLayout = (onLayout?: (event: LayoutChangeEvent) => void) => {
     if (onLayout) onLayout(event)
     const { width, height } = event.nativeEvent.layout
     if (width !== layout.width || height !== layout.height) setLayout({ width, height })
-  }, [onLayout])
+  }, [onLayout, layout.width, layout.height])
   return { onLayout: updateLayout, ...layout }
 }
 
