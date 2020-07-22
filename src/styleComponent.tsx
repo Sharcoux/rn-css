@@ -97,7 +97,7 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
 
       const styleConvertedFromCSS = React.useMemo(() => convertStyle(props.style, finalStyle.current, units.current), [props.style, finalStyle.current, units.current])
       const zIndex = useZIndex(StyleSheet.flatten(styleConvertedFromCSS).zIndex)
-      const style: StyleProp<any> = React.useMemo(() => (zIndex ? [styleConvertedFromCSS, zIndex] : styleConvertedFromCSS), [styleConvertedFromCSS, zIndex])
+      const style: StyleProp<any> = React.useMemo(() => (zIndex ? [styleConvertedFromCSS, { zIndex }] : styleConvertedFromCSS), [styleConvertedFromCSS, zIndex])
       const newProps = { style, onMouseEnter, onMouseLeave, onLayout }
 
       const currentFontSize = React.useContext(FontSizeContext)
