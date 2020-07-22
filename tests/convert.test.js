@@ -26,6 +26,7 @@ describe('CSS style conversion', () => {
     expect(convert('transform: translate(2px, 3px)')).toEqual({ transform: [{ translateX: '2px', translateY: '3px' }] })
     expect(convert('transform: rotate3d(2px, 3px, 26deg)')).toEqual({ transform: [{ rotateX: '2px', rotateY: '3px', rotateZ: '26deg' }] })
     expect(convert('text-decoration: underline line-through')).toEqual({ textDecorationLine: 'underline line-through', textDecorationStyle: 'solid', textDecorationColor: 'black' })
+    expect(convert('flex: 1 1 100%')).toEqual({ flexGrow: '1', flexShrink: '1', flexBasis: '100%' })
   })
   it('should merge props', () => {
     expect(convert('width: 10px; flex: 1;')).toEqual({ width: '10px', flexGrow: '1', flexShrink: '0', flexBasis: '0' })

@@ -11,7 +11,6 @@ export function parseValue (value: string): [number, string | undefined] {
 /** Convert a value using the provided unit transform table */
 export function convertValue (key: string, value: string, units: Units): string | number {
   if (!(Object(value) instanceof String)) {
-    console.log(value)
     console.log(`Failed to parse CSS instruction: ${key}=${value}. We expect a string, but ${value} was of type ${typeof value}.`)
     return 0
   }
@@ -20,12 +19,15 @@ export function convertValue (key: string, value: string, units: Units): string 
     if (['marginTop', 'marginBottom', 'translateY'].includes(key)) finalUnits['%'] = units.height! / 100
     else if (['marginLeft', 'marginRight', 'translateX'].includes(key)) finalUnits['%'] = units.width! / 100
     else if (key.startsWith('border') && key.endsWith('Radius')) finalUnits['%'] = (units.width! + units.height!) / 200
-    else if (['width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight', 'top', 'left', 'bottom', 'right'].includes(key)) {
+    else if (['width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight', 'top', 'left', 'bottom', 'right', 'flexBasis'].includes(key)) {
       if (value.startsWith('calc') || value.startsWith('max') || value.startsWith('min')) {
-        if (['width', 'minWidth', 'maxWidth'].includes(key)) finalUnits['%'] = units.width! / 100
-        else if (['height', 'minHeight', 'maxHeight'].includes(key)) finalUnits['%'] = units.height! / 100
-      } else return value // width: 100%, height: 100% are supported
-    } else if (['lineHeight'].includes(key)) finalUnits['%'] = units.em / 100
+        if (['height', 'minHeight', 'maxHeight', 'top', 'bottom'].includes(key)) finalUnits['%'] = units.height! / 100
+        else finalUnits['%'] = units.width! / 100
+      }
+      // width: 100%, height: 100% are supported
+      else return value
+    }
+    else if (['lineHeight'].includes(key)) finalUnits['%'] = units.em / 100
     else finalUnits['%'] = 0.01
   }
   const convertedValue = value.replace(/([+-]?\b\d+(\.\d+)?)([a-z]+\b|%)/ig, occ => {

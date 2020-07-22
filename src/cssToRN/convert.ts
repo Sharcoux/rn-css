@@ -81,7 +81,8 @@ export function textDecoration (value: string) {
       // To accept 'underline line-throught' as a value, we need to concatenate
       if (result.textDecorationLine !== 'none') result.textDecorationLine += ' ' + value
       else result.textDecorationLine = value
-    } else result.textDecorationColor = value
+    }
+    else result.textDecorationColor = value
   })
   return result
 }

@@ -56,7 +56,8 @@ export const useFontSize = (setFontSize?: string, rem = 16): { em: number } => {
         : fontUnit === '%' ? em * (1 + fontSize / 100)
           : fontSize
     return { em: newSize }
-  } else {
+  }
+  else {
     return { em: fontSize }
   }
 }

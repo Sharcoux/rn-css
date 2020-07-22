@@ -17,14 +17,16 @@ const convertStyle = <T, >(propsStyle: StyleProp<T> | undefined, rnStyle: Style,
         (Object.keys(transformation) as Array<keyof typeof transformation>).forEach(k => (result[k] = convertValue(k, transformation[k]!, units)))
         return result
       }) as unknown as TextStyle['transform']
-    } else if (key === 'shadowOffset') {
+    }
+    else if (key === 'shadowOffset') {
       convertedStyle.shadowOffset = {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         width: convertValue(key, rnStyle.shadowOffset!.width || '0', units) as number,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         height: convertValue(key, rnStyle.shadowOffset!.height || '0', units) as number
       }
-    } else {
+    }
+    else {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       convertedStyle[key] = convertValue(key, value, units)

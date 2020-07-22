@@ -24,6 +24,7 @@ There is only partial support for % units as I didn't find a way to retrieve the
  * bottom
  * left
  * right
+ * flex-basis
 
 **With calc, min, max**: You can try using calc, min, max with the following CSS props:
 

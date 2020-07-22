@@ -66,6 +66,7 @@ describe('extended CSS support', () => {
         width: 10vmin;
         height: 10vmax;
         padding: 10vw 10vh;
+        flex: 1 1 10vh;
         border: 1rem solid black;
       `
 
@@ -86,7 +87,10 @@ describe('extended CSS support', () => {
       paddingRight: vh,
       borderColor: 'black',
       borderStyle: 'solid',
-      borderWidth: 16
+      borderWidth: 16,
+      flexGrow: 1,
+      flexShrink: 1,
+      flexBasis: vh
     })
   })
   it('should handle em units', async () => {
@@ -194,12 +198,39 @@ describe('extended CSS support', () => {
 })
 it('should not convert deg and rad', async () => {
   const Comp = styled.View`
-      transform: rotate(10rad) rotate(10deg);
-    `
+    transform: rotate(10rad) rotate(10deg);
+  `
 
   const wrapper = TestRenderer.create(<Comp />)
 
   expect(wrapper.root.findByType('View').props.style).toEqual({ transform: [{ rotate: '10rad' }, { rotate: '10deg' }] })
+})
+it('should not convert % for supported values', async () => {
+  const Comp = styled.View`
+    width: 10%;
+    height: 10%;
+    min-width: 10%;
+    min-height: 10%;
+    top: 10%;
+    left: 10%;
+    right: 10%;
+    bottom: 10%;
+    flex-basis: 10%;
+  `
+
+  const wrapper = TestRenderer.create(<Comp />)
+
+  expect(wrapper.root.findByType('View').props.style).toEqual({
+    width: '10%',
+    height: '10%',
+    minWidth: '10%',
+    minHeight: '10%',
+    top: '10%',
+    left: '10%',
+    right: '10%',
+    bottom: '10%',
+    flexBasis: '10%'
+  })
 })
 it('should handle maths values', async () => {
   const Comp = styled.View`
