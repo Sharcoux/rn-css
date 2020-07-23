@@ -47,7 +47,7 @@ const Options = styled.FlatList.attrs<{pressed: boolean}>(props => ({ pressed: p
 `
 
 const ColorCircle = styled.TouchableOpacity<{color: string; size?: number}>`
-  backgroundColor: ${props => props.color};
+  background-color: ${props => props.color};
   width: ${props => props.size || 2}em;
   height: ${props => props.size || 2}em;
   opacity: 1;
@@ -103,7 +103,7 @@ const App = () => {
       <HoverableText>Hover me !</HoverableText>
       <Button />
       <FlatList />
-      <ColorCircle color={'black'} onLayout={(e) => { console.log(e.nativeEvent.layout) }}/>
+      <ColorCircle color="#236AFF" onLayout={(e) => { console.log(e.nativeEvent.layout) }}/>
     </Box>
   )
 }

@@ -31,4 +31,7 @@ describe('CSS style conversion', () => {
   it('should merge props', () => {
     expect(convert('width: 10px; flex: 1;')).toEqual({ width: '10px', flexGrow: '1', flexShrink: '0', flexBasis: '0' })
   })
+  it('should read colors', () => {
+    expect(convert('background-color: #236AFF; color: #8030D0;')).toEqual({ backgroundColor: '#236AFF', color: '#8030D0' })
+  })
 })

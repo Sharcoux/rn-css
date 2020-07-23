@@ -307,10 +307,10 @@ it('Should merge the inline css within rnCSS prop', async () => {
   `
   let wrapper
   await act(async () => {
-    wrapper = TestRenderer.create(<Comp rnCSS="color:blue;width:200px;"/>)
+    wrapper = TestRenderer.create(<Comp rnCSS="color:#236AFF;width:200px;"/>)
   })
   expect(wrapper.root.findByType('View').props.style).toEqual({
-    color: 'blue',
+    color: '#236AFF',
     width: 200
   })
 })
