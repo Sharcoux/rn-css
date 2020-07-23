@@ -113,13 +113,14 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
     return ForwardRefComponent as React.ForwardRefExoticComponent<Props & S & OptionalProps & { ref?: React.Ref<any> }>
   }
 
-  // provide withStyle(Comp).attrs({} | () => {}) feature
+  // provide styled(Comp).attrs({} | () => {}) feature
   styledComponent.attrs = <S, >(opts: Partial<S & Props> | ((props: S & Props) => Partial<S & Props>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
+    const ComponentWithAttrs = styledComponent(chunks, ...functs)
     const ForwardRefComponent = React.forwardRef<typeof Component, S & Props>((props: Props & S, ref) => {
       const attrs = (opts instanceof Function) ? opts(props) : opts
-      const ComponentWithAttrs = styledComponent(chunks, ...functs)
       return <ComponentWithAttrs ref={ref} {...props} {...attrs} />
     })
+    // TODO : Find a way to remove from the Props the properties affected by opts
     return ForwardRefComponent as React.ForwardRefExoticComponent<(Props | S) & OptionalProps & { ref?: React.Ref<any> }>
   }
 
