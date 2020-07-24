@@ -36,7 +36,7 @@ export function convertValue (key: string, value: string, units: Units): string 
   }
 
   // We replace all units within the value
-  const convertedValue = value.replace(/([+-]?\b\d+(\.\d+)?)([a-z]+\b|%)/ig, occ => {
+  const convertedValue = value.replace(/(\b\d+(\.\d+)?)([a-z]+\b|%)/ig, occ => {
     const [val, unit] = parseValue(occ)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     if (['deg', 'rad'].includes(unit!)) return occ // We don't want to convert deg and rad units

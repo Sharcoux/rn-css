@@ -22,7 +22,7 @@ const Box = styled.View`
 const Popup = styled.View`
   z-index: 20;
   position: absolute;
-  top: 100%;
+  top: calc(100% + 2px);
   background-color: black;
 `
 
