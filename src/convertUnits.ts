@@ -39,7 +39,7 @@ export function convertValue (key: string, value: string, units: Units): string 
   const convertedValue = value.replace(/(\b\d+(\.\d+)?)([a-z]+\b|%)/ig, occ => {
     const [val, unit] = parseValue(occ)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    if (['deg', 'rad'].includes(unit!)) return occ // We don't want to convert deg and rad units
+    if (['deg', 'rad', 'turn'].includes(unit!)) return occ // We don't want to convert deg and rad units
     return val * (finalUnits[unit as keyof Units || 'px']!) + ''
   })
 

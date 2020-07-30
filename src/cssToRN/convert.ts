@@ -88,7 +88,7 @@ export function textDecoration (value: string) {
 }
 
 function read2D (prefix: 'translate' | 'scale' | 'skew', value: string) {
-  const [x, y] = value.split(',').map(val => val.trim())
+  const [x, y = x] = value.split(',').map(val => val.trim()) as string[]
   return {
     [prefix + 'X']: x,
     [prefix + 'Y']: y
@@ -96,7 +96,7 @@ function read2D (prefix: 'translate' | 'scale' | 'skew', value: string) {
 }
 
 function read3D (prefix: 'rotate', value: string) {
-  const [x, y, z] = value.split(',').map(val => val.trim())
+  const [x, y = 0, z = 0] = value.split(',').map(val => val.trim())
   return {
     [prefix + 'X']: x,
     [prefix + 'Y']: y,
