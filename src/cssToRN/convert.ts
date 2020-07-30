@@ -1,4 +1,4 @@
-import type { Style } from '../types'
+import type { Style, Transform } from '../types'
 
 /** Check if the value is a number. Numbers start with a digit, a decimal point or calc(, max( ou min( */
 function isNumber (value: string) {
@@ -89,30 +89,30 @@ export function textDecoration (value: string) {
 
 function read2D (prefix: 'translate' | 'scale' | 'skew', value: string) {
   const [x, y = x] = value.split(',').map(val => val.trim()) as string[]
-  return {
-    [prefix + 'X']: x,
-    [prefix + 'Y']: y
-  }
+  return [
+    { [prefix + 'X']: x },
+    { [prefix + 'Y']: y }
+  ]
 }
 
-function read3D (prefix: 'rotate', value: string) {
-  const [x, y = 0, z = 0] = value.split(',').map(val => val.trim())
-  return {
-    [prefix + 'X']: x,
-    [prefix + 'Y']: y,
-    [prefix + 'Z']: z
-  }
+function read3D (prefix: 'rotate', value: string): Transform[] {
+  const [x, y, z] = value.split(',').map(val => val.trim())
+  const transform = []
+  if (x) transform.push({ [prefix + 'X']: x })
+  if (y) transform.push({ [prefix + 'Y']: y })
+  if (z) transform.push({ [prefix + 'Z']: z })
+  return transform
 }
 
 export function transform (value: string) {
   // Parse transform operations
-  const transform = [...value.matchAll(/(\w+)\((.*?)\)/gm)].map(val => {
+  const transform = [...value.matchAll(/(\w+)\((.*?)\)/gm)].reduce((acc, val) => {
     const operation = val[1]
     const values = val[2].trim()
-    if (['translate', 'scale', 'skew'].includes(operation)) return read2D(operation as 'translate' | 'scale' | 'skew', values)
-    else if (operation === 'rotate3d') return read3D('rotate', values)
-    else return { [operation]: values }
-  })
+    if (['translate', 'scale', 'skew'].includes(operation)) return acc.concat(read2D(operation as 'translate' | 'scale' | 'skew', values))
+    else if (operation === 'rotate3d') return acc.concat(read3D('rotate', values))
+    else return acc.concat({ [operation]: values })
+  }, [] as Transform[])
   return { transform }
 }
 

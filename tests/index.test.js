@@ -247,7 +247,7 @@ it('should handle maths values', async () => {
 
   expect(wrapper.root.findByType('View').props.style).toEqual({
     marginLeft: 140,
-    transform: [{ translateX: 32, translateY: 48 }, { rotate: '36deg' }],
+    transform: [{ translateX: 32 }, { translateY: 48 }, { rotate: '36deg' }],
     height: 160,
     width: 20
   })
@@ -316,7 +316,7 @@ it('Should merge the inline css within rnCSS prop', async () => {
 })
 it('Should accept % in transform', async () => {
   const Comp = styled.View`
-    transform: translate(2%, 3%);
+    transform: translate(2%, 3%) scale(2);
   `
   let wrapper
   await act(async () => {
@@ -330,8 +330,15 @@ it('Should accept % in transform', async () => {
   expect(wrapper.root.findByType('View').props.style).toEqual({
     transform: [
       {
-        translateX: 20,
+        translateX: 20
+      },
+      {
         translateY: 3
+      },
+      {
+        scaleX: 2
+      }, {
+        scaleY: 2
       }
     ]
   })

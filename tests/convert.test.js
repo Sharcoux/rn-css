@@ -23,13 +23,17 @@ describe('CSS style conversion', () => {
     expect(convert('font: bold italic 1.2em "Fira Sans", serif;')).toEqual({ fontWeight: 'bold', fontStyle: 'italic', fontSize: '1.2em', fontFamily: '"Fira Sans", serif' })
     expect(convert('box-shadow: 2px 3px 4px blue')).toEqual({ shadowOffset: { width: '2px', height: '3px' }, shadowRadius: '4px', shadowColor: 'blue' })
     expect(convert('text-shadow: 2vmin 3vmax 4vw blue')).toEqual({ textShadowOffset: { width: '2vmin', height: '3vmax' }, textShadowRadius: '4vw', textShadowColor: 'blue' })
-    expect(convert('transform: translate(2px, 3px)')).toEqual({ transform: [{ translateX: '2px', translateY: '3px' }] })
-    expect(convert('transform: rotate3d(2px, 3px, 26deg)')).toEqual({ transform: [{ rotateX: '2px', rotateY: '3px', rotateZ: '26deg' }] })
+    expect(convert('transform: translate(2px, 3px)')).toEqual({ transform: [{ translateX: '2px' }, { translateY: '3px' }] })
+    expect(convert('transform: rotate3d(2px, 3px, 26deg)')).toEqual({ transform: [{ rotateX: '2px' }, { rotateY: '3px' }, { rotateZ: '26deg' }] })
     expect(convert('text-decoration: underline line-through')).toEqual({ textDecorationLine: 'underline line-through', textDecorationStyle: 'solid', textDecorationColor: 'black' })
     expect(convert('flex: 1 1 100%')).toEqual({ flexGrow: '1', flexShrink: '1', flexBasis: '100%' })
   })
   it('should merge props', () => {
     expect(convert('width: 10px; flex: 1;')).toEqual({ width: '10px', flexGrow: '1', flexShrink: '0', flexBasis: '0' })
+  })
+  it('should apply single transform value to both x and y', () => {
+    expect(convert('transform: translate(2px)')).toEqual({ transform: [{ translateX: '2px' }, { translateY: '2px' }] })
+    expect(convert('transform: scale(2)')).toEqual({ transform: [{ scaleX: '2' }, { scaleY: '2' }] })
   })
   it('should read colors', () => {
     expect(convert('background-color: #236AFF; color: #8030D0;')).toEqual({ backgroundColor: '#236AFF', color: '#8030D0' })
