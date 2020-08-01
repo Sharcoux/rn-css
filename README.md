@@ -114,4 +114,8 @@ return <View rnCSS="width=2em;height=3em;"/>
 
 ### Coming soon:
 
-media-queries, linear-gradient
+media-queries
+
+### Coming later:
+
+linear-gradient, background-repeat, transitions, animations

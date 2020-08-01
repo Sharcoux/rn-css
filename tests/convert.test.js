@@ -38,4 +38,7 @@ describe('CSS style conversion', () => {
   it('should read colors', () => {
     expect(convert('background-color: #236AFF; color: #8030D0;')).toEqual({ backgroundColor: '#236AFF', color: '#8030D0' })
   })
+  it('should alias background to backgroundColor', () => {
+    expect(convert('background: #236AFF;')).toEqual({ backgroundColor: '#236AFF' })
+  })
 })

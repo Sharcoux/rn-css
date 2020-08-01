@@ -38,6 +38,9 @@ function cssChunkToStyle (css: string) {
       case 'borderWidth':
         Object.assign(result, sideValue('border', value, 'Width'))
         break
+      case 'background':
+        Object.assign(result, { backgroundColor: value })
+        break
       case 'padding':
       case 'margin':
         Object.assign(result, sideValue(key, value))
