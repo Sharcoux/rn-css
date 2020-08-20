@@ -76,8 +76,8 @@ const Button = () => {
 }
 
 const App = () => {
-  const ref = React.createRef<Text>()
-  const ref2 = React.createRef<typeof Box>()
+  const ref = React.useRef<Text>(null)
+  const ref2 = React.useRef<typeof Box>(null)
   React.useLayoutEffect(() => console.log(ref), [])
   return (
     <Box ref={ref2}>

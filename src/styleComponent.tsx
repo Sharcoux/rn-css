@@ -100,8 +100,10 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       const style: StyleProp<any> = React.useMemo(() => (zIndex ? [styleConvertedFromCSS, { zIndex }] : styleConvertedFromCSS), [styleConvertedFromCSS, zIndex])
       const newProps = { style, onMouseEnter, onMouseLeave, onLayout }
 
-      const currentFontSize = React.useContext(FontSizeContext)
-      if (em !== currentFontSize) {
+      // The lines below can improve perfs, but it causes the component to remount when the font size changes
+      // const currentFontSize = React.useContext(FontSizeContext)
+      // if (em !== currentFontSize) {
+      if (finalStyle.current.fontSize) {
         return <FontSizeContext.Provider value={em}>
           <Component ref={ref} {...props} {...newProps} />
         </FontSizeContext.Provider>
