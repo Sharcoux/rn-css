@@ -1,5 +1,5 @@
-import { AppRegistry, Platform, TouchableOpacity, TouchableOpacityProps } from 'react-native'
 import React from 'react'
+import { AppRegistry, Platform, TouchableOpacity, TouchableOpacityProps } from 'react-native'
 import { name as appName } from './app.json'
 import styled from './src'
 
@@ -53,6 +53,7 @@ const ColorCircle = styled.TouchableOpacity<{color: string; size?: number}>`
   opacity: 1;
   border-radius: 50%;
   &:hover {
+    background-color: red;
     opacity: 0.5;
   }
 `

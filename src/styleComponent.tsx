@@ -1,11 +1,11 @@
 /* eslint-disable react/display-name */
 import React, { MouseEvent } from 'react'
-import type { StyleMap, Style, Units } from './types'
-import cssToStyle from './cssToRN'
-import calculHash from './generateHash'
-import { useLayout, useScreenSize, useFontSize, useHover, FontSizeContext, useZIndex } from './features'
+import { FlatList, FlatListProps, LayoutChangeEvent, SectionList, SectionListProps, StyleProp, StyleSheet, VirtualizedList, VirtualizedListProps } from 'react-native'
 import convertStyle from './convertStyle'
-import { LayoutChangeEvent, StyleProp, StyleSheet, FlatList, FlatListProps, SectionList, SectionListProps, VirtualizedList, VirtualizedListProps } from 'react-native'
+import cssToStyle from './cssToRN'
+import { FontSizeContext, useFontSize, useHover, useLayout, useScreenSize, useZIndex } from './features'
+import calculHash from './generateHash'
+import type { Style, StyleMap, Units } from './types'
 
 // We use this to cache the computed styles
 const styleMap: StyleMap = {}
@@ -28,7 +28,7 @@ function buildCSSString<T extends { rnCSS?: string }> (chunks: TemplateStringsAr
 const styled = <Props, >(Component: React.ComponentType<Props>) => {
   const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
     const ForwardRefComponent = React.forwardRef<React.ComponentType<S & Props & OptionalProps>, S & Props & OptionalProps>((props: S & Props & OptionalProps, ref) => {
-      const units = React.useRef<Units>({ em: 16, vw: 1, vh: 1, vmin: 1, vmax: 1, width: 1, height: 1, rem: 16, px: 1, pt: 72 / 96, in: 96, pc: 9, cm: 96 / 2.54, mm: 96 / 25.4 })
+      const units = React.useRef<Units>({ em: 16, vw: 1, vh: 1, vmin: 1, vmax: 1, rem: 16, px: 1, pt: 72 / 96, in: 96, pc: 9, cm: 96 / 2.54, mm: 96 / 25.4 })
 
       // Store the style for mutualization
       const cssString = React.useRef(buildCSSString(chunks, functs, props))
