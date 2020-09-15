@@ -119,3 +119,15 @@ media-queries
 ### Coming later:
 
 linear-gradient, background-repeat, transitions, animations
+
+## Access current font size value
+
+If somewhere within your app, you need to know the current font size value in px to be able to manually convert em in px, you can do the following:
+
+```javascript
+import { FontSizeContext } from 'rn-css'
+
+...
+const em = React.useContext(FontSizeContext)
+const tenEmInPixels = 10 * em
+```

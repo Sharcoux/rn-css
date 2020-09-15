@@ -1,6 +1,7 @@
 import React from 'react'
 import * as RN from 'react-native'
 import styledComponent, { styledFlatList, styledSectionList, styledVirtualizedList } from './styleComponent'
+export { FontSizeContext } from './features'
 
 const styled = <T, >(Component: React.ComponentType<T>) => styledComponent<T>(Component)
 
