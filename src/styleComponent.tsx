@@ -100,6 +100,9 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       const style: StyleProp<any> = React.useMemo(() => (zIndex ? [styleConvertedFromCSS, { zIndex }] : styleConvertedFromCSS), [styleConvertedFromCSS, zIndex])
       const newProps = { style, onMouseEnter, onMouseLeave, onLayout }
 
+      // Handle ellipsis
+      if (StyleSheet.flatten(styleConvertedFromCSS).textOverflow === 'ellipsis') Object.assign(newProps, { numberOfLines: 1 })
+
       // The lines below can improve perfs, but it causes the component to remount when the font size changes
       // const currentFontSize = React.useContext(FontSizeContext)
       // if (em !== currentFontSize) {
