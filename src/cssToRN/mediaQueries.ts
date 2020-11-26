@@ -1,9 +1,192 @@
+import type { Units } from '../types'
+import { convertValue, parseValue } from '../convertUnits'
+
 const RE_MEDIA_QUERY = /^(?:(only|not)?\s*([_a-z][_a-z0-9-]*)|(\([^\)]+\)))(?:\s*and\s*(.*))?$/i
 const RE_MQ_EXPRESSION = /^\(\s*([_a-z-][_a-z0-9-]*)\s*(?:\:\s*([^\)]+))?\s*\)$/
 const RE_MQ_FEATURE = /^(?:(min|max)-)?(.+)/
 const RE_LENGTH_UNIT = /(em|rem|px|cm|mm|in|pt|pc)?\s*$/
 const RE_RESOLUTION_UNIT = /(dpi|dpcm|dppx)?\s*$/
 
+type Context = {
+  width: number
+  height: number
+  aspectRatio: number
+  orientation: 'portrait' | 'landscape'
+  resolution: number
+  scan: 'interlace' | 'progressive'
+  grid: 0 | -0 | 1
+  update: 'none' | 'slow' | 'fast'
+  overflowBlock: 'none' | 'scroll' | 'paged'
+  overflowInline: 'none' | 'scroll'
+  environmentBlending: 'opaque' | 'additive' | 'subtractive'
+  color: number
+  colorGamut: 'srgb' | 'p3' | 'rec2020'
+  colorIndex: number
+  displayMode: number
+  dynamicRange: 'standard' | 'high'
+  monochrome: number
+  invertedColors: 'none' | 'inverted'
+  pointer: 'none' | 'coarse' | 'fine'
+  hover: 'none' | 'hover'
+  anyPointer: 'none' | 'coarse' | 'fine'
+  anyHover: 'none' | 'hover'
+  lightLevel: number
+  prefersReducedMotion: 'no-preference' | 'reduce'
+  prefersReducedTransparency: 'no-preference' | 'reduce'
+  prefersReducedData: 'no-preference' | 'reduce'
+  prefersContrast: 'no-preference' | 'high' | 'low' | 'forced'
+  prefersColorScheme: 'light' | 'dark'
+  forcedColor: 'none' | 'active'
+  scripting: 'none' | 'initial-only' | 'enabled'
+  deviceWidth: number
+  deviceHeight: number
+  deviceAspectRatio: number
+  units: Units
+}
+
+type Constraint = {
+  width?: string
+  widthMin?: string
+  widthMax?: string
+  height?: string
+  heightMin?: string
+  heightMax?: string
+  aspectRatio?: string
+  aspectRatioMin?: string
+  aspectRatioMax?: string
+  orientation?: 'portrait' | 'landscape'
+  resolution?: string
+  resolutionMin?: string
+  resolutionMax?: string
+  scan?: 'interlace' | 'progressive'
+  grid?: 0 | -0 | 1
+  update?: 'none' | 'slow' | 'fast'
+  overflowBlock?: 'none' | 'scroll' | 'paged'
+  overflowInline?: 'none' | 'scroll'
+  environmentBlending?: 'opaque' | 'additive' | 'subtractive'
+  color?: string
+  colorMin?: string
+  colorMax?: string
+  colorGamut?: 'srgb' | 'p3' | 'rec2020'
+  colorIndex?: string
+  colorIndexMin?: string
+  colorIndexMax?: string
+  displayMode?: string
+  displayModeMin?: string
+  displayModeMax?: string
+  dynamicRange?: 'standard' | 'high'
+  monochrome?: string
+  monochromeMin?: string
+  monochromeMax?: string
+  invertedColors?: 'none' | 'inverted'
+  pointer?: 'none' | 'coarse' | 'fine'
+  hover?: 'none' | 'hover'
+  anyPointer?: 'none' | 'coarse' | 'fine'
+  anyHover?: 'none' | 'hover'
+  lightLevel?: string
+  lightLevelMin?: string
+  lightLevelMax?: string
+  prefersReducedMotion?: 'no-preference' | 'reduce'
+  prefersReducedTransparency?: 'no-preference' | 'reduce'
+  prefersReducedData?: 'no-preference' | 'reduce'
+  prefersContrast?: 'no-preference' | 'high' | 'low' | 'forced'
+  prefersColorScheme?: 'light' | 'dark'
+  forcedColor?: 'none' | 'active'
+  scripting?: 'none' | 'initial-only' | 'enabled'
+  deviceWidth?: string
+  deviceWidthMin?: string
+  deviceWidthMax?: string
+  deviceHeight?: string
+  deviceHeightMin?: string
+  deviceHeightMax?: string
+  deviceAspectRatio?: string
+  deviceAspectRatioMin?: string
+  deviceAspectRatioMax?: string
+}
+
+type Group = {
+  content: Group,
+  evaluate: (context: Context) => boolean
+}
+
+function evaluateConstraint (constraint: Constraint, context: Context) {
+  (Object.keys(constraint) as (keyof Constraint)[]).map(key => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const [, baseKey, minMax] = key.match(/(.*?)(Min|Max|$)/)! as [string, keyof Context, 'Min' | 'Max' | '']
+    const value = convertValue(baseKey, constraint[key] + '', context.units)
+    if (minMax === 'Min') {
+      return context[baseKey] > value
+    }
+    else if (key.endsWith('Max')) {
+      return context[baseKey] < value
+    }
+    else {
+      // Boolean check: we want the value to be defined and not equal to 'none'
+      if (value === '') return !!context[baseKey] && context[baseKey] !== 'none'
+      return context[baseKey] === value
+    }
+  })
+}
+
+function evaluateQuery (context: Context, group: Group) {
+  return group.evaluate(context)
+}
+
+type Evaluation = (context: Context) => boolean
+
+function or (evaluations: Evaluation[]): Evaluation {
+  return (context: Context) => !!evaluations.find(e => e(context))
+}
+function and (evaluations: Evaluation[]): Evaluation {
+  return (context: Context) => evaluations.every(e => e(context))
+}
+function not (evaluation: Evaluation): Evaluation {
+  return (context: Context) => !evaluation(context)
+}
+function group(parent: Evaluation | null): Evaluation {
+  return (context: Context) => 
+}
+
+const currentGroup = { parent: null }
+
+function parse (constraint: string): Evaluation {
+  const trim = constraint.trim()
+  if(trim.startsWith('(')) {
+    parse(constraint.substring(1))
+    const [, inner] = trim.match(/\(([^()]*\([^()]*\))*[^()]*\)/mis)
+  } else if(trim.startsWith(')')) {
+    if(currentGroup.parent) currentGroup = currentGroup.parent
+    else return currentGroup
+  }
+}
+
+function Group (inner) {
+  this.content = parse(inner)
+}
+Group.prototype.evaluate = function (context) {
+
+}
+
+const densityUnitsEquivalence = {
+  dpi: 'in',
+  dpcm: 'cm',
+  dppx: 'px',
+  x: 'px'
+}
+
+function convertDensityUnits (value: string, units: Units) {
+  if (value === 'infinite') return Infinity
+  const [num, unit] = parseValue(value)
+  return convertValue('resolution', num + densityUnitsEquivalence[unit as keyof typeof densityUnitsEquivalence], units)
+}
+
+const createMedia = (query: string) => {
+  let parse = query.match(/@media(.*?){([^{}]*{[^{}]*})*[^{}]*}/mis)
+  if (!parse) return
+  const [, constraints, instructions] = parse
+  parse = constraints.match(/\s*(screen)/)
+  return config => isValid(config) ? instructions : ''
+}
 
 export function matchQuery (mediaQuery: string, values: Value, units: Units) {
   return parseQuery(mediaQuery).some((query: MediaParsedValue) => {
@@ -213,6 +396,6 @@ type MediaParsedValue = {
 
 type MediaType = 'all' | 'screen' | 'print' | 'handheld' | 'aural' | 'speech' | 'braille' | 'embossed' | 'projection' | 'tty' | 'tv'
 
-function createMedia(mediaString: string) {
+function createMedia (mediaString: string) {
   const media = mediaString.trim().match(/(.*?) ((and|only|)/gmis)
 }
