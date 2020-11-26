@@ -33,6 +33,8 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-non-null-assertion': 'warn',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
+    'no-use-before-define': 'off',
+    'multiline-ternary': 'off',
     'brace-style': ['error', 'stroustrup', { allowSingleLine: true }],
     'linebreak-style': ['error', 'unix']
   }

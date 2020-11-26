@@ -6,7 +6,7 @@ function kebab2camel (string: string) {
 }
 
 function stripSpaces (string: string) {
-  return string.replace(/(calc|max|min)\(.*?\)/mg, res => res.replace(/\s/g, ''))
+  return string.replace(/(calc|max|min|rgb|rgba)\(.*?\)/mg, res => res.replace(/\s/g, ''))
 }
 
 function cssToStyle (css: string) {
@@ -54,13 +54,13 @@ function cssChunkToStyle (css: string) {
       case 'textDecoration':
         Object.assign(result, textDecoration(value))
         break
-      case 'place-content':
+      case 'placeContent':
         Object.assign(result, placeContent(value))
         break
       case 'flex':
         Object.assign(result, flex(value))
         break
-      case 'flex-flow':
+      case 'flexFlow':
         Object.assign(result, flexFlow(value))
         break
       case 'transform':

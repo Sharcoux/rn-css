@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 import React, { MouseEvent } from 'react'
 import { FlatList, FlatListProps, LayoutChangeEvent, SectionList, SectionListProps, StyleProp, StyleSheet, VirtualizedList, VirtualizedListProps } from 'react-native'
