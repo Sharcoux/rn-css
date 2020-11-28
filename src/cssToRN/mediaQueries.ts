@@ -1,212 +1,218 @@
-// const RE_MEDIA_QUERY = /^(?:(only|not)?\s*([_a-z][_a-z0-9-]*)|(\([^\)]+\)))(?:\s*and\s*(.*))?$/i
-// const RE_MQ_EXPRESSION = /^\(\s*([_a-z-][_a-z0-9-]*)\s*(?:\:\s*([^\)]+))?\s*\)$/
-// const RE_MQ_FEATURE = /^(?:(min|max)-)?(.+)/
-// const RE_LENGTH_UNIT = /(em|rem|px|cm|mm|in|pt|pc)?\s*$/
-// const RE_RESOLUTION_UNIT = /(dpi|dpcm|dppx)?\s*$/
+import type { Units, Context } from '../types'
+import { convertValue, parseValue } from '../convertUnits'
+import { PixelRatio, Platform } from 'react-native'
 
-// type MediaType = 'all' | 'screen' | 'print' | 'handheld' | 'aural' | 'speech' | 'braille' | 'embossed' | 'projection' | 'tty' | 'tv'
-// type MediaCriteria = {
-//   color?: string;
-//   colorIndex?: number;
-//   deviceAspectRatio?: string;
-//   aspectRation?: string;
-//   deviceHeight?: string;
-//   deviceWidth?: string;
-//   grid?: string;
-//   height?: string;
-//   monochrome?: string;
-//   orientation?: 'portrait' | 'landscape';
-//   resolution?: string;
-//   scan?: 'progressive' | 'interlace';
-//   width?: string;
-// }
-// type Value = {
-//   type: MediaType
-//   color?: number;
-//   colorIndex?: number;
-//   deviceAspectRatio?: number;
-//   aspectRation?: number;
-//   deviceHeight?: number;
-//   deviceWidth?: number;
-//   grid?: number;
-//   height?: number;
-//   monochrome?: number | boolean;
-//   orientation?: 'portrait' | 'landscape';
-//   resolution?: number;
-//   scan?: 'progressive' | 'interlace';
-//   width?: number;
-// }
-// type MediaValue = {
-//   type: MediaType;
-//   inverse?: boolean;
-//   only?: boolean;
-//   modifier?: 'min' | 'max';
-//   value: string;
-//   criteria: keyof MediaCriteria
-// }
-// type MediaParsedValue = {
-//   type: MediaType;
-//   expressions: MediaValue[];
-// }
+type Constraint = {
+  all?: undefined,
+  sprint?: undefined,
+  speech?: undefined,
+  screen?: undefined,
+  width?: string
+  widthMin?: string
+  widthMax?: string
+  height?: string
+  heightMin?: string
+  heightMax?: string
+  aspectRatio?: string
+  aspectRatioMin?: string
+  aspectRatioMax?: string
+  orientation?: 'portrait' | 'landscape'
+  resolution?: string
+  resolutionMin?: string
+  resolutionMax?: string
+  scan?: 'interlace' | 'progressive'
+  grid?: 0 | 1
+  update?: 'none' | 'slow' | 'fast'
+  overflowBlock?: 'none' | 'scroll' | 'paged'
+  overflowInline?: 'none' | 'scroll'
+  environmentBlending?: 'opaque' | 'additive' | 'subtractive'
+  color?: string
+  colorMin?: string
+  colorMax?: string
+  colorGamut?: 'srgb' | 'p3' | 'rec2020'
+  colorIndex?: string
+  colorIndexMin?: string
+  colorIndexMax?: string
+  dynamicRange?: 'standard' | 'high'
+  monochrome?: string
+  monochromeMin?: string
+  monochromeMax?: string
+  invertedColors?: 'none' | 'inverted'
+  pointer?: 'none' | 'coarse' | 'fine'
+  hover?: 'none' | 'hover'
+  anyPointer?: 'none' | 'coarse' | 'fine'
+  anyHover?: 'none' | 'hover'
+  prefersReducedMotion?: 'no-preference' | 'reduce'
+  prefersReducedTransparency?: 'no-preference' | 'reduce'
+  prefersReducedData?: 'no-preference' | 'reduce'
+  prefersContrast?: 'no-preference' | 'high' | 'low' | 'forced'
+  prefersColorScheme?: 'light' | 'dark'
+  forcedColor?: 'none' | 'active'
+  scripting?: 'none' | 'initial-only' | 'enabled'
+  deviceWidth?: string
+  deviceWidthMin?: string
+  deviceWidthMax?: string
+  deviceHeight?: string
+  deviceHeightMin?: string
+  deviceHeightMax?: string
+  deviceAspectRatio?: string
+  deviceAspectRatioMin?: string
+  deviceAspectRatioMax?: string
+}
 
-// export function matchQuery (mediaQuery: string, values: Value, units: Units) {
-//   return parseQuery(mediaQuery).some((query: MediaParsedValue) => {
-//     const inverse = query.inverse
+export function createContext (units: Units): Context {
+  const vw = (units.vw || 1) * 100
+  const vh = (units.vh || 1) * 100
+  return {
+    anyHover: 'hover',
+    anyPointer: Platform.OS === 'web' ? 'fine' : 'coarse',
+    aspectRatio: vw / vh,
+    color: 16,
+    colorGamut: 'srgb',
+    colorIndex: 0,
+    deviceAspectRatio: vw / vh,
+    deviceHeight: vh,
+    deviceWidth: vw,
+    dynamicRange: 'standard',
+    environmentBlending: 'opaque',
+    forcedColor: 'none',
+    grid: 0,
+    height: vh,
+    hover: 'hover',
+    invertedColors: 'none',
+    monochrome: 0,
+    orientation: vw > vh ? 'landscape' : 'portrait',
+    overflowBlock: 'scroll',
+    overflowInline: 'scroll',
+    pointer: 'coarse',
+    prefersColorScheme: 'dark',
+    prefersContrast: 'no-preference',
+    prefersReducedData: 'no-preference',
+    prefersReducedMotion: 'no-preference',
+    prefersReducedTransparency: 'no-preference',
+    resolution: PixelRatio.getPixelSizeForLayoutSize(vw),
+    scan: 'progressive',
+    scripting: 'enabled',
+    type: 'screen',
+    units,
+    update: 'fast',
+    width: vw
+  }
+}
 
-//     // Either the parsed or specified `type` is "all", or the types must be
-//     // equal for a match.
-//     const typeMatch = query.type === 'all' || values.type === query.type
+function convertAnyValue (key: string, value: string, units: Units) {
+  const finalValue = value
+  if (key === 'resolution') {
+    // Convert density
+    if (value === 'infinite') return Infinity
+    const densityUnitsEquivalence = {
+      dpi: 'in',
+      dpcm: 'cm',
+      dppx: 'px',
+      x: 'px'
+    }
+    const [num, unit] = parseValue(value)
+    return num + densityUnitsEquivalence[unit as keyof typeof densityUnitsEquivalence]
+  }
+  else if (key === 'deviceAspectRatio' || key === 'aspectRatio') {
+    // Convert ratio
+    const [w, h] = value.split('/').map(v => parseInt(v, 10))
+    return w / h
+  }
 
-//     // Quit early when `type` doesn't match, but take "not" into account.
-//     if ((typeMatch && inverse) || !(typeMatch || inverse)) {
-//       return false
-//     }
+  return convertValue(key, finalValue, units)
+}
 
-//     const expressionsMatch = query.expressions.every(expression => {
-//       const feature = expression.feature
-//       const modifier = expression.modifier
-//       let expValue = expression.value
-//       let value = values[feature]
+/** Check if a constraint is respected by the provided context */
+function evaluateConstraint (constraint: Constraint, context: Context): boolean {
+  return (Object.keys(constraint) as (keyof Constraint)[]).every(key => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const [, baseKey, minMax] = key.match(/(.*?)(Min|Max|$)/)! as [string, keyof Context, 'Min' | 'Max' | '']
+    const value = convertAnyValue(baseKey, constraint[key] + '', context.units)
+    if (minMax === 'Min') {
+      return context[baseKey] >= value
+    }
+    else if (key.endsWith('Max')) {
+      return context[baseKey] <= value
+    }
+    else if (['all', 'sprint', 'speech', 'screen'].includes(key)) {
+      return context.type === key || key === 'all'
+    }
+    else {
+      // Boolean check: we want the value to be defined and not equal to 'none'
+      if (value === undefined) return !!context[baseKey] && context[baseKey] !== 'none'
+      // float comparison
+      if (baseKey.endsWith('aspectRatio')) return Math.abs((context[baseKey] as number) - (value as number)) < ((value as number) + (context[baseKey] as number)) / 100
+      return context[baseKey] === value
+    }
+  })
+}
 
-//       // Missing or falsy values don't match.
-//       if (!value) { return false }
+/** Parse media query constraint such as min-width: 600px, or screen */
+function parseConstraintValue (constraintString: string): Evaluation {
+  let [key, value] = constraintString.split(':').map(v => v.trim())
+  if (key.startsWith('min-')) key = key.substring(4) + 'Min'
+  else if (key.startsWith('max-')) key = key.substring(4) + 'Max'
+  const constraint: Constraint = { [key]: value }
+  return (context: Context) => evaluateConstraint(constraint, context)
+}
 
-//       switch (feature) {
-//         case 'orientation':
-//         case 'scan':
-//           return value.toLowerCase() === expValue.toLowerCase()
+export type Evaluation = (context: Context) => boolean
 
-//         case 'width':
-//         case 'height':
-//         case 'device-width':
-//         case 'device-height':
-//           expValue = toPx(expValue)
-//           value = toPx(value)
-//           break
+function parse (constraint: string, previous?: Evaluation): Evaluation {
+  const result = constraint.match(/\sand\s|,|\sonly\s|\(|\snot\s/ims)
 
-//         case 'resolution':
-//           expValue = toDpi(expValue)
-//           value = toDpi(value)
-//           break
+  if (!result) {
+    // If we reached the end of the string, we just return the last constraint
+    if (constraint.match(/\w/)) return parseConstraintValue(constraint)
+    // If there is just an empty string, we just ignore it by returning a truthy evaluation
+    else return previous || (() => true)
+  }
 
-//         case 'aspect-ratio':
-//         case 'device-aspect-ratio':
-//         case /* Deprecated */ 'device-pixel-ratio':
-//           expValue = toDecimal(expValue)
-//           value = toDecimal(value)
-//           break
+  const token = result[0] // The next command we found
+  const tail = constraint.substring(result.index! + token.length) // The rest of the constraint
+  const current = constraint.substring(0, result.index!) // The current constraint
+  if (token === '(') {
+    try {
+      const { index } = tail.match(/\)/)!
+      const parenthesis = tail.substring(0, index!)
+      const postParenthesis = tail.substring(index! + 1)
+      return parse(postParenthesis, parse(parenthesis, previous))
+    }
+    catch (err) {
+      console.error('No matching parenthesis in the media query', constraint)
+      throw err
+    }
+  }
+  else if (token.includes('and')) {
+    const left = previous || parseConstraintValue(current)
+    const right = parse(tail)
+    return (context: Context) => left(context) && right(context)
+  }
+  else if (token.includes('not')) {
+    const evaluate = parse(tail)
+    return (context: Context) => !evaluate(context)
+  }
+  else if (token.includes('only')) {
+    return parse(tail, previous || parseConstraintValue(current))
+  }
+  else if (token === ',') {
+    const left = previous || parseConstraintValue(current)
+    const right = parse(tail)
+    return (context: Context) => left(context) || right(context)
+  }
+  else {
+    throw new Error(`Error while parsing media query '${constraint}'. No token found`)
+  }
+}
 
-//         case 'grid':
-//         case 'color':
-//         case 'color-index':
-//         case 'monochrome':
-//           expValue = parseInt(expValue, 10) || 1
-//           value = parseInt(value, 10) || 0
-//           break
-//       }
-
-//       switch (modifier) {
-//         case 'min': return value >= expValue
-//         case 'max': return value <= expValue
-//         default : return value === expValue
-//       }
-//     })
-
-//     return (expressionsMatch && !inverse) || (!expressionsMatch && inverse)
-//   })
-// }
-
-// function parseQuery (mediaQuery) {
-//   return mediaQuery.split(',').map(function (query) {
-//     query = query.trim()
-
-//     const captures = query.match(RE_MEDIA_QUERY)
-
-//     // Media Query must be valid.
-//     if (!captures) {
-//       throw new SyntaxError('Invalid CSS media query: "' + query + '"')
-//     }
-
-//     const modifier = captures[1]
-//     const type = captures[2]
-//     let expressions = ((captures[3] || '') + (captures[4] || '')).trim()
-//     const parsed = {}
-
-//     parsed.inverse = !!modifier && modifier.toLowerCase() === 'not'
-//     parsed.type = type ? type.toLowerCase() : 'all'
-
-//     // Check for media query expressions.
-//     if (!expressions) {
-//       parsed.expressions = []
-//       return parsed
-//     }
-
-//     // Split expressions into a list.
-//     expressions = expressions.match(/\([^\)]+\)/g)
-
-//     // Media Query must be valid.
-//     if (!expressions) {
-//       throw new SyntaxError('Invalid CSS media query: "' + query + '"')
-//     }
-
-//     parsed.expressions = expressions.map(function (expression) {
-//       const captures = expression.match(RE_MQ_EXPRESSION)
-
-//       // Media Query must be valid.
-//       if (!captures) {
-//         throw new SyntaxError('Invalid CSS media query: "' + query + '"')
-//       }
-
-//       const feature = captures[1].toLowerCase().match(RE_MQ_FEATURE)
-
-//       return {
-//         modifier: feature[1],
-//         feature: feature[2],
-//         value: captures[2]
-//       }
-//     })
-
-//     return parsed
-//   })
-// }
-
-// // -- Utilities ----------------------------------------------------------------
-
-// function toDecimal (ratio) {
-//   let decimal = Number(ratio)
-//   let numbers
-
-//   if (!decimal) {
-//     numbers = ratio.match(/^(\d+)\s*\/\s*(\d+)$/)
-//     decimal = numbers[1] / numbers[2]
-//   }
-
-//   return decimal
-// }
-
-// function toDpi (resolution) {
-//   const value = parseFloat(resolution)
-//   const units = String(resolution).match(RE_RESOLUTION_UNIT)[1]
-
-//   switch (units) {
-//     case 'dpcm': return value / 2.54
-//     case 'dppx': return value * 96
-//     default : return value
-//   }
-// }
-
-// function toPx (length) {
-//   const value = parseFloat(length)
-//   const units = String(length).match(RE_LENGTH_UNIT)[1]
-
-//   switch (units) {
-//     case 'em' : return value * 16
-//     case 'rem': return value * 16
-//     case 'cm' : return value * 96 / 2.54
-//     case 'mm' : return value * 96 / 2.54 / 10
-//     case 'in' : return value * 96
-//     case 'pt' : return value * 72
-//     case 'pc' : return value * 72 / 12
-//     default : return value
-//   }
-// }
+export const createMedia = (query: string) => {
+  const parsed = query.match(/@media(.*?){([^{}]*)}/mis)
+  if (!parsed) throw new Error(`Parsing error: check the syntax of media query ${query}.`)
+  const [, constraints, css] = parsed
+  const isValid = parse(constraints)
+  return {
+    css,
+    isValid
+  }
+}

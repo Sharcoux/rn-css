@@ -1,10 +1,10 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 import React, { MouseEvent } from 'react'
-import { FlatList, FlatListProps, LayoutChangeEvent, SectionList, SectionListProps, StyleProp, StyleSheet, VirtualizedList, VirtualizedListProps } from 'react-native'
+import { FlatList, FlatListProps, LayoutChangeEvent, RecursiveArray, SectionList, SectionListProps, StyleProp, StyleSheet, VirtualizedList, VirtualizedListProps } from 'react-native'
 import convertStyle from './convertStyle'
 import cssToStyle from './cssToRN'
-import { FontSizeContext, useFontSize, useHover, useLayout, useScreenSize, useZIndex } from './features'
+import { FontSizeContext, useFontSize, useHover, useLayout, useScreenSize, useZIndex, useMediaQuery } from './features'
 import calculHash from './generateHash'
 import type { Style, StyleMap, Units } from './types'
 
@@ -30,7 +30,6 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
   const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
     const ForwardRefComponent = React.forwardRef<React.ComponentType<S & Props & OptionalProps>, S & Props & OptionalProps>((props: S & Props & OptionalProps, ref) => {
       const units = React.useRef<Units>({ em: 16, vw: 1, vh: 1, vmin: 1, vmax: 1, rem: 16, px: 1, pt: 72 / 96, in: 96, pc: 9, cm: 96 / 2.54, mm: 96 / 25.4 })
-
       // Store the style for mutualization
       const cssString = React.useRef(buildCSSString(chunks, functs, props))
       const [rnStyle, setRNStyle] = React.useState<Style>(cssToStyle(cssString.current))
@@ -43,13 +42,11 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
         const style = styleMap[hash]
         if (style) {
           setRNStyle(style.style)
-          finalStyle.current = style.style
           style.usages++
         }
         else {
           const rns = cssToStyle(css)
           setRNStyle(rns)
-          finalStyle.current = rns
           styleMap[hash] = { style: rns, usages: 1 }
         }
         // When the style is not used anymore, we destroy it
@@ -61,28 +58,30 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       }, [props])
 
       // const [needsFontSize, setNeedsFontSize] = React.useState(false)
-      const [needsScreenSize, setNeedsScreenSize] = React.useState(false)
+      // const [needsScreenSize, setNeedsScreenSize] = React.useState(false)
       const [needsLayout, setNeedsLayout] = React.useState(false)
       // const [needsHover, setNeedsHover] = React.useState(false)
       React.useEffect(() => {
         const css = cssString.current
         // setNeedsFontSize(!!css.match(/\b(\d+)(\.\d+)?em\b/)) // Do we need em units
-        setNeedsScreenSize(!!css.match(/\b(\d+)(\.\d+)?v([hw]|min|max)\b/)) // Do we need vx units
+        // setNeedsScreenSize(!!css.match(/\b(\d+)(\.\d+)?v([hw]|min|max)\b/)) // Do we need vx units
         setNeedsLayout(!!css.match(/\d%/)) // Do we need % units
         // setNeedsHover(!!css.match(/&:hover/)) // Do we need to track the mouse
       }, [cssString.current])
 
-      const finalStyle = React.useRef<Style>({ ...rnStyle })
+      const finalStyle = { ...rnStyle }
+      delete finalStyle.media
+      delete finalStyle.hover
       // Read all the data we might need
 
       // Handle hover
       const { onMouseEnter, onMouseLeave, style: hoverStyle } = useHover(rnStyle, props.onMouseEnter, props.onMouseLeave)
-      finalStyle.current = hoverStyle
+      if (hoverStyle) Object.assign(finalStyle, hoverStyle)
 
       // Handle em units
-      const { em } = useFontSize(finalStyle.current.fontSize, units.current.rem)
+      const { em } = useFontSize(finalStyle.fontSize, units.current.rem)
       if (units.current.em !== em) units.current = { ...units.current, em }
-      if (finalStyle.current.fontSize) finalStyle.current.fontSize = em + 'px'
+      if (finalStyle.fontSize) finalStyle.fontSize = em + 'px'
 
       // Handle layout data needed for % units
       const { width, height, onLayout } = useLayout(props.onLayout)
@@ -91,23 +90,37 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       }
 
       // Handle screen size needed for vw and wh units
-      const { vw, vh, vmin, vmax } = useScreenSize()
-      if (needsScreenSize && (units.current.vw !== vw || units.current.vh !== vh || units.current.vmin !== vmin || units.current.vmax !== vmax)) {
-        units.current = { ...units.current, vw, vh, vmin, vmax }
+      const screenUnits = useScreenSize()
+      if (/* needsScreenSize && */(Object.keys(screenUnits) as (keyof typeof screenUnits)[]).find(key => units.current[key] !== screenUnits[key])) {
+        units.current = { ...units.current, ...screenUnits }
       }
 
-      const styleConvertedFromCSS = React.useMemo(() => convertStyle(props.style, finalStyle.current, units.current), [props.style, finalStyle.current, units.current])
-      const zIndex = useZIndex(StyleSheet.flatten(styleConvertedFromCSS).zIndex)
-      const style: StyleProp<any> = React.useMemo(() => (zIndex ? [styleConvertedFromCSS, { zIndex }] : styleConvertedFromCSS), [styleConvertedFromCSS, zIndex])
+      const mediaQuery = useMediaQuery(rnStyle.media, units.current)
+      if (mediaQuery) Object.assign(finalStyle, mediaQuery)
+
+      // We memoïze the style to keep the same reference if possible and change it only if the style changed
+      const calculatedStyle = React.useRef(finalStyle)
+      if (Object.keys(finalStyle).length !== Object.keys(calculatedStyle.current).length || Object.keys(finalStyle).find(key => calculatedStyle.current[key] !== finalStyle[key])) {
+        calculatedStyle.current = finalStyle
+      }
+      const styleConvertedFromCSS = React.useMemo(() => convertStyle(calculatedStyle.current, units.current), [calculatedStyle.current, units.current])
+      const zIndex = useZIndex(StyleSheet.flatten([props.style, styleConvertedFromCSS]).zIndex)
+      const style: StyleProp<any> = React.useMemo(() => {
+        const style = [] as RecursiveArray<any>
+        if (props.style) style.push(props.style)
+        style.push(styleConvertedFromCSS)
+        if (zIndex) style.push({ zIndex })
+        return style.length > 1 ? style : style[0]
+      }, [props.style, styleConvertedFromCSS, zIndex])
       const newProps = { style, onMouseEnter, onMouseLeave, onLayout }
 
       // Handle ellipsis
-      if (StyleSheet.flatten(styleConvertedFromCSS).textOverflow === 'ellipsis') Object.assign(newProps, { numberOfLines: 1 })
+      if (StyleSheet.flatten(style).textOverflow === 'ellipsis') Object.assign(newProps, { numberOfLines: 1 })
 
       // The lines below can improve perfs, but it causes the component to remount when the font size changes
       // const currentFontSize = React.useContext(FontSizeContext)
       // if (em !== currentFontSize) {
-      if (finalStyle.current.fontSize) {
+      if (finalStyle.fontSize) {
         return <FontSizeContext.Provider value={em}>
           <Component ref={ref} {...props} {...newProps} />
         </FontSizeContext.Provider>
