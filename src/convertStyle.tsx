@@ -1,10 +1,10 @@
 /* eslint-disable react/display-name */
-import { /* StyleSheet, */ StyleProp, TextStyle } from 'react-native'
+import { /* StyleSheet, */ TextStyle } from 'react-native'
 import { convertValue } from './convertUnits'
 import type { Style, Units } from './types'
 
 /** Mix the calculated RN style within the object style */
-const convertStyle = <T, >(propsStyle: StyleProp<T> | undefined, rnStyle: Style, units: Units): StyleProp<T> => {
+const convertStyle = (rnStyle: Style, units: Units) => {
   /** This is the result of the convertions from css style into RN style */
   const convertedStyle: TextStyle = {};
   // If width and height are specified, we can use those values for the first render
@@ -39,7 +39,7 @@ const convertStyle = <T, >(propsStyle: StyleProp<T> | undefined, rnStyle: Style,
       convertedStyle[key] = convertValue(key, value, units)
     }
   })
-  return (propsStyle ? [convertedStyle, propsStyle] : convertedStyle) as StyleProp<T>
+  return convertedStyle
 }
 
 export default convertStyle

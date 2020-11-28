@@ -301,6 +301,35 @@ it('should handle hover', async () => {
     width: 200
   })
 })
+// eslint-disable-next-line jest/no-focused-tests
+it.only('should handle media queries', async () => {
+  const { width, height } = Dimensions.get('window')
+  const Comp = styled.View`
+      width: 100px;
+      height: 100px;
+      @media screen and (max-width: ${width * 2}px) {
+        width: 200px;
+        height: 200px;
+      }
+      @media screen and (min-width: ${width * 2}px) {
+        color: red;
+      }
+      @media screen and (orientation: ${width > height ? 'landscape' : 'portrait'}) {
+        background: blue;
+      }
+    `
+
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp />)
+  })
+
+  expect(wrapper.root.findByType('View').props.style).toEqual({
+    height: 200,
+    width: 200,
+    backgroundColor: 'blue'
+  })
+})
 it('Should merge the inline css within rnCSS prop', async () => {
   const Comp = styled.View`
     width: 100px;

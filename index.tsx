@@ -13,11 +13,19 @@ const View = styled.View`
 `
 const Text = styled.Text<{col: string}>`
   color: ${props => props.col || 'black'}
+  @media (max-width: 20em) {
+    color: red;
+  }
 `
 
 const Box = styled.View`
   width: ${value}em;
   max-width: 50vw;
+`
+const Box2 = styled.View`
+  width: 100vw;
+  height: 2em;
+  background: blue;
 `
 const Popup = styled.View`
   z-index: 20;
@@ -104,6 +112,7 @@ const App = () => {
       <HoverableText>Hover me !</HoverableText>
       <Button />
       <FlatList />
+      <Box2 />
       <ColorCircle color="#236AFF" onLayout={(e) => { console.log(e.nativeEvent.layout) }}/>
     </Box>
   )

@@ -11,7 +11,7 @@ export function parseValue (value: string): [number, string | undefined] {
 /** Convert a value using the provided unit transform table */
 export function convertValue (key: string, value: string, units: Units): string | number {
   if (!(Object(value) instanceof String)) {
-    console.log(`Failed to parse CSS instruction: ${key}=${value}. We expect a string, but ${value} was of type ${typeof value}.`)
+    console.error(`Failed to parse CSS instruction: ${key}=${value}. We expect a string, but ${value} was of type ${typeof value}.`)
     return 0
   }
   // colors should be left untouched

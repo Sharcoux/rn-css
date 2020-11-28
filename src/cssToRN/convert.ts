@@ -32,7 +32,7 @@ export function border (prefixKey: 'border' | 'borderLeft' | 'borderRight' | 'bo
   return result
 }
 
-export function shadow (prefix: 'textShadow' | 'shadow', value: string): { [x:string]: any } {
+export function shadow (prefix: 'textShadow' | 'shadow', value: string): { [x:string]: string | { width: string, height: string } } {
   if (value === 'none') return shadow(prefix, '0 0 0 black')
   const { nonNumbers, numbers } = findNumbers(value)
   return {

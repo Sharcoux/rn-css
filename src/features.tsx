@@ -1,8 +1,9 @@
 /* eslint-disable react/display-name */
 import React, { MouseEvent } from 'react'
-import type { Style } from './types'
+import type { Style, Units, MediaQuery } from './types'
 import { useWindowDimensions, LayoutChangeEvent, Platform } from 'react-native'
 import { parseValue } from './convertUnits'
+import { createContext } from './cssToRN/mediaQueries'
 
 export const FontSizeContext = React.createContext(16)
 // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
@@ -17,11 +18,6 @@ export const useScreenSize = () => {
 /** HOC that will apply the style reserved for hover state if needed */
 export const useHover = (rnStyle: Style, onMouseEnter?: (event: MouseEvent) => void, onMouseLeave?: (event: MouseEvent) => void) => {
   const [hover, setHover] = React.useState(false)
-  const style: Style = React.useMemo(() => {
-    const style = (hover && rnStyle.hover) ? { ...rnStyle, ...rnStyle.hover } : { ...rnStyle }
-    delete style.hover
-    return style
-  }, [rnStyle, hover])
   const hoverStart = React.useCallback((event: MouseEvent) => {
     if (onMouseEnter) onMouseEnter(event)
     setHover(true)
@@ -30,7 +26,19 @@ export const useHover = (rnStyle: Style, onMouseEnter?: (event: MouseEvent) => v
     if (onMouseLeave) onMouseLeave(event)
     setHover(false)
   }, [onMouseLeave])
-  return { style, onMouseEnter: rnStyle.hover ? hoverStart : onMouseEnter, onMouseLeave: rnStyle.hover ? hoverStop : onMouseLeave }
+  return { style: (hover && rnStyle.hover) ? rnStyle.hover : undefined, onMouseEnter: rnStyle.hover ? hoverStart : onMouseEnter, onMouseLeave: rnStyle.hover ? hoverStop : onMouseLeave }
+}
+
+/** HOC that will apply the style provided in the media queries */
+export const useMediaQuery = (media: undefined | MediaQuery[], units: Units): Style | undefined => {
+  if (media) {
+    const context = createContext(units)
+    const mediaStyles = media.map(m => m(context)).map(m => m)
+    if (!mediaStyles.length) return
+    const mq = {} as Style
+    Object.assign(mq, ...mediaStyles)
+    return mq
+  }
 }
 
 /** HOC that will apply the font size to the styles defined with em units */

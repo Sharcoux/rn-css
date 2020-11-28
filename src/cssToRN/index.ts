@@ -1,6 +1,6 @@
-import type { Style } from '../types'
+import type { Context, Style } from '../types'
 import { sideValue, border, cornerValue, font, textDecoration, shadow, placeContent, flex, flexFlow, transform } from './convert'
-// import { createMedia } from './mediaQueries'
+import { createMedia } from './mediaQueries'
 
 function kebab2camel (string: string) {
   return string.replace(/-./g, x => x.toUpperCase()[1])
@@ -13,10 +13,12 @@ function stripSpaces (string: string) {
 function cssToStyle (css: string) {
   const result: Style = {}
   // Finf media queries
-  const cssWithoutMediaQueries = css.replace(/@media(.*?){({([^{}]*)}([^{}])*)}/gmis, res => {
-    const mediaInstructions = res.substring(0, res.length - 1).replace(/@media\s*{/mis, '')// We remove the `@media {` and `}`
-    // if (!result.media) result.media = []
-    // result.media.push(createMedia(mediaInstructions))
+  const cssWithoutMediaQueries = css.replace(/@media(.*?){[^{}]*}/gmis, res => {
+    const { css, isValid } = createMedia(res)
+    const style = cssChunkToStyle(css)
+    const mediaQuery = (context: Context) => isValid(context) && style
+    if (!result.media) result.media = []
+    result.media!.push(mediaQuery)
     return ''
   })
   // Find hover (we don't support hover within media queries)
