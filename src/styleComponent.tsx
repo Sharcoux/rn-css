@@ -107,8 +107,8 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       const zIndex = useZIndex(StyleSheet.flatten([props.style, styleConvertedFromCSS]).zIndex)
       const style: StyleProp<any> = React.useMemo(() => {
         const style = [] as RecursiveArray<any>
-        if (props.style) style.push(props.style)
         style.push(styleConvertedFromCSS)
+        if (props.style) style.push(props.style)
         if (zIndex) style.push({ zIndex })
         return style.length > 1 ? style : style[0]
       }, [props.style, styleConvertedFromCSS, zIndex])
