@@ -173,18 +173,48 @@ return <View rnCSS="width=2em;height=3em;"/>
 
 ---
 
+### <ins>Extends components:</ins>
+
+You can extend components this way:
+
+```javascript
+const MyComponent = styled.View`
+  background-color: red;
+`
+const Extended = styled(MyComponent)`
+  background-color: blue;
+`
+```
+
+** IMPORTANT:** To extend custom components, you need to propagate the style prop:
+
+```javascript
+const MyComponent = ({ style, ...props }) => {
+  return <View style={style}>
+    ...
+  </View>
+}
+const Extended = styled(MyComponent)`
+  background-color: blue;
+`
+```
+
+---
+
 ### <ins>media queries:</ins>
 
 You can add media queries with `@media <constraints> { <instructions> }`
 
 ```javascript
-const Hoverable = styled.View`
+const ResponsiveView = styled.View`
   background: red;
-  &:hover {
+  @media (min-width: 600px) {
     background: blue;
   }
 `
 ```
+
+You can use all supported units in the media query.
 
 This is a new feature. Don't hesitate to report any bug you might encounter.
 
