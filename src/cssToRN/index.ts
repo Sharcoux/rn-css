@@ -1,3 +1,4 @@
+import type { ViewStyle, TextStyle } from 'react-native'
 import type { Context, Style } from '../types'
 import { sideValue, border, cornerValue, font, textDecoration, shadow, placeContent, flex, flexFlow, transform } from './convert'
 import { createMedia } from './mediaQueries'
@@ -12,7 +13,7 @@ function stripSpaces (string: string) {
 
 function cssToStyle (css: string) {
   const result: Style = {}
-  // Finf media queries
+  // Find media queries
   const cssWithoutMediaQueries = css.replace(/@media(.*?){[^{}]*}/gmis, res => {
     const { css, isValid } = createMedia(res)
     const style = cssChunkToStyle(css)
@@ -31,8 +32,8 @@ function cssToStyle (css: string) {
   return result
 }
 
-function cssChunkToStyle (css: string) {
-  const result: Style = {}
+export function cssChunkToStyle (css: string) {
+  const result: ViewStyle & TextStyle = {}
   css.split(/\s*;\s*/mg).forEach((entry: string) => {
     const [rawKey, rawValue] = entry.split(':')
     if (!rawValue) return
@@ -83,6 +84,8 @@ function cssChunkToStyle (css: string) {
         Object.assign(result, shadow(key === 'boxShadow' ? 'shadow' : key, value))
         break
       // Other keys don't require any special treatment
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       default: result[key] = value
     }
   })

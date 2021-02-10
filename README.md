@@ -220,6 +220,20 @@ This is a new feature. Don't hesitate to report any bug you might encounter.
 
 ---
 
+## Convert a CSS string to React-Native Style
+
+If, for some reason, you just want to convert a css string to a ReactNative Style object, you can use this feature:
+
+```javascript
+import { cssToRNStyle } from 'rn-css'
+
+...
+const style = cssToRNStyle('width: 2em; border-width: 12px; background: blue;')
+const { width = 32, borderLeftWidth = 12, backgroundColor = 'blue' } = style
+```
+
+---
+
 ## Access current font size value
 
 You should not needed it, but in case, somewhere within your app, you need to access the current font size value in px to be able to manually convert em into px, you can do the following:

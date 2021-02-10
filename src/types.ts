@@ -1,3 +1,5 @@
+import { ViewStyle, TextStyle } from 'react-native'
+
 export type Units = {
   '%'?: number;
   vw?: number;
@@ -52,7 +54,7 @@ export type Context = {
   units: Units
 }
 
-export type MediaQuery = (context: Context) => false | Style
+export type MediaQuery = (context: Context) => false | ViewStyle & TextStyle
 
 export type Style = {
   [key: string]: string;
@@ -62,7 +64,7 @@ export type Style = {
     height: string;
   };
   transform?: Transform[];
-  hover?: Style;
+  hover?: ViewStyle & TextStyle;
   media?: MediaQuery[];
 }
 

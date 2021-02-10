@@ -302,7 +302,7 @@ it('should handle hover', async () => {
   })
 })
 // eslint-disable-next-line jest/no-focused-tests
-it.only('should handle media queries', async () => {
+it('should handle media queries', async () => {
   const { width, height } = Dimensions.get('window')
   const Comp = styled.View`
       width: 100px;
@@ -371,4 +371,27 @@ it('Should accept % in transform', async () => {
       }
     ]
   })
+})
+it('Should merge style props', async () => {
+  const Comp = styled.View`
+    height: 2em;
+  `
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp style={{
+      transform: [{
+        translateX: 50
+      }]
+    }} />)
+  })
+  expect(wrapper.root.findByType('View').props.style).toEqual([
+    { height: 32 },
+    {
+      transform: [
+        {
+          translateX: 50
+        }
+      ]
+    }
+  ])
 })
