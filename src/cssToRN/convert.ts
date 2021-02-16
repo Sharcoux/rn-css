@@ -11,7 +11,14 @@ function findNumbers (value: string) {
     nonNumbers: [] as string[],
     numbers: [] as string[]
   }
-  value.split(/\s+/mg).forEach(val => result[isNumber(val) ? 'numbers' : 'nonNumbers'].push(val))
+  let group = ''
+  value.split(/\s+/mg).forEach(val => {
+    // HACK: we prevent some parts of font-family names like "Rounded Mplus 1c" to be interpreted as numbers
+    if (val.startsWith('"') || val.startsWith("'")) group = val.charAt(0)
+    if (group && val.endsWith(group)) group = ''
+    if (group) result.nonNumbers.push(val)
+    else result[isNumber(val) ? 'numbers' : 'nonNumbers'].push(val)
+  })
   return result
 }
 
