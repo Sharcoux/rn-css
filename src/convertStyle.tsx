@@ -33,6 +33,10 @@ const convertStyle = (rnStyle: Style, units: Units) => {
         height: convertValue(key, rnStyle.shadowOffset!.height || '0', units) as number
       }
     }
+    // Font family should not be transformed
+    else if (key === 'fontFamily') {
+      convertedStyle[key] = value
+    }
     else {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore

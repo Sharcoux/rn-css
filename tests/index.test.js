@@ -252,6 +252,20 @@ it('should handle maths values', async () => {
     width: 20
   })
 })
+it('should handle font family names', async () => {
+  const Comp = styled.View`
+    font-family: 'Rounded Mplus 1c';
+  `
+
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp />)
+  })
+
+  expect(wrapper.root.findByType('View').props.style).toEqual({
+    fontFamily: "'Rounded Mplus 1c'"
+  })
+})
 it('should handle border radius values', async () => {
   const Comp = styled.View`
       width: 100px;
