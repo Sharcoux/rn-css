@@ -13,6 +13,9 @@ const View = styled.View`
 `
 const Text = styled.Text<{col: string}>`
   color: ${props => props.col || 'black'}
+  @media (max-width: 40em) {
+    color: blue
+  }
   @media (max-width: 20em) {
     color: red;
   }
@@ -91,7 +94,7 @@ const App = () => {
   return (
     <Box ref={ref2}>
       <View>
-        <Text ref={ref} col={'red'}>Welcome to ReactNativeStyledComponents</Text>
+        <Text ref={ref} col={'black'}>Welcome to ReactNativeStyledComponents</Text>
       </View>
       <Box>
         <Box>

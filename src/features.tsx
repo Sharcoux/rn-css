@@ -33,7 +33,7 @@ export const useHover = (rnStyle: Style, onMouseEnter?: (event: MouseEvent) => v
 export const useMediaQuery = (media: undefined | MediaQuery[], units: Units): Style | undefined => {
   if (media) {
     const context = createContext(units)
-    const mediaStyles = media.map(m => m(context)).map(m => m)
+    const mediaStyles = media.map(m => m(context)).filter(m => m)
     if (!mediaStyles.length) return
     const mq = {} as Style
     Object.assign(mq, ...mediaStyles)
