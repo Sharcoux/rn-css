@@ -74,6 +74,10 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       delete finalStyle.hover
       // Read all the data we might need
 
+      // apply media queries
+      const mediaQuery = useMediaQuery(rnStyle.media, units.current)
+      if (mediaQuery) Object.assign(finalStyle, mediaQuery)
+
       // Handle hover
       const { onMouseEnter, onMouseLeave, style: hoverStyle } = useHover(rnStyle, props.onMouseEnter, props.onMouseLeave)
       if (hoverStyle) Object.assign(finalStyle, hoverStyle)
@@ -94,9 +98,6 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       if (/* needsScreenSize && */(Object.keys(screenUnits) as (keyof typeof screenUnits)[]).find(key => units.current[key] !== screenUnits[key])) {
         units.current = { ...units.current, ...screenUnits }
       }
-
-      const mediaQuery = useMediaQuery(rnStyle.media, units.current)
-      if (mediaQuery) Object.assign(finalStyle, mediaQuery)
 
       // We memoïze the style to keep the same reference if possible and change it only if the style changed
       const calculatedStyle = React.useRef(finalStyle)
@@ -149,11 +150,11 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
 export default styled
 
 export const styledFlatList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Type, >(props: S & FlatListProps<Type> & OptionalProps) => invoke(styled<FlatListProps<Type>>(FlatList)(chunks, ...functs), props)
-styledFlatList.attrs = <S, >(opts: Partial<S & FlatListProps<any>> | ((props: S & FlatListProps<any>) => Partial<S & FlatListProps<any>>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & FlatListProps<any>>)[]) => <Props, >(componentProps: S & FlatListProps<Props> & OptionalProps) => invoke(styled<FlatListProps<Props>>(FlatList).attrs<S>(opts)(chunks, ...functs), componentProps)
+styledFlatList.attrs = <S, >(opts: Partial<S & FlatListProps<any>> | ((props: S & FlatListProps<any>) => Partial<S & FlatListProps<any>>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & FlatListProps<any>>)[]) => <Props, >(componentProps: S & FlatListProps<Props> & OptionalProps) => invoke(styled<FlatListProps<Props>>(FlatList).attrs<S & FlatListProps<Props>>(opts)(chunks, ...functs), componentProps)
 export const styledSectionList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Type, >(props: S & SectionListProps<Type> & OptionalProps) => invoke(styled<SectionListProps<Type>>(SectionList)(chunks, ...functs), props)
-styledSectionList.attrs = <S, >(opts: Partial<S & SectionListProps<any>> | ((props: S & SectionListProps<any>) => Partial<S & SectionListProps<any>>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & SectionListProps<any>>)[]) => <Props, >(componentProps: S & SectionListProps<Props> & OptionalProps) => invoke(styled<SectionListProps<any>>(SectionList).attrs(opts)(chunks, ...functs), componentProps)
+styledSectionList.attrs = <S, >(opts: Partial<S & SectionListProps<any>> | ((props: S & SectionListProps<any>) => Partial<S & SectionListProps<any>>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & SectionListProps<any>>)[]) => <Props, >(componentProps: S & SectionListProps<Props> & OptionalProps) => invoke(styled<SectionListProps<Props>>(SectionList).attrs<S & SectionListProps<Props>>(opts)(chunks, ...functs), componentProps as any)
 export const styledVirtualizedList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Type, >(props: S & VirtualizedListProps<Type> & OptionalProps) => invoke(styled<VirtualizedListProps<Type>>(VirtualizedList)(chunks, ...functs), props)
-styledVirtualizedList.attrs = <S, >(opts: Partial<S & VirtualizedListProps<any>> | ((props: S & VirtualizedListProps<any>) => Partial<S & VirtualizedListProps<any>>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & VirtualizedListProps<any>>)[]) => <Props, >(componentProps: S & VirtualizedListProps<Props> & OptionalProps) => invoke(styled<VirtualizedListProps<Props>>(VirtualizedList).attrs(opts)(chunks, ...functs), componentProps)
+styledVirtualizedList.attrs = <S, >(opts: Partial<S & VirtualizedListProps<any>> | ((props: S & VirtualizedListProps<any>) => Partial<S & VirtualizedListProps<any>>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & VirtualizedListProps<any>>)[]) => <Props, >(componentProps: S & VirtualizedListProps<Props> & OptionalProps) => invoke(styled<VirtualizedListProps<Props>>(VirtualizedList).attrs<S & VirtualizedListProps<Props>>(opts)(chunks, ...functs), componentProps)
 
 function invoke<T> (Component: React.ComponentType<T>, props: T) {
   return <Component {...props} />
