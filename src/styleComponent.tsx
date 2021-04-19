@@ -74,18 +74,13 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       delete finalStyle.hover
       // Read all the data we might need
 
-      // apply media queries
-      const mediaQuery = useMediaQuery(rnStyle.media, units.current)
-      if (mediaQuery) Object.assign(finalStyle, mediaQuery)
-
       // Handle hover
       const { onMouseEnter, onMouseLeave, style: hoverStyle } = useHover(rnStyle, props.onMouseEnter, props.onMouseLeave)
       if (hoverStyle) Object.assign(finalStyle, hoverStyle)
 
-      // Handle em units
-      const { em } = useFontSize(finalStyle.fontSize, units.current.rem)
-      if (units.current.em !== em) units.current = { ...units.current, em }
-      if (finalStyle.fontSize) finalStyle.fontSize = em + 'px'
+      // Calculate current em unit for media-queries
+      const { em: tempEm } = useFontSize(finalStyle.fontSize, units.current.rem)
+      if (units.current.em !== tempEm) units.current = { ...units.current, em: tempEm }
 
       // Handle layout data needed for % units
       const { width, height, onLayout } = useLayout(props.onLayout)
@@ -98,6 +93,15 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       if (/* needsScreenSize && */(Object.keys(screenUnits) as (keyof typeof screenUnits)[]).find(key => units.current[key] !== screenUnits[key])) {
         units.current = { ...units.current, ...screenUnits }
       }
+
+      // apply media queries
+      const mediaQuery = useMediaQuery(rnStyle.media, units.current)
+      if (mediaQuery) Object.assign(finalStyle, mediaQuery)
+
+      // Handle em units
+      const { em } = useFontSize(finalStyle.fontSize, units.current.rem)
+      if (units.current.em !== em) units.current = { ...units.current, em }
+      if (finalStyle.fontSize) finalStyle.fontSize = em + 'px'
 
       // We memoïze the style to keep the same reference if possible and change it only if the style changed
       const calculatedStyle = React.useRef(finalStyle)

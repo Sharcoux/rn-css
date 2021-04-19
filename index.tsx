@@ -11,13 +11,17 @@ const View = styled.View`
   width: 200px;
   height: 200px;
 `
+
 const Text = styled.Text<{col: string}>`
   color: ${props => props.col || 'black'}
+  font-size: 1em;
   @media (max-width: 40em) {
-    color: blue
+    color: blue;
+    font-size: 2em;
   }
   @media (max-width: 20em) {
     color: red;
+    font-size: 3em;
   }
 `
 
@@ -94,7 +98,7 @@ const App = () => {
   return (
     <Box ref={ref2}>
       <View>
-        <Text ref={ref} col={'black'}>Welcome to ReactNativeStyledComponents</Text>
+        <Text ref={ref} col={'black'} numberOfLines={1} style={{ flexGrow: 1, flexBasis: 'auto' }}>Welcome to ReactNativeStyledComponents</Text>
       </View>
       <Box>
         <Box>
