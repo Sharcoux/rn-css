@@ -11,8 +11,11 @@ import type { Style, StyleMap, Units } from './types'
 // We use this to cache the computed styles
 const styleMap: StyleMap = {}
 
+// We use this to share value within the component (Theme, Translation, whatever)
+export const SharedValue = React.createContext<unknown>(undefined)
+
 type Primitive = number | string | null | undefined | boolean
-type Functs<T> = (arg: T & { rnCSS?: string}) => Primitive
+type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown }) => Primitive
 type OptionalProps = {
   rnCSS?: string;
   onMouseEnter?: (event: MouseEvent) => void;
@@ -21,8 +24,8 @@ type OptionalProps = {
   children?: React.ReactNode;
   style?: StyleProp<any>;
 }
-function buildCSSString<T extends { rnCSS?: string }> (chunks: TemplateStringsArray, functs: (Primitive | Functs<T>)[], props: T) {
-  let computedString = chunks.map((chunk, i) => ([chunk, (functs[i] instanceof Function) ? (functs[i] as Functs<T>)(props) : functs[i]])).flat().join('')
+function buildCSSString<T extends { rnCSS?: string }> (chunks: TemplateStringsArray, functs: (Primitive | Functs<T>)[], props: T, shared: unknown) {
+  let computedString = chunks.map((chunk, i) => ([chunk, (functs[i] instanceof Function) ? (functs[i] as Functs<T>)({ ...props, shared }) : functs[i]])).flat().join('')
   if (props.rnCSS) computedString += props.rnCSS.replace(/=/gm, ':') + ';'
   return computedString
 }
@@ -30,12 +33,13 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
   const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
     const ForwardRefComponent = React.forwardRef<React.ComponentType<S & Props & OptionalProps>, S & Props & OptionalProps>((props: S & Props & OptionalProps, ref) => {
       const units = React.useRef<Units>({ em: 16, vw: 1, vh: 1, vmin: 1, vmax: 1, rem: 16, px: 1, pt: 72 / 96, in: 96, pc: 9, cm: 96 / 2.54, mm: 96 / 25.4 })
+      const shared = React.useContext(SharedValue)
       // Store the style for mutualization
-      const cssString = React.useRef(buildCSSString(chunks, functs, props))
+      const cssString = React.useRef(buildCSSString(chunks, functs, props, shared))
       const [rnStyle, setRNStyle] = React.useState<Style>(cssToStyle(cssString.current))
       React.useEffect(() => {
       // Build the css string with the context
-        const css = buildCSSString(chunks, functs, props)
+        const css = buildCSSString(chunks, functs, props, shared)
         cssString.current = css
         // Try to load an existing style from the style map or save it for next time
         const hash = calculHash(css)
@@ -55,7 +59,7 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
           style.usages--
           if (style.usages <= 0) delete styleMap[hash]
         }
-      }, [props])
+      }, [props, shared])
 
       // const [needsFontSize, setNeedsFontSize] = React.useState(false)
       // const [needsScreenSize, setNeedsScreenSize] = React.useState(false)

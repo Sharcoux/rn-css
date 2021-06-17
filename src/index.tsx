@@ -3,6 +3,7 @@ import * as RN from 'react-native'
 import styledComponent, { styledFlatList, styledSectionList, styledVirtualizedList } from './styleComponent'
 export { cssChunkToStyle as cssToRNStyle } from './cssToRN'
 export { FontSizeContext } from './features'
+export { SharedValue } from './styleComponent'
 
 const styled = <T, >(Component: React.ComponentType<T>) => styledComponent<T>(Component)
 

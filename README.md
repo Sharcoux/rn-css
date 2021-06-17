@@ -89,35 +89,7 @@ const View = styled.View<{ color: string }>`
 `
 ```
 
-### <ins>calc:</ins>
-
-You can write things like `calc(2em - 1px)`. Keep in mind that the support for % is limited right now.
-
-```javascript
-const View = styled.View`
-  width: calc(200px - 10em);
-`
-```
-
-### <ins>min:</ins>
-
-You can write things like `min(2em, 10px)`. Keep in mind that the support for % is limited right now.
-
-```javascript
-const View = styled.View`
-  width: min(2em, 10px);
-`
-```
-
-### <ins>max:</ins>
-
-You can write things like `max(2em, 10px)`. Keep in mind that the support for % is limited right now.
-
-```javascript
-const View = styled.View`
-  width: max(2em, 10px);
-`
-```
+---
 
 ### <ins>attrs:</ins>
 
@@ -148,28 +120,18 @@ const View = styled.View.attrs(props => ({ fontSize: props.fontSize * 2 }))`
 `
 ```
 
-
-### <ins>hover:</ins>
-
-You can add hover with `&:hover { <instructions> }`
-
-```javascript
-const Hoverable = styled.View`
-  background: red;
-  &:hover {
-    background: blue;
-  }
-`
-```
+---
 
 ### <ins>inline css with rnCSS:</ins>
 
-This is very handy! You can inject any css string with rnCSS props:
+This is very handy! You can inject any css string with the rnCSS props:
 
 ```javascript
 const View = styled.View``
 return <View rnCSS="width=2em;height=3em;"/>
 ```
+
+**Do not forget to close the string with a semicolon**
 
 ---
 
@@ -201,25 +163,6 @@ const Extended = styled(MyComponent)`
 
 ---
 
-### <ins>media queries:</ins>
-
-You can add media queries with `@media <constraints> { <instructions> }`
-
-```javascript
-const ResponsiveView = styled.View`
-  background: red;
-  @media (min-width: 600px) {
-    background: blue;
-  }
-`
-```
-
-You can use all supported units in the media query.
-
-This is a new feature. Don't hesitate to report any bug you might encounter.
-
----
-
 ## Convert a CSS string to React-Native Style
 
 If, for some reason, you just want to convert a css string to a ReactNative Style object, you can use this feature:
@@ -236,14 +179,140 @@ const { width = 32, borderLeftWidth = 12, backgroundColor = 'blue' } = style
 
 ## Access current font size value
 
-You should not needed it, but in case, somewhere within your app, you need to access the current font size value in px to be able to manually convert em into px, you can do the following:
+If, somewhere within your app, you need to access the current font size value in px to be able to manually convert em into px, you can use the `FontSizeContext`. This can be helpful if you want to change some behaviour within your app depending on the font size.
+
 
 ```javascript
 import { FontSizeContext } from 'rn-css'
 
 ...
+const [width, setWidth] = React.useState(0)
 const em = React.useContext(FontSizeContext)
-const tenEmInPixels = 10 * em
+if(width < 70 * em) { /* Do something when width is lesser than 70em */ }
+return <View onLayout={event => setWidth(event.nativeEvent.layout.width)}>...</View>
+```
+
+---
+## Extended CSS support
+
+We support some cool CSS feature that React-Native doesn't normally handle
+
+### <ins>hover:</ins>
+
+You can add hover with `&:hover { <instructions> }`
+
+```javascript
+const Hoverable = styled.View`
+  background: red;
+  &:hover {
+    background: blue;
+  }
+`
+```
+
+### <ins>media queries:</ins>
+
+You can add media queries with `@media <constraints> { <instructions> }`
+
+```javascript
+const ResponsiveView = styled.View`
+  background: red;
+  @media (min-width: 600px) {
+    background: blue;
+  }
+`
+```
+
+You can use all supported units in the media query.
+
+
+### <ins>text-overflow:</ins>
+
+If **rn-css** encounters `text-overflow: ellipsis;`, it will be transform into `numberOfLines: 1`, which should give the desired effect.
+
+```javascript
+const Text = styled.Text`
+  text-overflow: ellipsis;
+`
+```
+
+### <ins>z-index:</ins>
+
+**rn-css** will try to handle z-index as best as possible so that components from different trees can be correctly compared and positioned. In **iOS**, when a z-index is set, each parent will automatically receive this z-index, unless another value is set. This generally ensure that the behaviour matches the one from web. If you encounter an issue, please report. We might probably fix this.
+
+```javascript
+const View = styled.View`
+  z-index: 10;
+`
+```
+
+### <ins>calc:</ins>
+
+You can write things like `calc(2em - 1px)`. Keep in mind that the support for % is limited right now.
+
+```javascript
+const View = styled.View`
+  width: calc(200px - 10em);
+`
+```
+
+### <ins>min:</ins>
+
+You can write things like `min(2em, 10px)`. Keep in mind that the support for % is limited right now.
+
+```javascript
+const View = styled.View`
+  width: min(2em, 10px);
+`
+```
+
+### <ins>max:</ins>
+
+You can write things like `max(2em, 10px)`. Keep in mind that the support for % is limited right now.
+
+```javascript
+const View = styled.View`
+  width: max(2em, 10px);
+`
+```
+
+---
+
+## Shared value:
+
+If you want to share some data with all of your components, like a theme, you can use the `SharedValues` context. Use it this way:
+
+
+### Set the value:
+
+```javascript
+return <SharedValue.Provider value={{ green: '#00FF00', red: '#FF0000' }}>{children}</SharedValue.Provider>
+```
+
+### Use the value:
+
+```javascript
+const View = styled.View`
+  border-color: ${props => props.shared.green};
+`
+```
+
+### <ins>Typescript:</ins>
+
+For Typescript, `shared` will always be typed with `unknown`. You need to manually declare the type of your shared object. Be careful: you won't have typecheck this way. We don't have any better way for now.
+
+```typescript
+// Create your theme
+const theme = { green: '#00FF00', red: '#FF0000' } as const
+type Theme = typeof theme
+
+// Somewhere in your React tree:
+// <SharedValue.Provider value={theme}>{children}</SharedValue.Provider>
+
+// Use your shared theme
+const View = styled.View`
+  border-color: ${props => (props.shared as Theme).green;
+`
 ```
 
 ---
