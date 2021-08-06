@@ -163,20 +163,6 @@ const Extended = styled(MyComponent)`
 
 ---
 
-## Convert a CSS string to React-Native Style
-
-If, for some reason, you just want to convert a css string to a ReactNative Style object, you can use this feature:
-
-```javascript
-import { cssToRNStyle } from 'rn-css'
-
-...
-const style = cssToRNStyle('width: 2em; border-width: 12px; background: blue;')
-const { width = 32, borderLeftWidth = 12, backgroundColor = 'blue' } = style
-```
-
----
-
 ## Access current font size value
 
 If, somewhere within your app, you need to access the current font size value in px to be able to manually convert em into px, you can use the `FontSizeContext`. This can be helpful if you want to change some behaviour within your app depending on the font size.
@@ -193,6 +179,34 @@ return <View onLayout={event => setWidth(event.nativeEvent.layout.width)}>...</V
 ```
 
 ---
+
+## Convert a CSS string to React-Native Style
+
+If, for some reason, you just want to convert a css string to a ReactNative Style object, you can use this feature:
+
+```javascript
+import { cssToRNStyle } from 'rn-css'
+
+...
+const style = cssToRNStyle('width: 2em; border-width: 12px; background: blue;')
+const { width = 32, borderLeftWidth = 12, backgroundColor = 'blue' } = style
+```
+
+The second parameter lets you provide:
+  * **em** : *(Default: 16)* the current value of em unit for font size. You can retrieve the current context value with the `FontSizeContext`.
+  * **width** *(Default: 100)* the reference width that will be used to calculate percentages for the following properties: `marginLeft`, `marginRight`, `translateX` and `borderRadius`
+  * **height** *(Default: 100)* the reference width that will be used to calculate percentages for the following properties: `marginTop`, `marginBottom`, `translateY` and `borderRadius`
+
+```javascript
+import { cssToRNStyle, FontSizeContext } from 'rn-css'
+
+...
+const style = cssToRNStyle('width: 2em; margin: 10%;', { em: React.useContext(FontSizeContext), width: 100, height: 100 })
+const { width: 32, marginTop: 10, marginLeft: 10, marginRight: 10, marginBottom: 10 } = style
+```
+
+---
+
 ## Extended CSS support
 
 We support some cool CSS feature that React-Native doesn't normally handle

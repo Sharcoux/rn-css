@@ -58,7 +58,7 @@ describe('CSS to RN style conversion', () => {
   it('should handle trailing ;', () => {
     expect(cssToRNStyle('width: 10;')).toEqual({ width: 10 })
   })
-  it.only('should transform composite props', () => {
+  it('should transform composite props', () => {
     const { width, height } = Dimensions.get('window')
     expect(cssToRNStyle('border: 1px solid black')).toEqual({ borderWidth: 1, borderStyle: 'solid', borderColor: 'black' })
     expect(cssToRNStyle('borderTop: 1px solid black')).toEqual({ borderTopWidth: 1, borderTopStyle: 'solid', borderTopColor: 'black' })
