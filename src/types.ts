@@ -54,19 +54,24 @@ export type Context = {
   units: Units
 }
 
-export type MediaQuery = (context: Context) => false | ViewStyle & TextStyle
-
-export type Style = {
-  [key: string]: string;
-} & {
+export type PartialStyle = Partial<Record<keyof ViewStyle | keyof TextStyle, string>> & {
   shadowOffset?: {
     width: string;
     height: string;
   };
+  textShadowOffset?: {
+    width: string;
+    height: string;
+  };
   transform?: Transform[];
-  hover?: ViewStyle & TextStyle;
+}
+
+export type Style = PartialStyle & {
+  hover?: PartialStyle;
   media?: MediaQuery[];
 }
+
+export type MediaQuery = (context: Context) => false | PartialStyle
 
 export type Transform = {
   scaleX?: string;

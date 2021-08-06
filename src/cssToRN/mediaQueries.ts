@@ -1,4 +1,4 @@
-import type { Units, Context } from '../types'
+import type { Units, Context, PartialStyle, Transform } from '../types'
 import { convertValue, parseValue } from '../convertUnits'
 import { PixelRatio, Platform } from 'react-native'
 
@@ -100,8 +100,7 @@ export function createContext (units: Units): Context {
   }
 }
 
-function convertAnyValue (key: string, value: string, units: Units) {
-  const finalValue = value
+function convertAnyValue (key: keyof Context | keyof PartialStyle | keyof Transform, value: string, units: Units) {
   if (key === 'resolution') {
     // Convert density
     if (value === 'infinite') return Infinity
@@ -120,7 +119,7 @@ function convertAnyValue (key: string, value: string, units: Units) {
     return w / h
   }
 
-  return convertValue(key, finalValue, units)
+  return convertValue(key as keyof PartialStyle, value, units)
 }
 
 /** Check if a constraint is respected by the provided context */

@@ -1,5 +1,6 @@
-import type { ViewStyle, TextStyle } from 'react-native'
-import type { Context, Style } from '../types'
+import { Dimensions } from 'react-native'
+import convertStyle from '../convertStyle'
+import type { Context, PartialStyle, Style, Units } from '../types'
 import { sideValue, border, cornerValue, font, textDecoration, shadow, placeContent, flex, flexFlow, transform } from './convert'
 import { createMedia } from './mediaQueries'
 
@@ -32,8 +33,32 @@ function cssToStyle (css: string) {
   return result
 }
 
-export function cssChunkToStyle (css: string) {
-  const result: ViewStyle & TextStyle = {}
+export function cssToRNStyle (css: string, units: { em?: number, width?: number, height?: number } = {}) {
+  const { width, height } = Dimensions.get('window')
+  const finalUnits: Units = {
+    em: 16,
+    '%': 0.01,
+    vw: width / 100,
+    vh: height / 100,
+    vmin: Math.min(width, height) / 100,
+    vmax: Math.max(width, height) / 100,
+    width: 1,
+    height: 1,
+    rem: 16,
+    px: 1,
+    pt: 72 / 96,
+    in: 96,
+    pc: 9,
+    cm: 96 / 2.54,
+    mm: 96 / 25.4,
+    ...units
+  }
+  const rnStyle = cssChunkToStyle(css)
+  return convertStyle(rnStyle, finalUnits)
+}
+
+function cssChunkToStyle (css: string) {
+  const result: PartialStyle = {}
   css.split(/\s*;\s*/mg).forEach((entry: string) => {
     const [rawKey, rawValue] = entry.split(':')
     if (!rawValue) return

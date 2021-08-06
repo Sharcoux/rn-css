@@ -109,7 +109,7 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
 
       // We memoïze the style to keep the same reference if possible and change it only if the style changed
       const calculatedStyle = React.useRef(finalStyle)
-      if (Object.keys(finalStyle).length !== Object.keys(calculatedStyle.current).length || Object.keys(finalStyle).find(key => calculatedStyle.current[key] !== finalStyle[key])) {
+      if (Object.keys(finalStyle).length !== Object.keys(calculatedStyle.current).length || (Object.keys(finalStyle) as (keyof typeof finalStyle)[]).find(key => calculatedStyle.current[key] !== finalStyle[key])) {
         calculatedStyle.current = finalStyle
       }
       const styleConvertedFromCSS = React.useMemo(() => convertStyle(calculatedStyle.current, units.current), [calculatedStyle.current, units.current])

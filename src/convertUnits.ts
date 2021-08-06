@@ -1,4 +1,4 @@
-import type { Units } from './types'
+import type { PartialStyle, Transform, Units } from './types'
 import { calculate, min, max } from './cssToRN/maths'
 
 /** Take a css value like 12em and return [12, 'em'] */
@@ -9,7 +9,7 @@ export function parseValue (value: string): [number, string | undefined] {
 }
 
 /** Convert a value using the provided unit transform table */
-export function convertValue (key: string, value: string, units: Units): string | number {
+export function convertValue (key: keyof PartialStyle | keyof Transform, value: string, units: Units): string | number {
   if (!(Object(value) instanceof String)) {
     console.error(`Failed to parse CSS instruction: ${key}=${value}. We expect a string, but ${value} was of type ${typeof value}.`)
     return 0

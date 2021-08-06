@@ -1,23 +1,24 @@
 /* eslint-disable react/display-name */
-import { /* StyleSheet, */ TextStyle } from 'react-native'
+import { /* StyleSheet, */ TextStyle, ViewStyle } from 'react-native'
 import { convertValue } from './convertUnits'
-import type { Style, Units } from './types'
+import type { PartialStyle, Units } from './types'
 
 /** Mix the calculated RN style within the object style */
-const convertStyle = (rnStyle: Style, units: Units) => {
+const convertStyle = (rnStyle: PartialStyle, units: Units) => {
   /** This is the result of the convertions from css style into RN style */
-  const convertedStyle: TextStyle = {};
+  const convertedStyle: TextStyle & ViewStyle = {};
   // If width and height are specified, we can use those values for the first render
   (['width', 'height'] as const).forEach(key => {
     if (!units[key] && rnStyle[key]) {
-      const converted = convertValue(key, rnStyle[key], units)
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const converted = convertValue(key, rnStyle[key]!, units)
       if (!Number.isNaN(converted)) units[key] = converted as number
     }
   })
-  Object.keys(rnStyle).forEach(key => {
-    const value = rnStyle[key]
+  ;(Object.keys(rnStyle) as (keyof PartialStyle)[]).forEach(key => {
+    const value = rnStyle[key] || '0'
     // Handle object values
-    if (key === 'transform') {
+    if (key === 'transform' && rnStyle.transform) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       convertedStyle.transform = rnStyle.transform!.map(transformation => {
         const result = {} as { [trans: string]: string | number }
@@ -25,12 +26,20 @@ const convertStyle = (rnStyle: Style, units: Units) => {
         return result
       }) as unknown as TextStyle['transform']
     }
-    else if (key === 'shadowOffset') {
+    else if (key === 'shadowOffset' && rnStyle.shadowOffset) {
       convertedStyle.shadowOffset = {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         width: convertValue(key, rnStyle.shadowOffset!.width || '0', units) as number,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         height: convertValue(key, rnStyle.shadowOffset!.height || '0', units) as number
+      }
+    }
+    else if (key === 'textShadowOffset' && rnStyle.textShadowOffset) {
+      convertedStyle.textShadowOffset = {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        width: convertValue(key, rnStyle.textShadowOffset!.width || '0', units) as number,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        height: convertValue(key, rnStyle.textShadowOffset!.height || '0', units) as number
       }
     }
     // Font family should not be transformed
