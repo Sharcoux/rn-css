@@ -41,11 +41,15 @@ export const useMediaQuery = (media: undefined | MediaQuery[], units: Units): St
   }
 }
 
-/** HOC that will apply the font size to the styles defined with em units */
+/** HOC that will measure the layout to handle styles that use % units */
 export const useLayout = (onLayout?: (event: LayoutChangeEvent) => void) => {
   const [layout, setLayout] = React.useState({ width: 0, height: 0 })
   const updateLayout = React.useCallback((event: LayoutChangeEvent) => {
+    // Prevent calling setState if the component is unmounted
+    const unmounted = React.useRef(false)
+    React.useEffect(() => () => { unmounted.current = true }, [])
     if (onLayout) onLayout(event)
+    if (unmounted.current) return
     const { width, height } = event.nativeEvent.layout
     if (width !== layout.width || height !== layout.height) setLayout({ width, height })
   }, [onLayout, layout.width, layout.height])
