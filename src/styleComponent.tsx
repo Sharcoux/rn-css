@@ -17,7 +17,7 @@ export const SharedValue = React.createContext<unknown>(undefined)
 type Primitive = number | string | null | undefined | boolean
 type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown }) => Primitive
 type OptionalProps = {
-  rnCSS?: string;
+  rnCSS?: `${string};`;
   onMouseEnter?: (event: MouseEvent) => void;
   onMouseLeave?: (event: MouseEvent) => void;
   onLayout?: (event: LayoutChangeEvent) => void
