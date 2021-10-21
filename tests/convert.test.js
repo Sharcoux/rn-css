@@ -91,6 +91,6 @@ describe('CSS to RN style conversion', () => {
     expect(cssToRNStyle('background: #236AFF;')).toEqual({ backgroundColor: '#236AFF' })
   })
   it('should accept base64 urls', () => {
-    expect(cssToRNStyle("cursor: url('data:image/x-icon;base64,AAACAA'), auto")).toEqual({ cursor: "url('data:image/x-icon;base64,AAACAA'), auto" })
+    expect(cssToRNStyle("cursor: url('data:image/x-icon;base64,/35///58P//8eB///HAP//xgB//8QAP//AAD//wAB//8AA///gAf//8AP///wD////C////5v///+7////x///w=='), auto")).toEqual({ cursor: "url('data:image/x-icon;base64,/35///58P//8eB///HAP//xgB//8QAP//AAD//wAB//8AA///gAf//8AP///wD////C////5v///+7////x///w=='), auto" })
   })
 })

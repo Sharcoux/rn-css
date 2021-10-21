@@ -42,9 +42,9 @@ const convertStyle = (rnStyle: PartialStyle, units: Units) => {
         height: convertValue(key, rnStyle.textShadowOffset!.height || '0', units) as number
       }
     }
-    // Font family should not be transformed
-    else if (key === 'fontFamily') {
-      convertedStyle[key] = value
+    // Font family should not be transformed (same as cursor for web in case of base64 value)
+    else if (['cursor', 'fontFamily'].includes(key)) {
+      convertedStyle[key as 'fontFamily'] = value
     }
     else {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
