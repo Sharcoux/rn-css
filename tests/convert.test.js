@@ -90,4 +90,7 @@ describe('CSS to RN style conversion', () => {
   it('should alias background to backgroundColor', () => {
     expect(cssToRNStyle('background: #236AFF;')).toEqual({ backgroundColor: '#236AFF' })
   })
+  it('should accept base64 urls', () => {
+    expect(cssToRNStyle("cursor: url('data:image/x-icon;base64,AAACAA'), auto")).toEqual({ cursor: "url('data:image/x-icon;base64,AAACAA'), auto" })
+  })
 })

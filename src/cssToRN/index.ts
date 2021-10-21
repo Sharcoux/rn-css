@@ -59,8 +59,9 @@ export function cssToRNStyle (css: string, units: { em?: number, width?: number,
 
 function cssChunkToStyle (css: string) {
   const result: PartialStyle = {}
-  css.split(/\s*;\s*/mg).forEach((entry: string) => {
-    const [rawKey, rawValue] = entry.split(':')
+  css.split(/\s*;\s*(?!base64)/mg).forEach((entry: string) => {
+    const [rawKey, ...rest] = entry.split(':')
+    const rawValue = rest.join(':')
     if (!rawValue) return
     const key = kebab2camel(rawKey.trim())
     const value = stripSpaces(rawValue.trim())// We need this to correctly read calc() values
