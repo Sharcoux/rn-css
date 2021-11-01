@@ -51,8 +51,8 @@ export const useLayout = (onLayout?: (event: LayoutChangeEvent) => void) => {
     if (onLayout) onLayout(event)
     if (unmounted.current) return
     const { width, height } = event.nativeEvent.layout
-    if (width !== layout.width || height !== layout.height) setLayout({ width, height })
-  }, [onLayout, layout.width, layout.height])
+    setLayout(layout => layout.width === width && layout.height === height ? layout : { width, height })
+  }, [onLayout])
   return { onLayout: updateLayout, ...layout }
 }
 
