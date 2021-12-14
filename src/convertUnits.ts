@@ -47,6 +47,7 @@ export function convertValue (key: keyof PartialStyle | keyof Transform, value: 
   if (convertedValue.startsWith('calc(')) return calculate(convertedValue.substring(4))// remove calc. We can keep the parenthesis
   else if (convertedValue.startsWith('max(')) return max(convertedValue.substring(4, convertedValue.length - 1))// Remove max()
   else if (convertedValue.startsWith('min(')) return min(convertedValue.substring(4, convertedValue.length - 1))// remove min()
+  else if (key === 'fontWeight') return convertedValue // fontWeight must be a string even when it is an integer value.
   else if (parseFloat(convertedValue) + '' === convertedValue) return parseFloat(convertedValue)
   else return convertedValue
 }

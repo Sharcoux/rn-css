@@ -4,6 +4,7 @@
 
  * Add Theming features with the same [API](https://styled-components.com/docs/advanced) as `styled-components` lib.
  * Remove support for deprecated components: *ListView*, *SwipeableListView*, *TabBarIOS*, *ToolbarAndroid* and *ViewPagerAndroid*
+ * Fix font-weight to accept numeric values
 
 ## Version 1.4
 
