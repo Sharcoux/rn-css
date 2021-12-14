@@ -4,6 +4,7 @@ import styledComponent, { styledFlatList, styledSectionList, styledVirtualizedLi
 export { cssToRNStyle } from './cssToRN'
 export { FontSizeContext } from './features'
 export { SharedValue } from './styleComponent'
+export * from './useTheme'
 
 const styled = <T, >(Component: React.ComponentType<T>) => styledComponent<T>(Component)
 

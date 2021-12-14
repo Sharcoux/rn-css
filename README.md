@@ -2,6 +2,8 @@
 
 This is basically [styled-components](https://github.com/styled-components/styled-components) with a much better support for React-Native, and some awesome additional features. You can check the docs of [styled-components](https://github.com/styled-components/styled-components) for more details about the basic API. I'll focus here on the differences.
 
+**Current version: 1.5** [See the Changelog](./CHANGELOG.md)
+
 ---
 
 ## Purpose
@@ -328,6 +330,14 @@ const View = styled.View`
   border-color: ${props => (props.shared as Theme).green;
 `
 ```
+
+---
+
+## Theming:
+
+To match the API of styled-components, we offer the same abilities for theming [See the documentation](https://styled-components.com/docs/advanced).
+
+This relies on the [SharedValue](#shared-value) context. This means that you cannot use the Shared Value system **and** this theming système. Pick the one that best suits your needs.
 
 ---
 
