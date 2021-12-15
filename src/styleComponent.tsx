@@ -15,7 +15,7 @@ const styleMap: StyleMap = {}
 export const SharedValue = React.createContext<unknown>(undefined)
 
 type Primitive = number | string | null | undefined | boolean
-type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown }) => Primitive
+type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown, theme: unknown }) => Primitive
 type OptionalProps = {
   rnCSS?: `${string};`;
   onMouseEnter?: (event: MouseEvent) => void;
@@ -25,7 +25,7 @@ type OptionalProps = {
   style?: StyleProp<any>;
 }
 function buildCSSString<T extends { rnCSS?: string }> (chunks: TemplateStringsArray, functs: (Primitive | Functs<T>)[], props: T, shared: unknown) {
-  let computedString = chunks.map((chunk, i) => ([chunk, (functs[i] instanceof Function) ? (functs[i] as Functs<T>)({ ...props, shared }) : functs[i]])).flat().join('')
+  let computedString = chunks.map((chunk, i) => ([chunk, (functs[i] instanceof Function) ? (functs[i] as Functs<T>)({ ...props, shared, theme: shared }) : functs[i]])).flat().join('')
   if (props.rnCSS) computedString += props.rnCSS.replace(/=/gm, ':') + ';'
   return computedString
 }
