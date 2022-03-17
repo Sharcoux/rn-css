@@ -1,5 +1,6 @@
 import type { PartialStyle, Transform, Units } from './types'
 import { calculate, min, max } from './cssToRN/maths'
+import { Platform } from 'react-native'
 
 /** Take a css value like 12em and return [12, 'em'] */
 export function parseValue (value: string): [number, string | undefined] {
@@ -20,6 +21,7 @@ export function convertValue (key: keyof PartialStyle | keyof Transform, value: 
   // Percentage values need to rely on an other unit as reference
   const finalUnits = { ...units }
   if (value.includes('%')) {
+    if (Platform.OS === 'web') return value
     if (['marginTop', 'marginBottom', 'translateY'].includes(key)) finalUnits['%'] = units.height! / 100
     else if (['marginLeft', 'marginRight', 'translateX'].includes(key)) finalUnits['%'] = units.width! / 100
     else if (key.startsWith('border') && key.endsWith('Radius')) finalUnits['%'] = (units.width! + units.height!) / 200
