@@ -5,7 +5,7 @@ import { Platform } from 'react-native'
 /** Take a css value like 12em and return [12, 'em'] */
 export function parseValue (value: string): [number, string | undefined] {
   // Match a single unit
-  const unit = value.match(/([+-]?\b\d+(\.\d+)?)([a-z]+\b|%)/i)
+  const unit = value.match(/([+-]?\b\d+(\.\d+)?)([a-z]+\b|%)?/i)
   return [parseFloat(unit![1]), unit![3] as (string | undefined)]
 }
 
