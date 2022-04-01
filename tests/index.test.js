@@ -144,8 +144,10 @@ describe('extended CSS support', () => {
     // Mock Dimensions object to emulate a resize
     const listeners = []
     const oldDimensions = { ...Dimensions }
-    Dimensions.addEventListener = (type, listener) => type === 'change' && listeners.push(listener)
-    Dimensions.removeEventListener = (type, listener) => type === 'change' && listeners.splice(listeners.indexOf(listener), 1)
+    Dimensions.addEventListener = (type, listener) => {
+      type === 'change' && listeners.push(listener)
+      return { remove: () => listeners.splice(listeners.indexOf(listener), 1) }
+    }
     Dimensions.get = () => ({ width, height })
 
     // Check that the new Dimension object is working as expected
