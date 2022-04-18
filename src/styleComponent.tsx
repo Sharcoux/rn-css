@@ -65,8 +65,8 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
         // When the style is not used anymore, we destroy it
         return () => {
           const style = styleMap[hash]
-          style.usages--
           setTimeout(() => {
+            style.usages--
             if (style.usages <= 0) delete styleMap[hash]
           }, 3000)
         }
