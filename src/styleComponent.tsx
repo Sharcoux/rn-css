@@ -37,12 +37,7 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       // Build the css string with the context
       const css = React.useMemo(() => buildCSSString(chunks, functs, props, shared), [props, shared])
       // Store the style in RN format
-      const [rnStyle, setRNStyle] = React.useState<Style>(() => cssToStyle(css))
-      React.useEffect(() => {
-        // Try to load an existing style from the style map or save it for next time
-        const style = cssToStyle(css)
-        setRNStyle(style)
-      }, [css])
+      const rnStyle = React.useMemo(() => cssToStyle(css), [css])
 
       const { needsLayout, needsHover } = React.useMemo(() => ({
         // needsFontSize: !!css.match(/\b(\d+)(\.\d+)?em\b/)
@@ -95,10 +90,10 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       const units = React.useMemo<Units>(() => ({ ...baseUnits, em }), [baseUnits, em])
 
       const styleConvertedFromCSS = React.useMemo(() => convertStyle(finalStyle, units), [finalStyle, units])
-      const style: StyleProp<any> = React.useMemo(() => StyleSheet.flatten([styleConvertedFromCSS, props.style]), [props.style, styleConvertedFromCSS])
+      const style: StyleProp<any> = React.useMemo(() => [styleConvertedFromCSS, props.style], [props.style, styleConvertedFromCSS])
       const newProps = React.useMemo(() => {
         const newProps: OptionalProps = { style, onMouseEnter, onMouseLeave, onLayout }
-        if (style.textOverflow === 'ellipsis') Object.assign(newProps, { numberOfLines: 1 })
+        if (StyleSheet.flatten(style).textOverflow === 'ellipsis') Object.assign(newProps, { numberOfLines: 1 })
         return newProps
       }, [onLayout, onMouseEnter, onMouseLeave, style])
 
