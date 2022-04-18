@@ -2,7 +2,7 @@
 
 ## Version 1.6
 
- * Important performance boost
+ * Important performance fix (300% faster!)
 
 ## Version 1.5
 
