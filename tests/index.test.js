@@ -112,6 +112,45 @@ describe('extended CSS support', () => {
     expect(view.props.style).toEqual({ fontSize: 16 * 2, width: 16 * 2 * 10 })
     expect(text.props.style).toEqual({ fontSize: 16 * 6, height: 16 * 6 * 20 })
   })
+  it('should handle em units with more nodes', async () => {
+    const Parent = styled.View`
+        width: 10em;
+        font-size: 2em;
+      `
+    const Wrapper = styled(View)`
+        width: 10em;
+      `
+    const Child = styled(Text)`
+        height: 20em;
+        font-size: 3em;
+      `
+
+    let wrapper
+    await act(async () => {
+      wrapper = TestRenderer.create(<Parent><Wrapper><Child>test</Child></Wrapper></Parent>)
+    })
+    const [parent, view] = wrapper.root.findAllByType('View')
+    const text = wrapper.root.findByType('Text')
+    expect(parent.props.style).toEqual({ fontSize: 16 * 2, width: 16 * 2 * 10 })
+    expect(view.props.style).toEqual({ width: 16 * 2 * 10 })
+    expect(text.props.style).toEqual({ fontSize: 16 * 6, height: 16 * 6 * 20 })
+  })
+  it('should support overwriting style', async () => {
+    const Comp = styled.View`
+        width: 10em;
+        font-size: 2em;
+      `
+    const Extent = styled(Comp)`
+        width: 10px;
+      `
+
+    let wrapper
+    await act(async () => {
+      wrapper = TestRenderer.create(<Extent>test</Extent>)
+    })
+    const view = wrapper.root.findByType('View')
+    expect(view.props.style).toEqual({ width: 10, fontSize: 32 })
+  })
   it('should cache the value correctly', async () => {
     const Comp = styled(View)`
         width: 10em;
