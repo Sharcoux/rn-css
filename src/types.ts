@@ -85,11 +85,3 @@ export type Transform = {
   rotateY?: string;
   rotateZ?: string;
 }
-
-export type StyleMap = {
-  [key: string]: {
-    usages: number;
-    style: Style;
-    hash: string;
-  };
-}

@@ -5,15 +5,11 @@ import { FlatList, FlatListProps, LayoutChangeEvent, Platform, SectionList, Sect
 import convertStyle from './convertStyle'
 import cssToStyle from './cssToRN'
 import { useFontSize, useHover, useLayout, useScreenSize, useMediaQuery } from './features'
-import calculHash from './generateHash'
-import type { Style, StyleMap, Units } from './types'
+import type { Style, Units } from './types'
 
 export const defaultUnits: Units = { em: 16, vw: 1, vh: 1, vmin: 1, vmax: 1, rem: 16, px: 1, pt: 72 / 96, in: 96, pc: 9, cm: 96 / 2.54, mm: 96 / 25.4 }
 export const RemContext = React.createContext<number>(defaultUnits.rem)
 export const FontSizeContext = React.createContext(defaultUnits.em)
-
-// We use this to cache the computed styles
-const styleMap: StyleMap = {}
 
 // We use this to share value within the component (Theme, Translation, whatever)
 export const SharedValue = React.createContext<unknown>(undefined)
@@ -33,20 +29,6 @@ function buildCSSString<T extends { rnCSS?: string }> (chunks: TemplateStringsAr
   if (props.rnCSS) computedString += props.rnCSS.replace(/=/gm, ':') + ';'
   return computedString
 }
-function convertCSS (css: string, init?: boolean) {
-  cssToStyle(css)
-  const hash = calculHash(css)
-  const style = styleMap[hash]
-  if (style) {
-    style.usages++
-    return style
-  }
-  else {
-    const rns = cssToStyle(css)
-    styleMap[hash] = { style: rns, usages: init ? 0 : 1, hash }
-    return styleMap[hash]
-  }
-}
 const styled = <Props, >(Component: React.ComponentType<Props>) => {
   const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
     const ForwardRefComponent = React.forwardRef<React.ComponentType<S & Props & OptionalProps>, S & Props & OptionalProps>((props: S & Props & OptionalProps, ref) => {
@@ -55,18 +37,11 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       // Build the css string with the context
       const css = React.useMemo(() => buildCSSString(chunks, functs, props, shared), [props, shared])
       // Store the style in RN format
-      const [rnStyle, setRNStyle] = React.useState<Style>(() => convertCSS(css, true).style)
+      const [rnStyle, setRNStyle] = React.useState<Style>(() => cssToStyle(css))
       React.useEffect(() => {
         // Try to load an existing style from the style map or save it for next time
-        const style = convertCSS(css, false)
-        setRNStyle(style.style)
-        // When the style is not used anymore, we destroy it
-        return () => {
-          setTimeout(() => {
-            style.usages--
-            if (style.usages <= 0) delete styleMap[style.hash]
-          }, 300)
-        }
+        const style = cssToStyle(css)
+        setRNStyle(style)
       }, [css])
 
       const { needsLayout, needsHover } = React.useMemo(() => ({
