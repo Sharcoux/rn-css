@@ -1,6 +1,6 @@
 {
   "name": "rn-css",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "scripts": {
     "test": "jest",
     "prepare": "tsc",
