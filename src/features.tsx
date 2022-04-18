@@ -59,7 +59,7 @@ export const useLayout = (onLayout: undefined | ((event: LayoutChangeEvent) => v
 
 /** Apply the new fontSize to the component before we can calculate em units */
 export const useFontSize = (fontSizeTarget: string | undefined, rem: number, em: number): { em: number } => {
-  const [fontSize, fontUnit] = React.useMemo(() => fontSizeTarget === undefined ? [fontSizeTarget] : parseValue(fontSizeTarget), [fontSizeTarget])
+  const [fontSize, fontUnit] = React.useMemo(() => fontSizeTarget === undefined ? [] : parseValue(fontSizeTarget), [fontSizeTarget])
   const isRelative = fontUnit && ['rem', 'em', '%'].includes(fontUnit)
   const newSize = React.useMemo(() => {
     if (fontSize && isRelative) {

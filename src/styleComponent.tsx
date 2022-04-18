@@ -91,16 +91,17 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
 
       const styleConvertedFromCSS = React.useMemo(() => convertStyle(finalStyle, units), [finalStyle, units])
       const style: StyleProp<any> = React.useMemo(() => [styleConvertedFromCSS, props.style], [props.style, styleConvertedFromCSS])
+      const flatStyle = React.useMemo(() => StyleSheet.flatten(style), [style])
       const newProps = React.useMemo(() => {
         const newProps: OptionalProps = { style, onMouseEnter, onMouseLeave, onLayout }
-        if (StyleSheet.flatten(style).textOverflow === 'ellipsis') Object.assign(newProps, { numberOfLines: 1 })
+        if (flatStyle.textOverflow === 'ellipsis') Object.assign(newProps, { numberOfLines: 1 })
         return newProps
-      }, [onLayout, onMouseEnter, onMouseLeave, style])
+      }, [flatStyle.textOverflow, onLayout, onMouseEnter, onMouseLeave, style])
 
       // The lines below can improve perfs, but it causes the component to remount when the font size changes
       // const currentFontSize = React.useContext(FontSizeContext)
       // if (em !== currentFontSize) {
-      if (style.fontSize) {
+      if (flatStyle.fontSize) {
         return <FontSizeContext.Provider value={em}>
           <Component ref={ref} {...props} {...newProps} />
         </FontSizeContext.Provider>

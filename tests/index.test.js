@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import React from 'react'
-import { Text, View, Dimensions } from 'react-native'
+import { Text, View, Dimensions, StyleSheet } from 'react-native'
 import TestRenderer, { act } from 'react-test-renderer'
 import styled from '../src/index'
+
+function getStyle (node) {
+  return StyleSheet.flatten(node.props.style)
+}
 
 it('should update when props change', async () => {
   const Comp = styled.View`
@@ -15,13 +19,13 @@ it('should update when props change', async () => {
     wrapper = TestRenderer.create(<Comp opacity={0.5} />)
   })
 
-  expect(wrapper.root.findByType('View').props.style).toEqual({ paddingTop: 5, opacity: 0.5 })
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({ paddingTop: 5, opacity: 0.5 })
 
   await act(async () => {
     wrapper.update(<Comp opacity={0.9} />)
   })// We wait for the useEffect to happen
 
-  expect(wrapper.root.findByType('View').props.style).toEqual({ paddingTop: 5, opacity: 0.9 })
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({ paddingTop: 5, opacity: 0.9 })
 })
 it('calls an attr-function with context', async () => {
   const Comp = styled.View.attrs(p => ({
@@ -78,7 +82,7 @@ describe('extended CSS support', () => {
 
     const wrapper = TestRenderer.create(<Comp />)
     const view = wrapper.root.findByType('View')
-    expect(view.props.style).toEqual({
+    expect(getStyle(view)).toEqual({
       width: vmin,
       height: vmax,
       paddingTop: vw,
@@ -109,8 +113,8 @@ describe('extended CSS support', () => {
     })
     const view = wrapper.root.findByType('View')
     const text = wrapper.root.findByType('Text')
-    expect(view.props.style).toEqual({ fontSize: 16 * 2, width: 16 * 2 * 10 })
-    expect(text.props.style).toEqual({ fontSize: 16 * 6, height: 16 * 6 * 20 })
+    expect(getStyle(view)).toEqual({ fontSize: 16 * 2, width: 16 * 2 * 10 })
+    expect(getStyle(text)).toEqual({ fontSize: 16 * 6, height: 16 * 6 * 20 })
   })
   it('should handle em units with more nodes', async () => {
     const Parent = styled.View`
@@ -131,9 +135,9 @@ describe('extended CSS support', () => {
     })
     const [parent, view] = wrapper.root.findAllByType('View')
     const text = wrapper.root.findByType('Text')
-    expect(parent.props.style).toEqual({ fontSize: 16 * 2, width: 16 * 2 * 10 })
-    expect(view.props.style).toEqual({ width: 16 * 2 * 10 })
-    expect(text.props.style).toEqual({ fontSize: 16 * 6, height: 16 * 6 * 20 })
+    expect(getStyle(parent)).toEqual({ fontSize: 16 * 2, width: 16 * 2 * 10 })
+    expect(getStyle(view)).toEqual({ width: 16 * 2 * 10 })
+    expect(getStyle(text)).toEqual({ fontSize: 16 * 6, height: 16 * 6 * 20 })
   })
   it('should support overwriting style', async () => {
     const Comp = styled.View`
@@ -149,7 +153,7 @@ describe('extended CSS support', () => {
       wrapper = TestRenderer.create(<Extent>test</Extent>)
     })
     const view = wrapper.root.findByType('View')
-    expect(view.props.style).toEqual({ width: 10, fontSize: 32 })
+    expect(getStyle(view)).toEqual({ width: 10, fontSize: 32 })
   })
   it('should cache the value correctly', async () => {
     const Comp = styled(View)`
@@ -167,8 +171,8 @@ describe('extended CSS support', () => {
     })
     const view = wrapper.root.findByType('View')
     const text = wrapper.root.findByType('Text')
-    expect(view.props.style).toEqual({ fontSize: 16 * 2, width: 16 * 2 * 10 })
-    expect(text.props.style).toEqual({ fontSize: 16 * 4, width: 16 * 4 * 10 })
+    expect(getStyle(view)).toEqual({ fontSize: 16 * 2, width: 16 * 2 * 10 })
+    expect(getStyle(text)).toEqual({ fontSize: 16 * 4, width: 16 * 4 * 10 })
   })
   it('should handle window resizing', async () => {
     const Comp = styled(View)`
@@ -195,7 +199,7 @@ describe('extended CSS support', () => {
       wrapper = TestRenderer.create(<Comp />)
     })
     const view = wrapper.root.findByType('View')
-    expect(view.props.style).toEqual({
+    expect(getStyle(view)).toEqual({
       width: vw,
       paddingTop: vw,
       paddingBottom: vw,
@@ -216,7 +220,7 @@ describe('extended CSS support', () => {
     })// We wait for the useEffect to happen
     // Check that resizing the component works as espected
     const updatedView = wrapper.root.findByType('View')
-    expect(updatedView.props.style).toEqual({
+    expect(getStyle(updatedView)).toEqual({
       width: 20,
       paddingTop: 20,
       paddingBottom: 20,
@@ -246,7 +250,7 @@ it('should not convert deg and rad', async () => {
     wrapper = TestRenderer.create(<Comp />)
   })
 
-  expect(wrapper.root.findByType('View').props.style).toEqual({ transform: [{ rotate: '10rad' }, { rotate: '10deg' }] })
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({ transform: [{ rotate: '10rad' }, { rotate: '10deg' }] })
 })
 it('should not convert % for supported values', async () => {
   const Comp = styled.View`
@@ -266,7 +270,7 @@ it('should not convert % for supported values', async () => {
     wrapper = TestRenderer.create(<Comp />)
   })
 
-  expect(wrapper.root.findByType('View').props.style).toEqual({
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
     width: '10%',
     height: '10%',
     minWidth: '10%',
@@ -291,7 +295,7 @@ it('should handle maths values', async () => {
     wrapper = TestRenderer.create(<Comp />)
   })
 
-  expect(wrapper.root.findByType('View').props.style).toEqual({
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
     marginLeft: 140,
     transform: [{ translateX: 32 }, { translateY: 48 }, { rotate: '36deg' }],
     height: 160,
@@ -308,7 +312,7 @@ it('should handle font family names', async () => {
     wrapper = TestRenderer.create(<Comp />)
   })
 
-  expect(wrapper.root.findByType('View').props.style).toEqual({
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
     fontFamily: "'Rounded Mplus 1c'"
   })
 })
@@ -329,7 +333,7 @@ it('should handle border radius values', async () => {
     })
   })
 
-  expect(wrapper.root.findByType('View').props.style).toEqual({
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
     borderBottomLeftRadius: 50,
     borderBottomRightRadius: 50,
     borderTopLeftRadius: 50,
@@ -356,7 +360,7 @@ it('should handle hover', async () => {
     wrapper.root.findByType('View').props.onMouseEnter()
   })
 
-  expect(wrapper.root.findByType('View').props.style).toEqual({
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
     height: 200,
     width: 200
   })
@@ -384,7 +388,7 @@ it('should handle media queries', async () => {
     wrapper = TestRenderer.create(<Comp />)
   })
 
-  expect(wrapper.root.findByType('View').props.style).toEqual({
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
     height: 200,
     width: 200,
     backgroundColor: 'blue'
@@ -398,7 +402,7 @@ it('Should merge the inline css within rnCSS prop', async () => {
   await act(async () => {
     wrapper = TestRenderer.create(<Comp rnCSS="color:#236AFF;width:200px;"/>)
   })
-  expect(wrapper.root.findByType('View').props.style).toEqual({
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
     color: '#236AFF',
     width: 200
   })
@@ -416,7 +420,7 @@ it('Should accept % in transform', async () => {
       nativeEvent: { layout: { width: 1000, height: 100 } }
     })
   })
-  expect(wrapper.root.findByType('View').props.style).toEqual({
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
     transform: [
       {
         translateX: 20
@@ -444,7 +448,7 @@ it('Should merge style props', async () => {
       }]
     }} />)
   })
-  expect(wrapper.root.findByType('View').props.style).toEqual(
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual(
     {
       height: 32,
       transform: [
