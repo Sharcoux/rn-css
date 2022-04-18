@@ -33,6 +33,13 @@ function buildCSSString<T extends { rnCSS?: string }> (chunks: TemplateStringsAr
   if (props.rnCSS) computedString += props.rnCSS.replace(/=/gm, ':') + ';'
   return computedString
 }
+function initFromCSS (css: string) {
+  const hash = calculHash(css)
+  const rns = cssToStyle(css)
+  cssToStyle(css)
+  styleMap[hash] = { style: rns, usages: 0 }
+  return rns
+}
 const styled = <Props, >(Component: React.ComponentType<Props>) => {
   const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
     const ForwardRefComponent = React.forwardRef<React.ComponentType<S & Props & OptionalProps>, S & Props & OptionalProps>((props: S & Props & OptionalProps, ref) => {
@@ -41,7 +48,7 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       // Build the css string with the context
       const css = React.useMemo(() => buildCSSString(chunks, functs, props, shared), [props, shared])
       // Store the style in RN format
-      const [rnStyle, setRNStyle] = React.useState<Style>({})
+      const [rnStyle, setRNStyle] = React.useState<Style>(() => initFromCSS(css))
       React.useEffect(() => {
         // Try to load an existing style from the style map or save it for next time
         const hash = calculHash(css)
@@ -59,7 +66,9 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
         return () => {
           const style = styleMap[hash]
           style.usages--
-          if (style.usages <= 0) delete styleMap[hash]
+          setTimeout(() => {
+            if (style.usages <= 0) delete styleMap[hash]
+          }, 3000)
         }
       }, [css])
 
