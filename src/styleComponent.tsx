@@ -33,12 +33,19 @@ function buildCSSString<T extends { rnCSS?: string }> (chunks: TemplateStringsAr
   if (props.rnCSS) computedString += props.rnCSS.replace(/=/gm, ':') + ';'
   return computedString
 }
-function initFromCSS (css: string) {
-  const hash = calculHash(css)
-  const rns = cssToStyle(css)
+function convertCSS (css: string, init?: boolean) {
   cssToStyle(css)
-  styleMap[hash] = { style: rns, usages: 0 }
-  return rns
+  const hash = calculHash(css)
+  const style = styleMap[hash]
+  if (style) {
+    style.usages++
+    return style
+  }
+  else {
+    const rns = cssToStyle(css)
+    styleMap[hash] = { style: rns, usages: init ? 0 : 1, hash }
+    return styleMap[hash]
+  }
 }
 const styled = <Props, >(Component: React.ComponentType<Props>) => {
   const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
@@ -48,27 +55,17 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       // Build the css string with the context
       const css = React.useMemo(() => buildCSSString(chunks, functs, props, shared), [props, shared])
       // Store the style in RN format
-      const [rnStyle, setRNStyle] = React.useState<Style>(() => initFromCSS(css))
+      const [rnStyle, setRNStyle] = React.useState<Style>(() => convertCSS(css, true).style)
       React.useEffect(() => {
         // Try to load an existing style from the style map or save it for next time
-        const hash = calculHash(css)
-        const style = styleMap[hash]
-        if (style) {
-          setRNStyle(style.style)
-          style.usages++
-        }
-        else {
-          const rns = cssToStyle(css)
-          setRNStyle(rns)
-          styleMap[hash] = { style: rns, usages: 1 }
-        }
+        const style = convertCSS(css, false)
+        setRNStyle(style.style)
         // When the style is not used anymore, we destroy it
         return () => {
-          const style = styleMap[hash]
           setTimeout(() => {
             style.usages--
-            if (style.usages <= 0) delete styleMap[hash]
-          }, 3000)
+            if (style.usages <= 0) delete styleMap[style.hash]
+          }, 300)
         }
       }, [css])
 

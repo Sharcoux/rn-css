@@ -90,5 +90,6 @@ export type StyleMap = {
   [key: string]: {
     usages: number;
     style: Style;
+    hash: string;
   };
 }
