@@ -101,7 +101,7 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       // apply media queries
       const mediaQuery = useMediaQuery(rnStyle.media, baseUnits)
       // Handle em units
-      const fontSize = mediaQuery?.fontSize || tempStyle.fontSize
+      const fontSize = (mediaQuery && mediaQuery.fontSize) || tempStyle.fontSize
       const { em } = useFontSize(fontSize, baseUnits.rem, parentEm)
 
       const finalStyle = React.useMemo<Style>(() => {

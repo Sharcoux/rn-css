@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.6
+
+ * Important performance boost
+
 ## Version 1.5
 
  * Add Theming features with the same [API](https://styled-components.com/docs/advanced) as `styled-components` lib.
