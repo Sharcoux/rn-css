@@ -1,85 +1,75 @@
 /* eslint-disable react/display-name */
 import React, { MouseEvent } from 'react'
-import type { Style, Units, MediaQuery } from './types'
-import { useWindowDimensions, LayoutChangeEvent, Platform } from 'react-native'
+import type { Style, Units, MediaQuery, PartialStyle } from './types'
+import { useWindowDimensions, LayoutChangeEvent } from 'react-native'
 import { parseValue } from './convertUnits'
 import { createContext } from './cssToRN/mediaQueries'
 
-export const FontSizeContext = React.createContext(16)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-export const zIndexContext = React.createContext((_zIndex: number) => {})
-
-/** HOC that will apply the screen size to the styles defined with vmin, vmax, vw, vh units, and handle media queries constraints */
+/** Hook that will apply the screen size to the styles defined with vmin, vmax, vw, vh units, and handle media queries constraints */
 export const useScreenSize = () => {
   const { width, height } = useWindowDimensions()
-  return { vw: width / 100, vh: height / 100, vmin: Math.min(width, height) / 100, vmax: Math.max(width, height) / 100 }
+  return React.useMemo(() => ({
+    vw: width / 100, vh: height / 100, vmin: Math.min(width, height) / 100, vmax: Math.max(width, height) / 100
+  }), [height, width])
 }
 
-/** HOC that will apply the style reserved for hover state if needed */
-export const useHover = (rnStyle: Style, onMouseEnter?: (event: MouseEvent) => void, onMouseLeave?: (event: MouseEvent) => void) => {
+/** Hook that will apply the style reserved for hover state if needed */
+export const useHover = (onMouseEnter: undefined | ((event: MouseEvent) => void), onMouseLeave: undefined | ((event: MouseEvent) => void | undefined), needsHover: boolean) => {
   const [hover, setHover] = React.useState(false)
-  const hoverStart = React.useCallback((event: MouseEvent) => {
+  const hoverStart = React.useMemo(() => needsHover ? (event: MouseEvent) => {
     if (onMouseEnter) onMouseEnter(event)
     setHover(true)
-  }, [onMouseEnter])
-  const hoverStop = React.useCallback((event: MouseEvent) => {
+  } : undefined, [needsHover, onMouseEnter])
+  const hoverStop = React.useMemo(() => needsHover ? (event: MouseEvent) => {
     if (onMouseLeave) onMouseLeave(event)
     setHover(false)
-  }, [onMouseLeave])
-  return { style: (hover && rnStyle.hover) ? rnStyle.hover : undefined, onMouseEnter: rnStyle.hover ? hoverStart : onMouseEnter, onMouseLeave: rnStyle.hover ? hoverStop : onMouseLeave }
+  } : undefined, [needsHover, onMouseLeave])
+  return { hover, onMouseEnter: hoverStart || onMouseEnter, onMouseLeave: hoverStop || onMouseLeave }
 }
 
-/** HOC that will apply the style provided in the media queries */
+/** Hook that will apply the style provided in the media queries */
 export const useMediaQuery = (media: undefined | MediaQuery[], units: Units): Style | undefined => {
-  if (media) {
-    const context = createContext(units)
-    const mediaStyles = media.map(m => m(context)).filter(m => m)
-    if (!mediaStyles.length) return
-    const mq = {} as Style
-    Object.assign(mq, ...mediaStyles)
-    return mq
-  }
+  const mediaStyle = React.useMemo(() => {
+    if (media) {
+      const context = createContext(units)
+      const mediaStyles = media.map(m => m(context)).filter(m => !!m) as PartialStyle[]
+      if (!mediaStyles.length) return
+      const mq = {} as Style
+      Object.assign(mq, ...mediaStyles)
+      return mq
+    }
+  }, [media, units])
+  return mediaStyle
 }
 
-/** HOC that will measure the layout to handle styles that use % units */
-export const useLayout = (onLayout?: (event: LayoutChangeEvent) => void) => {
+/** Hook that will measure the layout to handle styles that use % units */
+export const useLayout = (onLayout: undefined | ((event: LayoutChangeEvent) => void), needsLayout: boolean) => {
   const [layout, setLayout] = React.useState({ width: 0, height: 0 })
   // Prevent calling setState if the component is unmounted
   const unmounted = React.useRef(false)
   React.useEffect(() => () => { unmounted.current = true }, [])
-  const updateLayout = React.useCallback((event: LayoutChangeEvent) => {
-    if (onLayout) onLayout(event)
+  const updateLayout = React.useMemo(() => needsLayout ? (event: LayoutChangeEvent) => {
     if (unmounted.current) return
+    if (onLayout) onLayout(event)
     const { width, height } = event.nativeEvent.layout
     setLayout(layout => layout.width === width && layout.height === height ? layout : { width, height })
-  }, [onLayout])
-  return { onLayout: updateLayout, ...layout }
+  } : undefined, [needsLayout, onLayout])
+  return { onLayout: updateLayout || onLayout, ...layout }
 }
 
 /** Apply the new fontSize to the component before we can calculate em units */
-export const useFontSize = (setFontSize?: string, rem = 16): { em: number } => {
-  const em = React.useContext(FontSizeContext)
-  if (!setFontSize) return { em }
-  const [fontSize, fontUnit] = parseValue(setFontSize)
-  const isRelative = ['rem', 'em', '%'].includes(fontUnit || '')
-  if (isRelative) {
-    const newSize = fontUnit === 'em' ? em * fontSize
-      : fontUnit === 'rem' ? fontSize * rem
-        : fontUnit === '%' ? em * (1 + fontSize / 100)
-          : fontSize
-    return { em: newSize }
-  }
-  else {
-    return { em: fontSize }
-  }
-}
-
-export const useZIndex = (zIndexFromStyle: number) => {
-  const [zIndex, setZIndex] = React.useState<number>()
-  const updateParentZIndex = React.useContext(zIndexContext)
-  React.useEffect(() => {
-    setZIndex(zIndexFromStyle)
-    if (Platform.OS === 'ios' && zIndexFromStyle && zIndexFromStyle !== zIndex) updateParentZIndex(zIndexFromStyle)
-  }, [zIndexFromStyle, updateParentZIndex])
-  return Platform.OS === 'web' ? (zIndex || 'auto') : zIndex
+export const useFontSize = (fontSizeTarget: string | undefined, rem: number, em: number): { em: number } => {
+  const [fontSize, fontUnit] = React.useMemo(() => fontSizeTarget === undefined ? [fontSizeTarget] : parseValue(fontSizeTarget), [fontSizeTarget])
+  const isRelative = fontUnit && ['rem', 'em', '%'].includes(fontUnit)
+  const newSize = React.useMemo(() => {
+    if (fontSize && isRelative) {
+      const newSize = fontUnit === 'em' ? em * fontSize
+        : fontUnit === 'rem' ? fontSize * rem
+          : fontUnit === '%' ? em * (1 + fontSize / 100)
+            : fontSize
+      return newSize
+    }
+    else return fontSize || em
+  }, [em, fontSize, fontUnit, isRelative, rem])
+  return { em: newSize }
 }

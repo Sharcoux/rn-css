@@ -202,8 +202,10 @@ it('should not convert deg and rad', async () => {
   const Comp = styled.View`
     transform: rotate(10rad) rotate(10deg);
   `
-
-  const wrapper = TestRenderer.create(<Comp />)
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp />)
+  })
 
   expect(wrapper.root.findByType('View').props.style).toEqual({ transform: [{ rotate: '10rad' }, { rotate: '10deg' }] })
 })
@@ -220,7 +222,10 @@ it('should not convert % for supported values', async () => {
     flex-basis: 10%;
   `
 
-  const wrapper = TestRenderer.create(<Comp />)
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp />)
+  })
 
   expect(wrapper.root.findByType('View').props.style).toEqual({
     width: '10%',
@@ -400,14 +405,14 @@ it('Should merge style props', async () => {
       }]
     }} />)
   })
-  expect(wrapper.root.findByType('View').props.style).toEqual([
-    { height: 32 },
+  expect(wrapper.root.findByType('View').props.style).toEqual(
     {
+      height: 32,
       transform: [
         {
           translateX: 50
         }
       ]
     }
-  ])
+  )
 })

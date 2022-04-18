@@ -2,8 +2,7 @@ import React from 'react'
 import * as RN from 'react-native'
 import styledComponent, { styledFlatList, styledSectionList, styledVirtualizedList } from './styleComponent'
 export { cssToRNStyle } from './cssToRN'
-export { FontSizeContext } from './features'
-export { SharedValue } from './styleComponent'
+export { SharedValue, FontSizeContext, RemContext } from './styleComponent'
 export * from './useTheme'
 
 const styled = <T, >(Component: React.ComponentType<T>) => styledComponent<T>(Component)
