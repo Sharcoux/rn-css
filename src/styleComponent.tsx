@@ -1,11 +1,12 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 import React, { MouseEvent } from 'react'
-import { FlatList, FlatListProps, LayoutChangeEvent, Platform, SectionList, SectionListProps, StyleProp, StyleSheet, VirtualizedList, VirtualizedListProps } from 'react-native'
+import { FlatList, FlatListProps, LayoutChangeEvent, Platform, SectionList, SectionListProps, StyleProp, StyleSheet, TextStyle, ViewStyle, VirtualizedList, VirtualizedListProps } from 'react-native'
 import convertStyle from './convertStyle'
 import cssToStyle from './cssToRN'
 import { useFontSize, useHover, useLayout, useScreenSize, useMediaQuery } from './features'
 import type { Style, Units } from './types'
+import generateHash from './generateHash'
 
 export const defaultUnits: Units = { em: 16, vw: 1, vh: 1, vmin: 1, vmax: 1, rem: 16, px: 1, pt: 72 / 96, in: 96, pc: 9, cm: 96 / 2.54, mm: 96 / 25.4 }
 export const RemContext = React.createContext<number>(defaultUnits.rem)
@@ -29,6 +30,22 @@ function buildCSSString<T extends { rnCSS?: string }> (chunks: TemplateStringsAr
   if (props.rnCSS) computedString += props.rnCSS.replace(/=/gm, ':') + ';'
   return computedString
 }
+const styleMap: Record<string, { style: ViewStyle & TextStyle, usage: number }> = {}
+function getStyle (hash: string, style: ViewStyle & TextStyle) {
+  const styleInfo = styleMap[hash]
+  if (styleInfo) {
+    styleInfo.usage++
+    return styleInfo.style
+  }
+  else {
+    const sheet = StyleSheet.create({ [hash]: style })
+    return (styleMap[hash] = { style: sheet[hash], usage: 1 }).style
+  }
+}
+function removeStyle (hash: string) {
+  styleMap[hash].usage--
+  if (styleMap[hash].usage <= 0) delete styleMap[hash]
+}
 const styled = <Props, >(Component: React.ComponentType<Props>) => {
   const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
     const ForwardRefComponent = React.forwardRef<React.ComponentType<S & Props & OptionalProps>, S & Props & OptionalProps>((props: S & Props & OptionalProps, ref) => {
@@ -41,7 +58,7 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
 
       const { needsLayout, needsHover } = React.useMemo(() => ({
         // needsFontSize: !!css.match(/\b(\d+)(\.\d+)?em\b/)
-        // needsScreenSize: !!cssString.current.match(/\b(\d+)(\.\d+)?v([hw]|min|max)\b/) || !!rnStyle.media,
+        // needsScreenSize: !!css.match(/\b(\d+)(\.\d*)?v([hw]|min|max)\b/) || !!rnStyle.media,
         needsLayout: !!css.match(/\d%/),
         needsHover: !!rnStyle.hover
       }), [css, rnStyle.hover])
@@ -89,19 +106,26 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
 
       const units = React.useMemo<Units>(() => ({ ...baseUnits, em }), [baseUnits, em])
 
-      const styleConvertedFromCSS = React.useMemo(() => convertStyle(finalStyle, units), [finalStyle, units])
-      const style: StyleProp<any> = React.useMemo(() => [styleConvertedFromCSS, props.style], [props.style, styleConvertedFromCSS])
-      const flatStyle = React.useMemo(() => StyleSheet.flatten(style), [style])
+      const { style: styleConvertedFromCSS, hash } = React.useMemo(() => {
+        const style = convertStyle(finalStyle, units)
+        delete (style as Style).textOverflow
+        const hash = generateHash(JSON.stringify(style))
+        return { style: getStyle(hash, style), hash }
+      }, [finalStyle, units])
       const newProps = React.useMemo(() => {
-        const newProps: OptionalProps = { style, onMouseEnter, onMouseLeave, onLayout }
-        if (flatStyle.textOverflow === 'ellipsis') Object.assign(newProps, { numberOfLines: 1 })
+        const newProps: OptionalProps = { style: [styleConvertedFromCSS, props.style], onMouseEnter, onMouseLeave, onLayout }
+        if (finalStyle.textOverflow === 'ellipsis') {
+          Object.assign(newProps, { numberOfLines: 1 })
+        }
         return newProps
-      }, [flatStyle.textOverflow, onLayout, onMouseEnter, onMouseLeave, style])
+      }, [finalStyle.textOverflow, onLayout, onMouseEnter, onMouseLeave, props.style, styleConvertedFromCSS])
+
+      React.useEffect(() => () => removeStyle(hash), [hash])
 
       // The lines below can improve perfs, but it causes the component to remount when the font size changes
       // const currentFontSize = React.useContext(FontSizeContext)
       // if (em !== currentFontSize) {
-      if (flatStyle.fontSize) {
+      if (styleConvertedFromCSS.fontSize) {
         return <FontSizeContext.Provider value={em}>
           <Component ref={ref} {...props} {...newProps} />
         </FontSizeContext.Provider>

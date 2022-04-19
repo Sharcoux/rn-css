@@ -63,6 +63,7 @@ export type PartialStyle = Partial<Record<keyof ViewStyle | keyof TextStyle, str
     width: string;
     height: string;
   };
+  textOverflow?: 'ellipsis'
   transform?: Transform[];
 }
 

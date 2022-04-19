@@ -2,7 +2,8 @@
 
 ## Version 1.6
 
- * Important performance fix (300% faster!)
+ * Creation of RemContext to control rem units value
+ * Important performance fix (500% faster!)
 
 ## Version 1.5
 

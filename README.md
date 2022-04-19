@@ -180,6 +180,14 @@ if(width < 70 * em) { /* Do something when width is lesser than 70em */ }
 return <View onLayout={event => setWidth(event.nativeEvent.layout.width)}>...</View>
 ```
 
+Default value for `rem` units is 16. If you want to declare another value, you can use `RemContext`:
+
+```javascript
+import { RemContext } from 'rn-css'
+...
+return <RemContext.Provider value={10}>{children}</RemContext.Provider>
+```
+
 ---
 
 ## Convert a CSS string to React-Native Style

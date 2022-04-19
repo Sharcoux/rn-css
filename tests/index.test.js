@@ -407,6 +407,27 @@ it('Should merge the inline css within rnCSS prop', async () => {
     width: 200
   })
 })
+it('Should handle text-overflow', async () => {
+  const Comp = styled.Text`
+    text-overflow: ellipsis;
+  `
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp />)
+  })
+  expect(wrapper.root.findByType('Text').props.numberOfLines).toBe(1)
+})
+it('Should handle extending text-overflow', async () => {
+  const Comp = styled.View``
+  const Extend = styled(Comp)`
+    text-overflow: ellipsis;
+  `
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Extend />)
+  })
+  expect(wrapper.root.findByType('View').props.numberOfLines).toBe(1)
+})
 it('Should accept % in transform', async () => {
   const Comp = styled.View`
     transform: translate(2%, 3%) scale(2);
