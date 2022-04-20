@@ -14,6 +14,7 @@ describe('CSS style conversion', () => {
     expect(convert('width: 10;')).toEqual({ width: '10' })
   })
   it('should transform composite props', () => {
+    expect(convert('background: none rgb(255, 255, 255)')).toEqual({ backgroundColor: 'rgb(255,255,255)' })
     expect(convert('outline: 1px solid black')).toEqual({ outlineWidth: '1px', outlineStyle: 'solid', outlineColor: 'black' })
     expect(convert('border: 1px solid black')).toEqual({ borderWidth: '1px', borderStyle: 'solid', borderColor: 'black' })
     expect(convert('borderTop: 1px solid black')).toEqual({ borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: 'black' })

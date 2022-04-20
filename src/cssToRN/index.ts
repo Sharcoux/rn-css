@@ -1,7 +1,7 @@
 import { Dimensions } from 'react-native'
 import convertStyle from '../convertStyle'
 import type { Context, PartialStyle, Style, Units } from '../types'
-import { sideValue, border, cornerValue, font, textDecoration, shadow, placeContent, flex, flexFlow, transform } from './convert'
+import { sideValue, border, cornerValue, font, textDecoration, shadow, placeContent, flex, flexFlow, transform, background } from './convert'
 import { createMedia } from './mediaQueries'
 
 function kebab2camel (string: string) {
@@ -78,7 +78,7 @@ function cssChunkToStyle (css: string) {
         Object.assign(result, sideValue('border', value, 'Width'))
         break
       case 'background':
-        Object.assign(result, { backgroundColor: value })
+        Object.assign(result, background(value))
         break
       case 'padding':
       case 'margin':

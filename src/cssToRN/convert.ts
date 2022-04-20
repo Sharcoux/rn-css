@@ -75,6 +75,12 @@ export function placeContent (value: string) {
   return { alignContent, justifyContent }
 }
 
+export function background (value: string) {
+  const values = value.split(/\s+/mg)
+  // The background-color is the only one that we support and it's the last value
+  return { backgroundColor: values.pop() }
+}
+
 export function textDecoration (value: string) {
   const values = value.split(/\s+/mg)
   const result = {
