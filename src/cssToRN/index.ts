@@ -66,6 +66,7 @@ function cssChunkToStyle (css: string) {
     const key = kebab2camel(rawKey.trim())
     const value = stripSpaces(rawValue.trim())// We need this to correctly read calc() values
     switch (key) {
+      case 'outline':
       case 'border':
       case 'borderTop':
       case 'borderLeft':

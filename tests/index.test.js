@@ -71,7 +71,7 @@ describe('extended CSS support', () => {
         height: 10vmax;
         padding: 10vw 10vh;
         flex: 1 1 10vh;
-        border: 1rem solid black;
+        outline: 1rem solid black;
       `
 
     const { width, height } = Dimensions.get('window')
@@ -89,9 +89,9 @@ describe('extended CSS support', () => {
       paddingBottom: vw,
       paddingLeft: vh,
       paddingRight: vh,
-      borderColor: 'black',
-      borderStyle: 'solid',
-      borderWidth: 16,
+      outlineColor: 'black',
+      outlineStyle: 'solid',
+      outlineWidth: 16,
       flexGrow: 1,
       flexShrink: 1,
       flexBasis: vh

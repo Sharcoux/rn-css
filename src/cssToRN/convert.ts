@@ -23,7 +23,7 @@ function findNumbers (value: string) {
 }
 
 /** Parse a css value for border */
-export function border (prefixKey: 'border' | 'borderLeft' | 'borderRight' | 'borderTop' | 'borderBottom', value: string): { [x:string]: string } {
+export function border (prefixKey: 'border' | 'borderLeft' | 'borderRight' | 'borderTop' | 'borderBottom' | 'outline', value: string): { [x:string]: string } {
   const values = value.split(/\s+/mg)
   const result = {
     [prefixKey + 'Width']: '0',
