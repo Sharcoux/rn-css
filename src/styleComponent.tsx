@@ -122,10 +122,8 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
 
       React.useEffect(() => () => removeStyle(hash), [hash])
 
-      // The lines below can improve perfs, but it causes the component to remount when the font size changes
-      // const currentFontSize = React.useContext(FontSizeContext)
-      // if (em !== currentFontSize) {
-      if (styleConvertedFromCSS.fontSize) {
+      // em !== parentEm alone is a bit dangerous as the component would rerender when the font size change
+      if (em !== parentEm || finalStyle.fontSize !== undefined) {
         return <FontSizeContext.Provider value={em}>
           <Component ref={ref} {...props} {...newProps} />
         </FontSizeContext.Provider>

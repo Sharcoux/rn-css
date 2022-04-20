@@ -119,11 +119,9 @@ describe('extended CSS support', () => {
   it('should handle em units with more nodes', async () => {
     const Parent = styled.View`
         width: 10em;
-        font-size: 2em;
+        font-size: 10px;
       `
-    const Wrapper = styled(View)`
-        width: 10em;
-      `
+    const Wrapper = styled(View)``
     const Child = styled(Text)`
         height: 20em;
         font-size: 3em;
@@ -133,11 +131,10 @@ describe('extended CSS support', () => {
     await act(async () => {
       wrapper = TestRenderer.create(<Parent><Wrapper><Child>test</Child></Wrapper></Parent>)
     })
-    const [parent, view] = wrapper.root.findAllByType('View')
+    const [parent] = wrapper.root.findAllByType('View')
     const text = wrapper.root.findByType('Text')
-    expect(getStyle(parent)).toEqual({ fontSize: 16 * 2, width: 16 * 2 * 10 })
-    expect(getStyle(view)).toEqual({ width: 16 * 2 * 10 })
-    expect(getStyle(text)).toEqual({ fontSize: 16 * 6, height: 16 * 6 * 20 })
+    expect(getStyle(parent)).toEqual({ fontSize: 10, width: 100 })
+    expect(getStyle(text)).toEqual({ fontSize: 30, height: 3 * 20 * 10 })
   })
   it('should support overwriting style', async () => {
     const Comp = styled.View`
@@ -417,16 +414,18 @@ it('Should handle text-overflow', async () => {
   })
   expect(wrapper.root.findByType('Text').props.numberOfLines).toBe(1)
 })
-it('Should handle extending text-overflow', async () => {
-  const Comp = styled.View``
+it('Should overwrite properties when extending', async () => {
+  const Comp = styled.View`
+    width: 10px;
+  `
   const Extend = styled(Comp)`
-    text-overflow: ellipsis;
+    width: 20px;
   `
   let wrapper
   await act(async () => {
     wrapper = TestRenderer.create(<Extend />)
   })
-  expect(wrapper.root.findByType('View').props.numberOfLines).toBe(1)
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({ width: 20 })
 })
 it('Should accept % in transform', async () => {
   const Comp = styled.View`

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react'
 import { AppRegistry, Platform, TouchableOpacity, TouchableOpacityProps } from 'react-native'
 import { name as appName } from './app.json'
