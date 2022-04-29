@@ -17,6 +17,9 @@ module.exports = {
     path: path.resolve(__dirname, 'demo'),
     filename: 'index.bundle.js'
   },
+  watchOptions: {
+    ignored: /node_modules/
+  },
   devtool: 'source-map',
   devServer: {
     static: path.resolve(__dirname, 'demo'),

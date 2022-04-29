@@ -1,5 +1,6 @@
 import React from 'react'
 import * as RN from 'react-native'
+import './polyfill'
 import styledComponent, { styledFlatList, styledSectionList, styledVirtualizedList } from './styleComponent'
 export { cssToRNStyle } from './cssToRN'
 export { SharedValue, FontSizeContext, RemContext } from './styleComponent'
