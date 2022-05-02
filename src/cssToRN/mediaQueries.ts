@@ -159,7 +159,7 @@ function parseConstraintValue (constraintString: string): Evaluation {
 export type Evaluation = (context: Context) => boolean
 
 function parse (constraint: string, previous?: Evaluation): Evaluation {
-  const result = constraint.match(/\sand\s|,|\sonly\s|\(|\snot\s/ims)
+  const result = constraint.match(/\sand\s|,|\sonly\s|\(|\snot\s/im)
 
   if (!result) {
     // If we reached the end of the string, we just return the last constraint
@@ -206,7 +206,8 @@ function parse (constraint: string, previous?: Evaluation): Evaluation {
 }
 
 export const createMedia = (query: string) => {
-  const parsed = query.match(/@media(.*?){([^{}]*)}/mis)
+  // We use [\s\S] instead of dotall flag (s) because it is not supported by react-native-windows
+  const parsed = query.match(/@media([\s\S]*?){([^{}]*)}/mi)
   if (!parsed) throw new Error(`Parsing error: check the syntax of media query ${query}.`)
   const [, constraints, css] = parsed
   const isValid = parse(constraints)
