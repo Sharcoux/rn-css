@@ -14,8 +14,8 @@ function stripSpaces (string: string) {
 
 function cssToStyle (css: string) {
   const result: Style = {}
-  // Find media queries
-  const cssWithoutMediaQueries = css.replace(/@media(.*?){[^{}]*}/gmis, res => {
+  // Find media queries (We use [\s\S] instead of . because dotall flag (s) is not supported by react-native-windows)
+  const cssWithoutMediaQueries = css.replace(/@media([\s\S]*?){[^{}]*}/gmi, res => {
     const { css, isValid } = createMedia(res)
     const style = cssChunkToStyle(css)
     const mediaQuery = (context: Context) => isValid(context) && style
@@ -23,9 +23,9 @@ function cssToStyle (css: string) {
     result.media!.push(mediaQuery)
     return ''
   })
-  // Find hover (we don't support hover within media queries)
-  const cssWithoutHover = cssWithoutMediaQueries.replace(/&:hover\s*{(.*?)}/gmis, res => {
-    const hoverInstructions = res.substring(0, res.length - 1).replace(/&:hover\s*{/mis, '')// We remove the `&:hover {` and `}`
+  // Find hover (we don't support hover within media queries) (We use [\s\S] instead of . because dotall flag (s) is not supported by react-native-windows)
+  const cssWithoutHover = cssWithoutMediaQueries.replace(/&:hover\s*{([\s\S]*?)}/gmi, res => {
+    const hoverInstructions = res.substring(0, res.length - 1).replace(/&:hover\s*{/mi, '')// We remove the `&:hover {` and `}`
     result.hover = cssChunkToStyle(hoverInstructions)
     return ''
   })
