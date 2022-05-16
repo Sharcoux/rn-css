@@ -1,7 +1,7 @@
 import { Dimensions } from 'react-native'
 import convertStyle from '../convertStyle'
 import type { Context, PartialStyle, Style, Units } from '../types'
-import { sideValue, border, cornerValue, font, textDecoration, shadow, placeContent, flex, flexFlow, transform, background } from './convert'
+import { sideValue, border, borderLike, cornerValue, font, textDecoration, shadow, placeContent, flex, flexFlow, transform, background } from './convert'
 import { createMedia } from './mediaQueries'
 
 function kebab2camel (string: string) {
@@ -66,16 +66,20 @@ function cssChunkToStyle (css: string) {
     const key = kebab2camel(rawKey.trim())
     const value = stripSpaces(rawValue.trim())// We need this to correctly read calc() values
     switch (key) {
-      case 'outline':
       case 'border':
+        Object.assign(result, border(value))
+        break
       case 'borderTop':
       case 'borderLeft':
       case 'borderRight':
       case 'borderBottom':
-        Object.assign(result, border(key, value))
+      case 'outline':
+        Object.assign(result, borderLike(key, value))
         break
+      case 'borderStyle':
+      case 'borderColor':
       case 'borderWidth':
-        Object.assign(result, sideValue('border', value, 'Width'))
+        Object.assign(result, sideValue('border', value, key.split('border').pop() as '' | 'Width' | 'Style' | 'Color'))
         break
       case 'background':
         Object.assign(result, background(value))

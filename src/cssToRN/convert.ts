@@ -23,7 +23,29 @@ function findNumbers (value: string) {
 }
 
 /** Parse a css value for border */
-export function border (prefixKey: 'border' | 'borderLeft' | 'borderRight' | 'borderTop' | 'borderBottom' | 'outline', value: string): { [x:string]: string } {
+export function border (value: string): { [x:string]: string } {
+  const values = value.split(/\s+/mg)
+  const result = {
+    borderWidth: '0',
+    borderColor: 'black',
+    borderStyle: 'solid'
+  }
+  values.forEach((value: string) => {
+    if (['solid', 'dotted', 'dashed'].includes(value)) result.borderStyle = value
+    else if (isNumber(value)) result.borderWidth = value
+    // eslint-disable-next-line no-useless-return
+    else if (value === 'none') return
+    else result.borderColor = value
+  })
+  return {
+    ...sideValue('border', result.borderWidth, 'Width'),
+    ...sideValue('border', result.borderColor, 'Color'),
+    ...sideValue('border', result.borderStyle, 'Style')
+  }
+}
+
+/** Parse a css value for border-like elements */
+export function borderLike (prefixKey: 'outline' | 'borderLeft' | 'borderRight' | 'borderTop' | 'borderBottom', value: string): { [x:string]: string } {
   const values = value.split(/\s+/mg)
   const result = {
     [prefixKey + 'Width']: '0',
@@ -164,9 +186,9 @@ export function font (value: string) {
 }
 
 /** Parses a css value for the side of an element (border-width, margin, padding) */
-export function sideValue (prefixKey: 'padding' | 'margin' | 'border', value: string, postFix: 'Width' | '' = ''): { [x: string]: string} {
+export function sideValue <T extends 'padding' | 'margin' | 'border'> (prefixKey: T, value: string, postFix: T extends 'border' ? 'Width' | 'Style' | 'Color' | '' : '' = ''): { [x: string]: string} {
   if (value === 'none') return sideValue(prefixKey, '0', postFix)
-  const [top, right = top, bottom = top, left = right] = findNumbers(value).numbers
+  const [top = value, right = top, bottom = top, left = right] = findNumbers(value).numbers
   return {
     [prefixKey + 'Top' + postFix]: top,
     [prefixKey + 'Left' + postFix]: left,

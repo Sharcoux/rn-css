@@ -175,7 +175,7 @@ describe('extended CSS support', () => {
     const Comp = styled(View)`
         width: 10vw;
         padding: 10vw 10vw;
-        border: 10vw solid black;
+        outline: 10vw solid black;
       `
 
     const { width, height } = Dimensions.get('window')
@@ -202,9 +202,9 @@ describe('extended CSS support', () => {
       paddingBottom: vw,
       paddingLeft: vw,
       paddingRight: vw,
-      borderColor: 'black',
-      borderStyle: 'solid',
-      borderWidth: vw
+      outlineColor: 'black',
+      outlineStyle: 'solid',
+      outlineWidth: vw
     })
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     await act(async () => {})// We wait for the useEffect to happen
@@ -223,9 +223,9 @@ describe('extended CSS support', () => {
       paddingBottom: 20,
       paddingLeft: 20,
       paddingRight: 20,
-      borderColor: 'black',
-      borderStyle: 'solid',
-      borderWidth: 20
+      outlineColor: 'black',
+      outlineStyle: 'solid',
+      outlineWidth: 20
     })
 
     // Ensure that the listener has been removed
@@ -402,6 +402,29 @@ it('Should merge the inline css within rnCSS prop', async () => {
   expect(getStyle(wrapper.root.findByType('View'))).toEqual({
     color: '#236AFF',
     width: 200
+  })
+})
+it('Should merge the inline css within rnCSS prop and respect priority', async () => {
+  const Comp = styled.View`
+    border-width: 2px;
+  `
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp rnCSS="border:none;"/>)
+  })
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
+    borderBottomColor: 'black',
+    borderBottomStyle: 'solid',
+    borderBottomWidth: 0,
+    borderLeftColor: 'black',
+    borderLeftStyle: 'solid',
+    borderLeftWidth: 0,
+    borderRightColor: 'black',
+    borderRightStyle: 'solid',
+    borderRightWidth: 0,
+    borderTopColor: 'black',
+    borderTopStyle: 'solid',
+    borderTopWidth: 0
   })
 })
 it('Should handle text-overflow', async () => {

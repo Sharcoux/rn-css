@@ -17,7 +17,20 @@ describe('CSS style conversion', () => {
     expect(convert('background: none')).toEqual({ backgroundColor: 'transparent' })
     expect(convert('background: none rgb(255, 255, 255)')).toEqual({ backgroundColor: 'rgb(255,255,255)' })
     expect(convert('outline: 1px solid black')).toEqual({ outlineWidth: '1px', outlineStyle: 'solid', outlineColor: 'black' })
-    expect(convert('border: 1px solid black')).toEqual({ borderWidth: '1px', borderStyle: 'solid', borderColor: 'black' })
+    expect(convert('border: 1px solid black')).toEqual({
+      borderBottomColor: 'black',
+      borderBottomStyle: 'solid',
+      borderBottomWidth: '1px',
+      borderLeftColor: 'black',
+      borderLeftStyle: 'solid',
+      borderLeftWidth: '1px',
+      borderRightColor: 'black',
+      borderRightStyle: 'solid',
+      borderRightWidth: '1px',
+      borderTopColor: 'black',
+      borderTopStyle: 'solid',
+      borderTopWidth: '1px'
+    })
     expect(convert('borderTop: 1px solid black')).toEqual({ borderTopWidth: '1px', borderTopStyle: 'solid', borderTopColor: 'black' })
     expect(convert('borderWidth: 2px 3% 4rem')).toEqual({ borderTopWidth: '2px', borderBottomWidth: '4rem', borderLeftWidth: '3%', borderRightWidth: '3%' })
     expect(convert('border-radius: 1px')).toEqual({ borderTopLeftRadius: '1px', borderTopRightRadius: '1px', borderBottomLeftRadius: '1px', borderBottomRightRadius: '1px' })
@@ -63,7 +76,20 @@ describe('CSS to RN style conversion', () => {
   })
   it('should transform composite props', () => {
     const { width, height } = Dimensions.get('window')
-    expect(cssToRNStyle('border: 1px solid black')).toEqual({ borderWidth: 1, borderStyle: 'solid', borderColor: 'black' })
+    expect(cssToRNStyle('border: 1px solid black')).toEqual({
+      borderBottomColor: 'black',
+      borderBottomStyle: 'solid',
+      borderBottomWidth: 1,
+      borderLeftColor: 'black',
+      borderLeftStyle: 'solid',
+      borderLeftWidth: 1,
+      borderRightColor: 'black',
+      borderRightStyle: 'solid',
+      borderRightWidth: 1,
+      borderTopColor: 'black',
+      borderTopStyle: 'solid',
+      borderTopWidth: 1
+    })
     expect(cssToRNStyle('borderTop: 1px solid black')).toEqual({ borderTopWidth: 1, borderTopStyle: 'solid', borderTopColor: 'black' })
     expect(cssToRNStyle('borderWidth: 2px 3em 4rem', { width: 100, height: 100 })).toEqual({ borderTopWidth: 2, borderBottomWidth: 64, borderLeftWidth: 48, borderRightWidth: 48 })
     expect(cssToRNStyle('border-radius: 1px')).toEqual({ borderTopLeftRadius: 1, borderTopRightRadius: 1, borderBottomLeftRadius: 1, borderBottomRightRadius: 1 })
