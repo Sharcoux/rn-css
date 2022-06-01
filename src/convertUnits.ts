@@ -41,7 +41,7 @@ export function convertValue (key: keyof PartialStyle | keyof Transform, value: 
   const convertedValue = value.replace(/(\b\d+(\.\d+)?)([a-z]+\b|%)/ig, occ => {
     const [val, unit] = parseValue(occ)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    if (['deg', 'rad', 'turn'].includes(unit!)) return occ // We don't want to convert deg and rad units
+    if (['deg', 'rad', 'turn', 's'].includes(unit!)) return occ // We don't want to convert deg, rad, turn, second units
     return val * (finalUnits[unit as keyof Units || 'px']!) + ''
   })
 

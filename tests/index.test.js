@@ -437,6 +437,16 @@ it('Should handle text-overflow', async () => {
   })
   expect(wrapper.root.findByType('Text').props.numberOfLines).toBe(1)
 })
+it('Should handle transition', async () => {
+  const Comp = styled.View`
+    transition: all 0.5s;
+  `
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp />)
+  })
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({ transition: 'all 0.5s' })
+})
 it('Should overwrite properties when extending', async () => {
   const Comp = styled.View`
     width: 10px;

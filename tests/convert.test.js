@@ -5,6 +5,7 @@ describe('CSS style conversion', () => {
   it('should transform basic values', () => {
     expect(convert('width: 10')).toEqual({ width: '10' })
     expect(convert('margin-top: 10')).toEqual({ marginTop: '10' })
+    expect(convert('transition: all 0.5s')).toEqual({ transition: 'all 0.5s' })
   })
   it('should transform calc values', () => {
     expect(convert('width: calc( 100% - 10px )')).toEqual({ width: 'calc(100%-10px)' })
@@ -66,6 +67,7 @@ describe('CSS to RN style conversion', () => {
   it('should transform basic values', () => {
     expect(cssToRNStyle('width: 10')).toEqual({ width: 10 })
     expect(cssToRNStyle('margin-top: 10')).toEqual({ marginTop: 10 })
+    expect(cssToRNStyle('transition: all 0.5s')).toEqual({ transition: 'all 0.5s' })
   })
   it('should transform calc values', () => {
     expect(cssToRNStyle('width: calc( 100% - 10px )', { width: 100, height: 100 })).toEqual({ width: 90 })
