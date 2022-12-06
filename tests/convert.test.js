@@ -69,6 +69,14 @@ describe('CSS to RN style conversion', () => {
     expect(cssToRNStyle('margin-top: 10')).toEqual({ marginTop: 10 })
     expect(cssToRNStyle('transition: all 0.5s')).toEqual({ transition: 'all 0.5s' })
   })
+  it('should convert units', () => {
+    expect(cssToRNStyle('font-size: 12pt')).toEqual({ fontSize: 16 })
+    expect(cssToRNStyle('font-size: 12px')).toEqual({ fontSize: 12 })
+    expect(cssToRNStyle('font-size: 12cm')).toEqual({ fontSize: 453.54330708661416 })
+    expect(cssToRNStyle('font-size: 12mm')).toEqual({ fontSize: 45.35433070866142 })
+    expect(cssToRNStyle('font-size: 12in')).toEqual({ fontSize: 1152 })
+    expect(cssToRNStyle('font-size: 12pc')).toEqual({ fontSize: 192 })
+  })
   it('should transform calc values', () => {
     expect(cssToRNStyle('width: calc( 100% - 10px )', { width: 100, height: 100 })).toEqual({ width: 90 })
     expect(cssToRNStyle('margin-top: calc(10 - 10)')).toEqual({ marginTop: 0 })
