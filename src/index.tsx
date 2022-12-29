@@ -6,6 +6,10 @@ export { cssToRNStyle } from './cssToRN'
 export { SharedValue, FontSizeContext, RemContext } from './styleComponent'
 export * from './useTheme'
 
+export interface ISharedValue {}
+
+export interface DefaultTheme {}
+
 const styled = <T, >(Component: React.ComponentType<T>) => styledComponent<T>(Component)
 
 styled.ActivityIndicator = styled(RN.ActivityIndicator)

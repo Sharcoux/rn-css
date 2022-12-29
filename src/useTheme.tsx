@@ -1,8 +1,9 @@
 import React from 'react'
 import { SharedValue } from './styleComponent'
+import { DefaultTheme } from '.';
 
 /** Provider for the theme. */
-export const ThemeProvider = ({ theme, children }: { theme: unknown; children: React.ReactNode }) => {
+export const ThemeProvider = ({ theme, children }: { theme: DefaultTheme; children: React.ReactNode }) => {
   return <SharedValue.Provider value={theme}>
     {children}
   </SharedValue.Provider>

@@ -7,6 +7,7 @@ import cssToStyle from './cssToRN'
 import { useFontSize, useHover, useLayout, useScreenSize, useMediaQuery } from './features'
 import type { Style, Units } from './types'
 import generateHash from './generateHash'
+import { DefaultTheme } from '.'
 
 export const defaultUnits: Units = { em: 16, vw: 1, vh: 1, vmin: 1, vmax: 1, rem: 16, px: 1, pt: 72 / 96, in: 96, pc: 9, cm: 96 / 2.54, mm: 96 / 25.4 }
 export const RemContext = React.createContext<number>(defaultUnits.rem)
@@ -16,7 +17,7 @@ export const FontSizeContext = React.createContext(defaultUnits.em)
 export const SharedValue = React.createContext<unknown>(undefined)
 
 type Primitive = number | string | null | undefined | boolean
-type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown, theme: unknown }) => Primitive
+type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown, theme: DefaultTheme }) => Primitive
 type OptionalProps = {
   rnCSS?: `${string};`;
   onMouseEnter?: (event: MouseEvent) => void;
