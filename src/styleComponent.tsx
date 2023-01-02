@@ -15,8 +15,10 @@ export const FontSizeContext = React.createContext(defaultUnits.em)
 // We use this to share value within the component (Theme, Translation, whatever)
 export const SharedValue = React.createContext<unknown>(undefined)
 
+export type DefaultTheme = unknown
+
 type Primitive = number | string | null | undefined | boolean
-type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown, theme: unknown }) => Primitive
+type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown, theme: DefaultTheme }) => Primitive
 type OptionalProps = {
   rnCSS?: `${string};`;
   onMouseEnter?: (event: MouseEvent) => void;

@@ -347,6 +347,22 @@ To match the API of styled-components, we offer the same abilities for theming [
 
 This relies on the [SharedValue](#shared-value) context. This means that you cannot use the Shared Value system **and** this theming système. Pick the one that best suits your needs.
 
+### Custom theme type for typescript
+
+When you use the theme prop in your components, it is initially typed as `unknown`. But you can make it follow your custom type by extending the type declaration of **rn-css**. You will need to create a file `rncss.d.ts` in the `src` of your project root and add the following lines:
+
+```ts
+import 'rn-css';
+
+declare module 'rn-css' {
+  type MyTheme = {
+    // Describe your theme here.
+    // Alternatively, you can use: `type MyTheme = typeof theme` if you have a fixed `theme` object.
+  }
+  export interface DefaultTheme extends MyTheme {}
+}
+```
+
 ---
 
 ## Coming later:

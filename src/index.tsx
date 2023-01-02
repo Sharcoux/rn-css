@@ -3,7 +3,7 @@ import * as RN from 'react-native'
 import './polyfill'
 import styledComponent, { styledFlatList, styledSectionList, styledVirtualizedList } from './styleComponent'
 export { cssToRNStyle } from './cssToRN'
-export { SharedValue, FontSizeContext, RemContext } from './styleComponent'
+export { SharedValue, FontSizeContext, RemContext, DefaultTheme } from './styleComponent'
 export * from './useTheme'
 
 const styled = <T, >(Component: React.ComponentType<T>) => styledComponent<T>(Component)
