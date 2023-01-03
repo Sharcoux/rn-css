@@ -15,7 +15,8 @@ export const FontSizeContext = React.createContext(defaultUnits.em)
 // We use this to share value within the component (Theme, Translation, whatever)
 export const SharedValue = React.createContext<unknown>(undefined)
 
-export type DefaultTheme = unknown
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DefaultTheme {}
 
 type Primitive = number | string | null | undefined | boolean
 type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown, theme: DefaultTheme }) => Primitive
@@ -28,7 +29,7 @@ type OptionalProps = {
   style?: StyleProp<any>;
 }
 function buildCSSString<T extends { rnCSS?: string }> (chunks: TemplateStringsArray, functs: (Primitive | Functs<T>)[], props: T, shared: unknown) {
-  let computedString = chunks.map((chunk, i) => ([chunk, (functs[i] instanceof Function) ? (functs[i] as Functs<T>)({ shared, theme: shared, ...props }) : functs[i]])).flat().join('')
+  let computedString = chunks.map((chunk, i) => ([chunk, (functs[i] instanceof Function) ? (functs[i] as Functs<T>)({ shared, theme: (shared as DefaultTheme), ...props }) : functs[i]])).flat().join('')
   if (props.rnCSS) computedString += props.rnCSS.replace(/=/gm, ':') + ';'
   return computedString
 }
