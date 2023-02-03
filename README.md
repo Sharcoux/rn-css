@@ -2,7 +2,7 @@
 
 This is basically [styled-components](https://github.com/styled-components/styled-components) with a much better support for React-Native, and some awesome additional features. You can check the docs of [styled-components](https://github.com/styled-components/styled-components) for more details about the basic API. I'll focus here on the differences.
 
-**Current version: 1.5** [See the Changelog](./CHANGELOG.md)
+**Current version: 1.8** [See the Changelog](./CHANGELOG.md)
 
 ---
 

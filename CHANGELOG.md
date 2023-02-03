@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 1.8
+
+ * Accept returning an RN Style object in the tagged template string
+ * Fix a type issue in the style prop of the components
+
+## Version 1.7
+
+ * Improve type support for the Theming system
+
 ## Version 1.6
 
  * Creation of RemContext to control rem units value
