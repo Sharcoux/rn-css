@@ -91,6 +91,17 @@ const View = styled.View<{ color: string }>`
 `
 ```
 
+Here is an example returning directly a Style object:
+
+```javascript
+const View = styled.View`
+  color: black;
+  ${props => ({ justifyContent: props.center })}
+`
+```
+
+
+
 ---
 
 ### <ins>attrs:</ins>
@@ -323,7 +334,7 @@ const View = styled.View`
 
 ### <ins>Typescript:</ins>
 
-For Typescript, `shared` will always be typed with `unknown`. You need to manually declare the type of your shared object. Be careful: you won't have typecheck this way. We don't have any better way for now.
+For Typescript, `shared` will always be typed with `unknown`. You need to manually declare the type of your shared object. Read the Theming section to learn more about workarounds.
 
 ```typescript
 // Create your theme

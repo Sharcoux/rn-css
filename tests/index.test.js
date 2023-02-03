@@ -512,3 +512,29 @@ it('Should merge style props', async () => {
     }
   )
 })
+it('Should accept RN Style in the tagged template', async () => {
+  const Comp = styled.View`
+    ${{ height: 20, color: 'red' }}
+  `
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp />)
+  })
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
+    color: 'red',
+    height: 20
+  })
+})
+it('Should accept functions returning RN Style in the tagged template', async () => {
+  const Comp = styled.View`
+    ${props => ({ height: props.value, width: props.value })}
+  `
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp value={20} />)
+  })
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
+    width: 20,
+    height: 20
+  })
+})

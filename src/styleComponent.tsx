@@ -7,6 +7,7 @@ import cssToStyle from './cssToRN'
 import { useFontSize, useHover, useLayout, useScreenSize, useMediaQuery } from './features'
 import type { Style, Units } from './types'
 import generateHash from './generateHash'
+import rnToCSS from './rnToCss'
 
 export const defaultUnits: Units = { em: 16, vw: 1, vh: 1, vmin: 1, vmax: 1, rem: 16, px: 1, pt: 72 / 96, in: 96, pc: 9, cm: 96 / 2.54, mm: 96 / 25.4 }
 export const RemContext = React.createContext<number>(defaultUnits.rem)
@@ -18,7 +19,7 @@ export const SharedValue = React.createContext<unknown>(undefined)
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DefaultTheme {}
 
-type Primitive = number | string | null | undefined | boolean
+type Primitive = number | string | null | undefined | boolean | (ViewStyle & TextStyle)
 type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown, theme: DefaultTheme }) => Primitive
 type OptionalProps = {
   rnCSS?: `${string};`;
@@ -28,11 +29,20 @@ type OptionalProps = {
   children?: React.ReactNode;
   style?: StyleProp<any>;
 }
+
+/** Converts the tagged template string into a css string */
 function buildCSSString<T extends { rnCSS?: string }> (chunks: TemplateStringsArray, functs: (Primitive | Functs<T>)[], props: T, shared: unknown) {
-  let computedString = chunks.map((chunk, i) => ([chunk, (functs[i] instanceof Function) ? (functs[i] as Functs<T>)({ shared, theme: (shared as DefaultTheme), ...props }) : functs[i]])).flat().join('')
+  let computedString = chunks
+    // Evaluate the chunks from the tagged template
+    .map((chunk, i) => ([chunk, (functs[i] instanceof Function) ? (functs[i] as Functs<T>)({ shared, theme: (shared as DefaultTheme), ...props }) : functs[i]]))
+    .flat()
+    // Convert the objects to string if the result is not a primitive
+    .map(chunk => typeof chunk === 'object' ? rnToCSS(chunk as Partial<ViewStyle & TextStyle>) : chunk)
+    .join('')
   if (props.rnCSS) computedString += props.rnCSS.replace(/=/gm, ':') + ';'
   return computedString
 }
+
 const styleMap: Record<string, { style: ViewStyle & TextStyle, usage: number }> = {}
 function getStyle (hash: string, style: ViewStyle & TextStyle) {
   const styleInfo = styleMap[hash]
