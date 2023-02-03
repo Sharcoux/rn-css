@@ -98,7 +98,7 @@ const App = () => {
   React.useLayoutEffect(() => console.log(ref), [])
   return (
     <Box ref={ref2}>
-      <View>
+      <View style={{ flexDirection: 'column' }}>
         <Text ref={ref} col={'black'} numberOfLines={1} style={{ flexGrow: 1, flexBasis: 'auto' }}>Welcome to ReactNativeStyledComponents</Text>
       </View>
       <Box>

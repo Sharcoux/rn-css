@@ -27,7 +27,7 @@ type OptionalProps = {
   onMouseLeave?: (event: MouseEvent) => void;
   onLayout?: (event: LayoutChangeEvent) => void
   children?: React.ReactNode;
-  style?: StyleProp<any>;
+  style?: StyleProp<unknown>;
 }
 
 /** Converts the tagged template string into a css string */
