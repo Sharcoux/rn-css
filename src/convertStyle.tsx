@@ -1,10 +1,10 @@
 /* eslint-disable react/display-name */
-import { /* StyleSheet, */ TextStyle } from 'react-native'
+import { /* StyleSheet, */ Animated, TextStyle } from 'react-native'
 import { convertValue } from './convertUnits'
 import type { AnyStyle, CompleteStyle, PartialStyle, Units } from './types'
 
 /** Mix the calculated RN style within the object style */
-const convertStyle = <T extends AnyStyle = AnyStyle>(rnStyle: PartialStyle, units: Units) => {
+const convertStyle = <T extends AnyStyle | Animated.WithAnimatedValue<AnyStyle> = AnyStyle>(rnStyle: PartialStyle, units: Units) => {
   /** This is the result of the convertions from css style into RN style */
   const convertedStyle: CompleteStyle = {};
   // If width and height are specified, we can use those values for the first render

@@ -59,7 +59,7 @@ function removeStyle (hash: string) {
   styleMap[hash].usage--
   if (styleMap[hash].usage <= 0) delete styleMap[hash]
 }
-const styled = <Props, StyleType extends AnyStyle = AnyStyle>(Component: React.ComponentType<Props>) => {
+const styled = <Props, StyleType extends AnyStyle | Animated.WithAnimatedValue<AnyStyle> = AnyStyle>(Component: React.ComponentType<Props>) => {
   const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
     const ForwardRefComponent = React.forwardRef<React.ComponentType<S & Props & OptionalProps<StyleType>>, S & Props & OptionalProps<StyleType>>((props: S & Props & OptionalProps<StyleType>, ref) => {
       const rem = React.useContext(RemContext)
@@ -120,13 +120,13 @@ const styled = <Props, StyleType extends AnyStyle = AnyStyle>(Component: React.C
       const units = React.useMemo<Units>(() => ({ ...baseUnits, em }), [baseUnits, em])
 
       const { style: styleConvertedFromCSS, hash } = React.useMemo(() => {
-        const style = convertStyle<StyleType>(finalStyle, units)
+        const style = convertStyle<CompleteStyle>(finalStyle, units)
         delete (style as Style).textOverflow
         const hash = generateHash(JSON.stringify(style))
-        return { style: getStyle<StyleType>(hash, style), hash }
+        return { style: getStyle<CompleteStyle>(hash, style), hash }
       }, [finalStyle, units])
       const newProps = React.useMemo(() => {
-        const newProps: OptionalProps<StyleType> = { style: [styleConvertedFromCSS, props.style], onMouseEnter, onMouseLeave, onLayout }
+        const newProps: OptionalProps<StyleType> = { style: [styleConvertedFromCSS as StyleType, props.style], onMouseEnter, onMouseLeave, onLayout }
         if (finalStyle.textOverflow === 'ellipsis') {
           Object.assign(newProps, { numberOfLines: 1 })
         }
