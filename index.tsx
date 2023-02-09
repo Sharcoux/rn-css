@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react'
-import { AppRegistry, Platform, TouchableOpacity, TouchableOpacityProps } from 'react-native'
+import { Animated, AppRegistry, Platform, TouchableOpacity, TouchableOpacityProps, ViewStyle } from 'react-native'
 import { name as appName } from './app.json'
 import styled from './src'
 
@@ -11,6 +11,14 @@ const View = styled.View`
   border-radius: 50%;
   width: 200px;
   height: 200px;
+`
+
+const Dot = styled(Animated.View)`
+  width: 5em;
+  height: 5em;
+  margin: 2em;
+  border-radius: 50%;
+  z-index: 10;
 `
 
 const Text = styled.Text<{col: string}>`
@@ -96,6 +104,17 @@ const App = () => {
   const ref = React.useRef<Text>(null)
   const ref2 = React.useRef<typeof Box>(null)
   React.useLayoutEffect(() => console.log(ref), [])
+  const dotLeft = React.useRef(new Animated.Value(0))
+  const dotStyle: Animated.WithAnimatedValue<ViewStyle> = React.useMemo(
+    () => ({
+      left: dotLeft.current.interpolate({
+        inputRange: [0, 50],
+        outputRange: ['0%', '50%']
+      })
+    }),
+    []
+  )
+
   return (
     <Box ref={ref2}>
       <View style={{ flexDirection: 'column' }}>
@@ -122,6 +141,7 @@ const App = () => {
       <FlatList />
       <Box2 />
       <ColorCircle color="#236AFF" onLayout={(e) => { console.log(e.nativeEvent.layout) }}/>
+      <Dot style={dotStyle}/>
     </Box>
   )
 }

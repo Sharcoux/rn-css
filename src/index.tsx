@@ -7,7 +7,7 @@ export { cssToRNStyle } from './cssToRN'
 export { SharedValue, FontSizeContext, RemContext, DefaultTheme } from './styleComponent'
 export * from './useTheme'
 
-const styled = <T, >(Component: React.ComponentType<T>) => styledComponent<T, AnyStyle>(Component)
+const styled = <T, >(Component: React.ComponentType<T>) => styledComponent<T, AnyStyle | RN.Animated.WithAnimatedValue<AnyStyle>>(Component)
 
 styled.ActivityIndicator = styled(RN.ActivityIndicator)
 styled.Button = styled(RN.Button)
