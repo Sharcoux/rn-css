@@ -1,6 +1,6 @@
 import { Dimensions } from 'react-native'
 import convertStyle from '../convertStyle'
-import type { Context, PartialStyle, Style, Units } from '../types'
+import { CompleteStyle, Context, PartialStyle, Style, Units } from '../types'
 import { sideValue, border, borderLike, cornerValue, font, textDecoration, shadow, placeContent, flex, flexFlow, transform, background } from './convert'
 import { createMedia } from './mediaQueries'
 
@@ -54,7 +54,7 @@ export function cssToRNStyle (css: string, units: { em?: number, width?: number,
     ...units
   }
   const rnStyle = cssChunkToStyle(css)
-  return convertStyle(rnStyle, finalUnits)
+  return convertStyle<CompleteStyle>(rnStyle, finalUnits)
 }
 
 function cssChunkToStyle (css: string) {
