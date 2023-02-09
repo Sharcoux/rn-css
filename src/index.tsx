@@ -2,15 +2,13 @@ import React from 'react'
 import * as RN from 'react-native'
 import './polyfill'
 import styledComponent, { styledFlatList, styledSectionList, styledVirtualizedList } from './styleComponent'
-import { AnyStyle } from './types'
 export { cssToRNStyle } from './cssToRN'
 export { SharedValue, FontSizeContext, RemContext, DefaultTheme } from './styleComponent'
 export * from './useTheme'
 
-const styled = <T, >(Component: React.ComponentType<T>) => styledComponent<T, AnyStyle | RN.Animated.WithAnimatedValue<AnyStyle>>(Component)
+const styled = <StyleType, InitialProps extends { style?: RN.StyleProp<StyleType> }>(Component: React.ComponentType<InitialProps>) => styledComponent<StyleType, InitialProps>(Component)
 
 styled.ActivityIndicator = styled(RN.ActivityIndicator)
-styled.Button = styled(RN.Button)
 styled.DrawerLayoutAndroid = styled(RN.DrawerLayoutAndroid)
 styled.Image = styled(RN.Image)
 styled.ImageBackground = styled(RN.ImageBackground)
@@ -23,7 +21,6 @@ styled.Switch = styled(RN.Switch)
 styled.RecyclerViewBackedScrollView = styled(RN.RecyclerViewBackedScrollView)
 styled.RefreshControl = styled(RN.RefreshControl)
 styled.SafeAreaView = styled(RN.SafeAreaView)
-styled.StatusBar = styled(RN.StatusBar)
 styled.Text = styled(RN.Text)
 styled.TextInput = styled(RN.TextInput)
 styled.TouchableHighlight = styled(RN.TouchableHighlight)

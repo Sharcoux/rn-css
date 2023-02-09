@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 import React, { MouseEvent } from 'react'
-import { Animated, FlatList, FlatListProps, LayoutChangeEvent, Platform, SectionList, SectionListProps, StyleProp, StyleSheet, VirtualizedList, VirtualizedListProps } from 'react-native'
+import { FlatList, FlatListProps, LayoutChangeEvent, Platform, SectionList, SectionListProps, StyleProp, StyleSheet, ViewStyle, VirtualizedList, VirtualizedListProps } from 'react-native'
 import convertStyle from './convertStyle'
 import cssToStyle from './cssToRN'
 import { useFontSize, useHover, useLayout, useScreenSize, useMediaQuery } from './features'
@@ -21,13 +21,12 @@ export interface DefaultTheme {}
 
 type Primitive = number | string | null | undefined | boolean | CompleteStyle
 type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown, theme: DefaultTheme }) => Primitive
-type OptionalProps<T extends AnyStyle | Animated.WithAnimatedValue<AnyStyle> = AnyStyle> = {
+type OptionalProps = {
   rnCSS?: `${string};`;
   onMouseEnter?: (event: MouseEvent) => void;
   onMouseLeave?: (event: MouseEvent) => void;
   onLayout?: (event: LayoutChangeEvent) => void
   children?: React.ReactNode;
-  style?: StyleProp<T>;
 }
 
 /** Converts the tagged template string into a css string */
@@ -59,9 +58,9 @@ function removeStyle (hash: string) {
   styleMap[hash].usage--
   if (styleMap[hash].usage <= 0) delete styleMap[hash]
 }
-const styled = <Props, StyleType extends AnyStyle | Animated.WithAnimatedValue<AnyStyle> = AnyStyle>(Component: React.ComponentType<Props>) => {
+const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }, Props extends InitialProps & OptionalProps = InitialProps & OptionalProps>(Component: React.ComponentType<InitialProps>) => {
   const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
-    const ForwardRefComponent = React.forwardRef<React.ComponentType<S & Props & OptionalProps<StyleType>>, S & Props & OptionalProps<StyleType>>((props: S & Props & OptionalProps<StyleType>, ref) => {
+    const ForwardRefComponent = React.forwardRef<React.ComponentType<S & Props>, S & Props>((props: S & Props, ref) => {
       const rem = React.useContext(RemContext)
       const shared = React.useContext(SharedValue)
       // Build the css string with the context
@@ -126,7 +125,7 @@ const styled = <Props, StyleType extends AnyStyle | Animated.WithAnimatedValue<A
         return { style: getStyle<CompleteStyle>(hash, style), hash }
       }, [finalStyle, units])
       const newProps = React.useMemo(() => {
-        const newProps: OptionalProps<StyleType> = { style: [styleConvertedFromCSS as StyleType, props.style], onMouseEnter, onMouseLeave, onLayout }
+        const newProps = { style: [styleConvertedFromCSS as StyleType, props.style], onMouseEnter, onMouseLeave, onLayout }
         if (finalStyle.textOverflow === 'ellipsis') {
           Object.assign(newProps, { numberOfLines: 1 })
         }
@@ -145,18 +144,18 @@ const styled = <Props, StyleType extends AnyStyle | Animated.WithAnimatedValue<A
         return <Component ref={ref} {...props} {...newProps} />
       }
     })
-    return ForwardRefComponent as React.ForwardRefExoticComponent<Props & S & OptionalProps<StyleType> & { ref?: React.Ref<any> }>
+    return ForwardRefComponent as React.ForwardRefExoticComponent<Props & S & { ref?: React.Ref<any> }>
   }
 
   // provide styled(Comp).attrs({} | () => {}) feature
-  styledComponent.attrs = <S, >(opts: Partial<S & Props> | ((props: S & Props) => Partial<S & Props>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
+  styledComponent.attrs = <Part extends Partial<Props>, >(opts: Part | ((props: Props) => Part)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<Props>)[]) => {
     const ComponentWithAttrs = styledComponent(chunks, ...functs)
-    const ForwardRefComponent = React.forwardRef<typeof Component, S & Props>((props: Props & S, ref) => {
+    const ForwardRefComponent = React.forwardRef<React.ComponentType<Props>, Exclude<Props, Part> & Partial<Part>>((props, ref) => {
       const attrs = (opts instanceof Function) ? opts(props) : opts
-      return <ComponentWithAttrs ref={ref} {...props} {...attrs} />
+      return <ComponentWithAttrs ref={ref} {...(props as Props)} {...attrs} />
     })
     // TODO : Find a way to remove from the Props the properties affected by opts
-    return ForwardRefComponent as React.ForwardRefExoticComponent<(Props | S) & OptionalProps<StyleType> & { ref?: React.Ref<any> }>
+    return ForwardRefComponent
   }
 
   return styledComponent
@@ -164,12 +163,12 @@ const styled = <Props, StyleType extends AnyStyle | Animated.WithAnimatedValue<A
 
 export default styled
 
-export const styledFlatList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Type, >(props: S & FlatListProps<Type> & OptionalProps) => invoke(styled<FlatListProps<Type>>(FlatList)(chunks, ...functs), props)
-styledFlatList.attrs = <S, >(opts: Partial<S & FlatListProps<any>> | ((props: S & FlatListProps<any>) => Partial<S & FlatListProps<any>>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & FlatListProps<any>>)[]) => <Props, >(componentProps: S & FlatListProps<Props> & OptionalProps) => invoke(styled<FlatListProps<Props>>(FlatList).attrs<S & FlatListProps<Props>>(opts)(chunks, ...functs), componentProps)
-export const styledSectionList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Type, >(props: S & SectionListProps<Type> & OptionalProps) => invoke(styled<SectionListProps<Type>>(SectionList)(chunks, ...functs), props)
-styledSectionList.attrs = <S, >(opts: Partial<S & SectionListProps<any>> | ((props: S & SectionListProps<any>) => Partial<S & SectionListProps<any>>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & SectionListProps<any>>)[]) => <Props, >(componentProps: S & SectionListProps<Props> & OptionalProps) => invoke(styled<SectionListProps<Props>>(SectionList).attrs<S & SectionListProps<Props>>(opts)(chunks, ...functs), componentProps as any)
-export const styledVirtualizedList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Type, >(props: S & VirtualizedListProps<Type> & OptionalProps) => invoke(styled<VirtualizedListProps<Type>>(VirtualizedList)(chunks, ...functs), props)
-styledVirtualizedList.attrs = <S, >(opts: Partial<S & VirtualizedListProps<any>> | ((props: S & VirtualizedListProps<any>) => Partial<S & VirtualizedListProps<any>>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & VirtualizedListProps<any>>)[]) => <Props, >(componentProps: S & VirtualizedListProps<Props> & OptionalProps) => invoke(styled<VirtualizedListProps<Props>>(VirtualizedList).attrs<S & VirtualizedListProps<Props>>(opts)(chunks, ...functs), componentProps)
+export const styledFlatList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Type, >(props: S & OptionalProps & FlatListProps<Type>) => invoke(styled<ViewStyle, FlatListProps<Type>>(FlatList)(chunks, ...functs), props)
+styledFlatList.attrs = <S, >(opts: Partial<S & FlatListProps<any>> | ((props: S & FlatListProps<any>) => Partial<S & FlatListProps<any>>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & FlatListProps<any>>)[]) => <Props, >(componentProps: S & OptionalProps & FlatListProps<Props>) => invoke(styled<ViewStyle, FlatListProps<Props>>(FlatList).attrs<S>(opts as S)(chunks, ...functs as (Primitive | Functs<FlatListProps<Props>>)[]), componentProps as any)
+export const styledSectionList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Type, >(props: S & OptionalProps & SectionListProps<Type>) => invoke(styled<ViewStyle, SectionListProps<Type>>(SectionList)(chunks, ...functs), props)
+styledSectionList.attrs = <S, >(opts: Partial<S & SectionListProps<any>> | ((props: S & SectionListProps<any>) => Partial<S & SectionListProps<any>>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & SectionListProps<any>>)[]) => <Props, >(componentProps: S & OptionalProps & SectionListProps<Props>) => invoke(styled<ViewStyle, SectionListProps<Props>>(SectionList).attrs<S>(opts as S)(chunks, ...functs as (Primitive | Functs<SectionListProps<Props>>)[]), componentProps as any)
+export const styledVirtualizedList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Type, >(props: S & OptionalProps & VirtualizedListProps<Type>) => invoke(styled<ViewStyle, VirtualizedListProps<Type>>(VirtualizedList)(chunks, ...functs), props)
+styledVirtualizedList.attrs = <S, >(opts: Partial<S & VirtualizedListProps<any>> | ((props: S & VirtualizedListProps<any>) => Partial<S & VirtualizedListProps<any>>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & VirtualizedListProps<any>>)[]) => <Props, >(componentProps: S & OptionalProps & VirtualizedListProps<Props>) => invoke(styled<ViewStyle, VirtualizedListProps<Props>>(VirtualizedList).attrs<S>(opts as S)(chunks, ...functs as (Primitive | Functs<VirtualizedListProps<Props>>)[]), componentProps as any)
 
 function invoke<T> (Component: React.ComponentType<T>, props: T) {
   return <Component {...props} />
