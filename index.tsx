@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react'
 import { Animated, AppRegistry, Platform, TouchableOpacity, TouchableOpacityProps, ViewStyle } from 'react-native'
@@ -114,6 +115,14 @@ const App = () => {
     }),
     []
   )
+
+  const LangDropdownItem = styled.View.attrs<{ label: string; value: number }>(
+    ({ label }) => ({
+      label: label + 2
+    })
+  )`
+    z-index: ${props => props.value + ''};
+  `
 
   return (
     <Box ref={ref2}>
