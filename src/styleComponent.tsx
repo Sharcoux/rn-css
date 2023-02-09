@@ -1,11 +1,11 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 import React, { MouseEvent } from 'react'
-import { FlatList, FlatListProps, LayoutChangeEvent, Platform, SectionList, SectionListProps, StyleProp, StyleSheet, TextStyle, ViewStyle, VirtualizedList, VirtualizedListProps } from 'react-native'
+import { FlatList, FlatListProps, LayoutChangeEvent, Platform, SectionList, SectionListProps, StyleProp, StyleSheet, VirtualizedList, VirtualizedListProps } from 'react-native'
 import convertStyle from './convertStyle'
 import cssToStyle from './cssToRN'
 import { useFontSize, useHover, useLayout, useScreenSize, useMediaQuery } from './features'
-import type { Style, Units } from './types'
+import type { AnyStyle, CompleteStyle, Style, Units } from './types'
 import generateHash from './generateHash'
 import rnToCSS from './rnToCss'
 
@@ -19,15 +19,15 @@ export const SharedValue = React.createContext<unknown>(undefined)
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DefaultTheme {}
 
-type Primitive = number | string | null | undefined | boolean | (ViewStyle & TextStyle)
+type Primitive = number | string | null | undefined | boolean | CompleteStyle
 type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown, theme: DefaultTheme }) => Primitive
-type OptionalProps = {
+type OptionalProps<T extends AnyStyle = AnyStyle> = {
   rnCSS?: `${string};`;
   onMouseEnter?: (event: MouseEvent) => void;
   onMouseLeave?: (event: MouseEvent) => void;
   onLayout?: (event: LayoutChangeEvent) => void
   children?: React.ReactNode;
-  style?: StyleProp<unknown>;
+  style?: StyleProp<T>;
 }
 
 /** Converts the tagged template string into a css string */
@@ -37,31 +37,31 @@ function buildCSSString<T extends { rnCSS?: string }> (chunks: TemplateStringsAr
     .map((chunk, i) => ([chunk, (functs[i] instanceof Function) ? (functs[i] as Functs<T>)({ shared, theme: (shared as DefaultTheme), ...props }) : functs[i]]))
     .flat()
     // Convert the objects to string if the result is not a primitive
-    .map(chunk => typeof chunk === 'object' ? rnToCSS(chunk as Partial<ViewStyle & TextStyle>) : chunk)
+    .map(chunk => typeof chunk === 'object' ? rnToCSS(chunk as Partial<CompleteStyle>) : chunk)
     .join('')
   if (props.rnCSS) computedString += props.rnCSS.replace(/=/gm, ':') + ';'
   return computedString
 }
 
-const styleMap: Record<string, { style: ViewStyle & TextStyle, usage: number }> = {}
-function getStyle (hash: string, style: ViewStyle & TextStyle) {
+const styleMap: Record<string, { style: AnyStyle, usage: number }> = {}
+function getStyle <T extends AnyStyle, > (hash: string, style: T) {
   const styleInfo = styleMap[hash]
   if (styleInfo) {
     styleInfo.usage++
-    return styleInfo.style
+    return styleInfo.style as T
   }
   else {
     const sheet = StyleSheet.create({ [hash]: style })
-    return (styleMap[hash] = { style: sheet[hash], usage: 1 }).style
+    return (styleMap[hash] = { style: sheet[hash], usage: 1 }).style as T
   }
 }
 function removeStyle (hash: string) {
   styleMap[hash].usage--
   if (styleMap[hash].usage <= 0) delete styleMap[hash]
 }
-const styled = <Props, >(Component: React.ComponentType<Props>) => {
+const styled = <Props, StyleType extends AnyStyle = AnyStyle>(Component: React.ComponentType<Props>) => {
   const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
-    const ForwardRefComponent = React.forwardRef<React.ComponentType<S & Props & OptionalProps>, S & Props & OptionalProps>((props: S & Props & OptionalProps, ref) => {
+    const ForwardRefComponent = React.forwardRef<React.ComponentType<S & Props & OptionalProps<StyleType>>, S & Props & OptionalProps<StyleType>>((props: S & Props & OptionalProps<StyleType>, ref) => {
       const rem = React.useContext(RemContext)
       const shared = React.useContext(SharedValue)
       // Build the css string with the context
@@ -120,13 +120,13 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       const units = React.useMemo<Units>(() => ({ ...baseUnits, em }), [baseUnits, em])
 
       const { style: styleConvertedFromCSS, hash } = React.useMemo(() => {
-        const style = convertStyle(finalStyle, units)
+        const style = convertStyle<StyleType>(finalStyle, units)
         delete (style as Style).textOverflow
         const hash = generateHash(JSON.stringify(style))
-        return { style: getStyle(hash, style), hash }
+        return { style: getStyle<StyleType>(hash, style), hash }
       }, [finalStyle, units])
       const newProps = React.useMemo(() => {
-        const newProps: OptionalProps = { style: [styleConvertedFromCSS, props.style], onMouseEnter, onMouseLeave, onLayout }
+        const newProps: OptionalProps<StyleType> = { style: [styleConvertedFromCSS, props.style], onMouseEnter, onMouseLeave, onLayout }
         if (finalStyle.textOverflow === 'ellipsis') {
           Object.assign(newProps, { numberOfLines: 1 })
         }
@@ -145,7 +145,7 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
         return <Component ref={ref} {...props} {...newProps} />
       }
     })
-    return ForwardRefComponent as React.ForwardRefExoticComponent<Props & S & OptionalProps & { ref?: React.Ref<any> }>
+    return ForwardRefComponent as React.ForwardRefExoticComponent<Props & S & OptionalProps<StyleType> & { ref?: React.Ref<any> }>
   }
 
   // provide styled(Comp).attrs({} | () => {}) feature
@@ -156,7 +156,7 @@ const styled = <Props, >(Component: React.ComponentType<Props>) => {
       return <ComponentWithAttrs ref={ref} {...props} {...attrs} />
     })
     // TODO : Find a way to remove from the Props the properties affected by opts
-    return ForwardRefComponent as React.ForwardRefExoticComponent<(Props | S) & OptionalProps & { ref?: React.Ref<any> }>
+    return ForwardRefComponent as React.ForwardRefExoticComponent<(Props | S) & OptionalProps<StyleType> & { ref?: React.Ref<any> }>
   }
 
   return styledComponent

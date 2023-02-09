@@ -1,12 +1,12 @@
 /* eslint-disable react/display-name */
-import { /* StyleSheet, */ TextStyle, ViewStyle } from 'react-native'
+import { /* StyleSheet, */ TextStyle } from 'react-native'
 import { convertValue } from './convertUnits'
-import type { PartialStyle, Units } from './types'
+import type { AnyStyle, CompleteStyle, PartialStyle, Units } from './types'
 
 /** Mix the calculated RN style within the object style */
-const convertStyle = (rnStyle: PartialStyle, units: Units) => {
+const convertStyle = <T extends AnyStyle = AnyStyle>(rnStyle: PartialStyle, units: Units) => {
   /** This is the result of the convertions from css style into RN style */
-  const convertedStyle: TextStyle & ViewStyle = {};
+  const convertedStyle: CompleteStyle = {};
   // If width and height are specified, we can use those values for the first render
   (['width', 'height'] as const).forEach(key => {
     if (!units[key] && rnStyle[key]) {
@@ -52,7 +52,7 @@ const convertStyle = (rnStyle: PartialStyle, units: Units) => {
       convertedStyle[key] = convertValue(key, value, units)
     }
   })
-  return convertedStyle
+  return convertedStyle as T
 }
 
 export default convertStyle

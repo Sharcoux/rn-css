@@ -2,11 +2,12 @@ import React from 'react'
 import * as RN from 'react-native'
 import './polyfill'
 import styledComponent, { styledFlatList, styledSectionList, styledVirtualizedList } from './styleComponent'
+import { AnyStyle } from './types'
 export { cssToRNStyle } from './cssToRN'
 export { SharedValue, FontSizeContext, RemContext, DefaultTheme } from './styleComponent'
 export * from './useTheme'
 
-const styled = <T, >(Component: React.ComponentType<T>) => styledComponent<T>(Component)
+const styled = <T, >(Component: React.ComponentType<T>) => styledComponent<T, AnyStyle>(Component)
 
 styled.ActivityIndicator = styled(RN.ActivityIndicator)
 styled.Button = styled(RN.Button)

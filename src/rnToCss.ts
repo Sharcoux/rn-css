@@ -1,6 +1,6 @@
-import { TextStyle, ViewStyle } from 'react-native'
+import { CompleteStyle } from './types'
 
-const rnToCSS = (rn: Partial<ViewStyle & TextStyle>) =>
+const rnToCSS = (rn: Partial<CompleteStyle>) =>
   Object.entries(rn)
     .map(([key, value]) => `${camelToKebab(key)}: ${convertValue(value)};`)
     .join('\n')

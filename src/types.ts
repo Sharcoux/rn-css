@@ -1,4 +1,4 @@
-import { ViewStyle, TextStyle } from 'react-native'
+import { ViewStyle, TextStyle, ImageStyle } from 'react-native'
 
 export type Units = {
   '%'?: number;
@@ -54,7 +54,11 @@ export type Context = {
   units: Units
 }
 
-export type PartialStyle = Partial<Record<keyof ViewStyle | keyof TextStyle, string>> & {
+export type AnyStyle = ViewStyle | TextStyle | ImageStyle
+
+export type CompleteStyle = ViewStyle & TextStyle & ImageStyle
+
+export type PartialStyle = Partial<Record<keyof CompleteStyle, string>> & {
   shadowOffset?: {
     width: string;
     height: string;
