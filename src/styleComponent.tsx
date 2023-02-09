@@ -150,7 +150,7 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
   // provide styled(Comp).attrs({} | () => {}) feature
   styledComponent.attrs = <Part, Result extends Partial<Part & Props> = Partial<Part & Props>>(opts: Result | ((props: Part & Props) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<Part & Props>)[]) => {
     const ComponentWithAttrs = styledComponent(chunks, ...functs)
-    const ForwardRefComponent = React.forwardRef<React.ComponentType<Props & Part>, Exclude<Props & Part, Result> & Partial<Props & Part>>((props, ref) => {
+    const ForwardRefComponent = React.forwardRef<React.ComponentType<Props & Part>, Props & Part>((props, ref) => {
       const attrs = (opts instanceof Function) ? opts(props) : opts
       return <ComponentWithAttrs ref={ref} {...props} {...attrs} />
     })
