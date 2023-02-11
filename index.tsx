@@ -158,7 +158,7 @@ const App = () => {
       <Box2 />
       <ColorCircle color="#236AFF" onLayout={(e) => { console.log(e.nativeEvent.layout) }}/>
       <Dot style={dotStyle}/>
-      <ExtendedComp />
+      <ExtendedComp style={{}}/>
     </Box>
   )
 }

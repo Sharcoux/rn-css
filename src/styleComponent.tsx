@@ -148,8 +148,7 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
   }
 
   // provide styled(Comp).attrs({} | () => {}) feature
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  styledComponent.attrs = <Part, Result extends Partial<Props & Part> = {}>(opts: Partial<Props & Part> | ((props: Props & Part) => Partial<Props & Part>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<Part & Props>)[]) => {
+  styledComponent.attrs = <Part, Result extends Partial<Props & Part> = Partial<Props & Part>>(opts: Partial<Props & Part> | ((props: Props & Part) => Partial<Props & Part>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<Part & Props>)[]) => {
     const ComponentWithAttrs = styledComponent(chunks, ...functs)
     const ForwardRefComponent = React.forwardRef<any, Result>((props, ref) => {
       const attrs = (opts instanceof Function) ? opts(props as unknown as Props & Part) : opts
