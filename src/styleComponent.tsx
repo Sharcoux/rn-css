@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 import React, { MouseEvent } from 'react'
@@ -148,11 +149,12 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
   }
 
   // provide styled(Comp).attrs({} | () => {}) feature
-  styledComponent.attrs = <Part, Result extends Partial<Props & Part> = Partial<Props & Part>>(opts: Partial<Props & Part> | ((props: Props & Part) => Partial<Props & Part>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<Part & Props>)[]) => {
+  styledComponent.attrs = <Part, Result extends Partial<Props & Part> = Partial<Props & Part>>(opts: Result | ((props: Props & Part) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<Props & Part>)[]) => {
     const ComponentWithAttrs = styledComponent(chunks, ...functs)
-    const ForwardRefComponent = React.forwardRef<any, Result>((props, ref) => {
-      const attrs = (opts instanceof Function) ? opts(props as unknown as Props & Part) : opts
-      return <ComponentWithAttrs ref={ref} {...(props as unknown as Props & Part)} {...attrs} />
+    // We need to limit the props control to only Result https://www.typescriptlang.org/play?#code/GYVwdgxgLglg9mABBATgUwIZTQUQB7ZgAmaRAwnALYAOAPAAopzUDOAfABQU0BciH1Jqz6NmLAJSIAvG0QYwAT0kBvAFCJkCFlET5CJYt2rT+gsSKETpstRo3ooIFEiMDL49YgC+nvWmL+5FTUAHRYUCgsJrQASmgsIAA2OmgEgVH0GCiwGIkMlmyc4ZF8cQnJkjKItnYQWjqMaHVgwDAA5k5YpEYmbua6eBCJICT5YgA0iGVJUGyVNp52iA5OLsEcyiFbZqyTW2FQESxeHks+SyvOiI3NrR0oXUE0nufLaI5XfgGGwao+qqBILAEIgen1hNVENhtHxtCgYGA2pNtApEmhYREEW1vCpPJckDsWH9VM1tNd0Ld2j0pMh0F0viQntQuMFxAcjhsofEoHwAORwADWvJxqhuCDurmUiBRaL50KgwpOQA
+    const ForwardRefComponent = React.forwardRef<any, Omit<Props, keyof Result> & Part & Partial<Props>>((props, ref) => {
+      const attrs = (opts instanceof Function) ? opts(props as Props & Part) : opts
+      return <ComponentWithAttrs ref={ref} {...(props as Props & Part)} {...attrs} />
     })
     // TODO : Find a way to remove from the Props the properties affected by opts
     return ForwardRefComponent
@@ -164,11 +166,11 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
 export default styled
 
 export const styledFlatList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & FlatListProps<any> & OptionalProps>)[]) => <Type, >(props: S & OptionalProps & FlatListProps<Type>) => invoke(styled<ViewStyle, FlatListProps<Type>>(FlatList)(chunks, ...functs), props)
-styledFlatList.attrs = <S, >(opts: Partial<S & FlatListProps<any> & OptionalProps> | ((props: S & FlatListProps<any> & OptionalProps) => Partial<S & OptionalProps & FlatListProps<any>>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & FlatListProps<any>>)[]) => <Props, >(componentProps: Partial<S & OptionalProps & FlatListProps<Props>>) => invoke(styled<ViewStyle, FlatListProps<Props>>(FlatList).attrs<S>(opts as any)(chunks, ...functs), componentProps as any)
+styledFlatList.attrs = <S, Result extends Partial<S & FlatListProps<any> & OptionalProps> = {} > (opts: Result | ((props: S & OptionalProps & FlatListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: Omit<FlatListProps<Props> & OptionalProps, keyof Result> & S & Partial<Result>) => invoke(styled<ViewStyle, FlatListProps<Props>>(FlatList).attrs<S>(opts)(chunks, ...functs), componentProps as any)
 export const styledSectionList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & SectionListProps<any> & OptionalProps>)[]) => <Type, >(props: S & OptionalProps & SectionListProps<Type>) => invoke(styled<ViewStyle, SectionListProps<Type>>(SectionList)(chunks, ...functs), props)
-styledSectionList.attrs = <S, >(opts: Partial<S & SectionListProps<any> & OptionalProps> | ((props: S & SectionListProps<any> & OptionalProps) => Partial<S & OptionalProps & SectionListProps<any>>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & SectionListProps<any>>)[]) => <Props, >(componentProps: Partial<S & OptionalProps & SectionListProps<Props>>) => invoke(styled<ViewStyle, SectionListProps<Props>>(SectionList).attrs<S>(opts as any)(chunks, ...functs), componentProps as any)
+styledSectionList.attrs = <S, Result extends Partial<S & SectionListProps<any> & OptionalProps> = {} >(opts: Result | ((props: S & OptionalProps & SectionListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: Omit<SectionListProps<Props> & OptionalProps, keyof Result> & S & Partial<Result>) => invoke(styled<ViewStyle, SectionListProps<Props>>(SectionList).attrs<S>(opts)(chunks, ...functs), componentProps as any)
 export const styledVirtualizedList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & VirtualizedListProps<any> & OptionalProps>)[]) => <Type, >(props: S & OptionalProps & VirtualizedListProps<Type>) => invoke(styled<ViewStyle, VirtualizedListProps<Type>>(VirtualizedList)(chunks, ...functs), props)
-styledVirtualizedList.attrs = <S, >(opts: Partial<S & VirtualizedListProps<any> & OptionalProps> | ((props: S & VirtualizedListProps<any> & OptionalProps) => Partial<S & OptionalProps & VirtualizedListProps<any>>)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & VirtualizedListProps<any>>)[]) => <Props, >(componentProps: Partial<S & OptionalProps & VirtualizedListProps<Props>>) => invoke(styled<ViewStyle, VirtualizedListProps<Props>>(VirtualizedList).attrs<S>(opts as any)(chunks, ...functs), componentProps as any)
+styledVirtualizedList.attrs = <S, Result extends Partial<S & VirtualizedListProps<any> & OptionalProps> = {} >(opts: Result | ((props: S & OptionalProps & VirtualizedListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: Omit<VirtualizedListProps<Props> & OptionalProps, keyof Result> & S & Partial<Result>) => invoke(styled<ViewStyle, VirtualizedListProps<Props>>(VirtualizedList).attrs<S>(opts)(chunks, ...functs), componentProps as any)
 
 function invoke<T> (Component: React.ComponentType<T>, props: T) {
   return <Component {...props} />

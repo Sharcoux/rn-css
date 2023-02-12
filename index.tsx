@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react'
-import { Animated, AppRegistry, Platform, Text, TouchableOpacity, TouchableOpacityProps, ViewStyle } from 'react-native'
+import { Animated, AppRegistry, Platform, StyleProp, Text, TextStyle, TouchableOpacity, TouchableOpacityProps, ViewStyle } from 'react-native'
 import { name as appName } from './app.json'
 import styled from './src'
 
@@ -65,7 +65,7 @@ const HoverableText = styled.Text`
     fontSize: 2em
   }
 `
-const Options = styled.FlatList.attrs<{selected: boolean; pressed: boolean}>(props => ({ pressed: props.selected }))`
+const Options = styled.FlatList.attrs<{selected: boolean; pressed: boolean}>(props => ({ pressed: props.selected || props.pressed }))`
   position: absolute;
   top: 100%;
   z-index: 1;
@@ -84,7 +84,7 @@ const ColorCircle = styled.TouchableOpacity<{color: string; size?: number}>`
 `
 
 const FlatList = () => {
-  return <Options data={['teset']} pressed renderItem={({ item }) => (<StyledText col={'blue'}>{item}</StyledText>)}/>
+  return <Options data={['teset']} selected pressed renderItem={({ item }) => (<StyledText col={'blue'}>{item}</StyledText>)}/>
 }
 
 const Comp = ({ style, text }: { style?: ViewStyle; text: string }) => {
@@ -94,8 +94,22 @@ const Comp = ({ style, text }: { style?: ViewStyle; text: string }) => {
 }
 const ExtendedComp = styled(Comp).attrs({ text: 'test' })``
 
+const CustomTouchable = styled.TouchableOpacity.attrs<{ extra: string }>({ activeOpacity: 1 })``
+
 const Touchable = styled.TouchableOpacity<{pressed: boolean}>`
   background-color: ${props => props.pressed ? 'blue' : 'red'};
+`
+
+const CustomSelectContainer = styled.TouchableOpacity.attrs({ activeOpacity: 1 })`
+  padding: 2px;
+  margin: 0.2em;
+  border-radius: 0.6em;
+  width: 8em;
+  height: 3.6em;
+  flex-direction: row;
+  background-color: white;
+  border-width: 1px;
+  border-style: solid;
 `
 
 const Forward = React.forwardRef<typeof TouchableOpacity, TouchableOpacityProps>((props: TouchableOpacityProps, ref) => {
@@ -103,10 +117,13 @@ const Forward = React.forwardRef<typeof TouchableOpacity, TouchableOpacityProps>
 })
 Forward.displayName = 'Forward'
 
-const Button = () => {
+const Button = ({ color, style }: { color: string; style?: StyleProp<TextStyle> }) => {
   const [pressed, setPressed] = React.useState(false)
-  return <Touchable pressed={pressed} onPress={() => setPressed(!pressed)}><StyledText col={'black'}>Press Me!</StyledText></Touchable>
+  return <Touchable pressed={pressed} onPress={() => setPressed(!pressed)}><StyledText style={style} col={color}>Press Me!</StyledText></Touchable>
 }
+
+const StyledButton = styled(Button).attrs<{ fallbackColor: string }>(({ color: 'black' }))``
+const StyledButton2 = styled(Button).attrs(({ color: 'black' }))``
 
 const App = () => {
   const ref = React.useRef<Text>(null)
@@ -131,7 +148,10 @@ const App = () => {
     z-index: ${props => props.value + ''};
   `
 
+  const touchableProps = { activeOpacity: 0 } as TouchableOpacityProps
+
   return (
+
     <Box ref={ref2}>
       <View style={{ flexDirection: 'column' }}>
         <StyledText ref={ref} col={'black'} numberOfLines={1} style={{ flexGrow: 1, flexBasis: 'auto' }}>Welcome to ReactNativeStyledComponents</StyledText>
@@ -153,12 +173,15 @@ const App = () => {
         <StyledText col='white'>Hover me !</StyledText>
       </Hoverable>
       <HoverableText>Hover me !</HoverableText>
-      <Button />
+      <StyledButton fallbackColor='white'/>
+      <StyledButton2 color='white' />
       <FlatList />
       <Box2 />
       <ColorCircle color="#236AFF" onLayout={(e) => { console.log(e.nativeEvent.layout) }}/>
       <Dot style={dotStyle}/>
-      <ExtendedComp style={{}}/>
+      <CustomTouchable style={{}} {...touchableProps} extra='test'>
+        <ExtendedComp style={{}}/>
+      </CustomTouchable>
     </Box>
   )
 }
