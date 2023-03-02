@@ -93,6 +93,9 @@ const Comp = ({ style, text }: { style?: ViewStyle; text: string }) => {
   </View>
 }
 const ExtendedComp = styled(Comp).attrs({ text: 'test' })``
+const ExtendedComp2 = styled(Comp)<{ small: boolean }>`
+  ${props => props.small ? 'font-size: 0.8em' : ''}
+`
 
 const CustomTouchable = styled.TouchableOpacity.attrs<{ extra: string }>({ activeOpacity: 1 })``
 
@@ -179,8 +182,8 @@ const App = () => {
       <Box2 />
       <ColorCircle color="#236AFF" onLayout={(e) => { console.log(e.nativeEvent.layout) }}/>
       <Dot style={dotStyle}/>
-      <CustomTouchable style={{}} {...touchableProps} extra='test'>
-        <ExtendedComp style={{}}/>
+      <CustomTouchable style={{}} {...touchableProps} activeOpacity={0} extra='test'>
+        <ExtendedComp style={{}} text='notest'/>
       </CustomTouchable>
     </Box>
   )

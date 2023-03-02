@@ -59,6 +59,7 @@ function removeStyle (hash: string) {
   styleMap[hash].usage--
   if (styleMap[hash].usage <= 0) delete styleMap[hash]
 }
+
 const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }, Props extends InitialProps & OptionalProps = InitialProps & OptionalProps>(Component: React.ComponentType<InitialProps>) => {
   const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
     const ForwardRefComponent = React.forwardRef<any, S & Props>((props: S & Props, ref) => {
@@ -152,7 +153,7 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
   styledComponent.attrs = <Part, Result extends Partial<Props & Part> = Partial<Props & Part>>(opts: Result | ((props: Props & Part) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<Props & Part>)[]) => {
     const ComponentWithAttrs = styledComponent(chunks, ...functs)
     // We need to limit the props control to only Result https://www.typescriptlang.org/play?#code/GYVwdgxgLglg9mABBATgUwIZTQUQB7ZgAmaRAwnALYAOAPAAopzUDOAfABQU0BciH1Jqz6NmLAJSIAvG0QYwAT0kBvAFCJkCFlET5CJYt2rT+gsSKETpstRo3ooIFEiMDL49YgC+nvWmL+5FTUAHRYUCgsJrQASmgsIAA2OmgEgVH0GCiwGIkMlmyc4ZF8cQnJkjKItnYQWjqMaHVgwDAA5k5YpEYmbua6eBCJICT5YgA0iGVJUGyVNp52iA5OLsEcyiFbZqyTW2FQESxeHks+SyvOiI3NrR0oXUE0nufLaI5XfgGGwao+qqBILAEIgen1hNVENhtHxtCgYGA2pNtApEmhYREEW1vCpPJckDsWH9VM1tNd0Ld2j0pMh0F0viQntQuMFxAcjhsofEoHwAORwADWvJxqhuCDurmUiBRaL50KgwpOQA
-    const ForwardRefComponent = React.forwardRef<any, Omit<Props, keyof Result> & Part & Partial<Props>>((props, ref) => {
+    const ForwardRefComponent = React.forwardRef<any, Omit<Props, keyof Result> & Part & Partial<Pick<Props, Extract<keyof Props, keyof Result>>>>((props, ref) => {
       const attrs = (opts instanceof Function) ? opts(props as Props & Part) : opts
       return <ComponentWithAttrs ref={ref} {...(props as Props & Part)} {...attrs} />
     })
