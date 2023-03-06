@@ -14,17 +14,17 @@ export const useScreenSize = () => {
 }
 
 /** Hook that will apply the style reserved for hover state if needed */
-export const useHover = (onMouseEnter: undefined | ((event: MouseEvent) => void), onMouseLeave: undefined | ((event: MouseEvent) => void | undefined), needsHover: boolean) => {
+export const useHover = (onMouseOver: undefined | ((event: MouseEvent) => void), onMouseLeave: undefined | ((event: MouseEvent) => void | undefined), needsHover: boolean) => {
   const [hover, setHover] = React.useState(false)
   const hoverStart = React.useMemo(() => needsHover ? (event: MouseEvent) => {
-    if (onMouseEnter) onMouseEnter(event)
+    if (onMouseOver) onMouseOver(event)
     setHover(true)
-  } : undefined, [needsHover, onMouseEnter])
+  } : undefined, [needsHover, onMouseOver])
   const hoverStop = React.useMemo(() => needsHover ? (event: MouseEvent) => {
     if (onMouseLeave) onMouseLeave(event)
     setHover(false)
   } : undefined, [needsHover, onMouseLeave])
-  return { hover, onMouseEnter: hoverStart || onMouseEnter, onMouseLeave: hoverStop || onMouseLeave }
+  return { hover, onMouseOver: hoverStart || onMouseOver, onMouseLeave: hoverStop || onMouseLeave }
 }
 
 /** Hook that will apply the style provided in the media queries */

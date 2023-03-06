@@ -78,7 +78,7 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
       }), [css, rnStyle.hover])
 
       // Handle hover
-      const { onMouseEnter, onMouseLeave, hover } = useHover(props.onMouseEnter, props.onMouseLeave, needsHover)
+      const { onMouseOver, onMouseLeave, hover } = useHover(props.onMouseEnter, props.onMouseLeave, needsHover)
       const tempStyle = React.useMemo<Style>(() => {
         const style = { ...rnStyle }
         delete style.media
@@ -127,12 +127,12 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
         return { style: getStyle<CompleteStyle>(hash, style), hash }
       }, [finalStyle, units])
       const newProps = React.useMemo(() => {
-        const newProps = { style: [styleConvertedFromCSS as StyleType, props.style], onMouseEnter, onMouseLeave, onLayout }
+        const newProps = { style: [styleConvertedFromCSS as StyleType, props.style], onMouseOver, onMouseLeave, onLayout }
         if (finalStyle.textOverflow === 'ellipsis') {
           Object.assign(newProps, { numberOfLines: 1 })
         }
         return newProps
-      }, [finalStyle.textOverflow, onLayout, onMouseEnter, onMouseLeave, props.style, styleConvertedFromCSS])
+      }, [finalStyle.textOverflow, onLayout, onMouseOver, onMouseLeave, props.style, styleConvertedFromCSS])
 
       React.useEffect(() => () => removeStyle(hash), [hash])
 
