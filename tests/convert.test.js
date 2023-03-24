@@ -38,6 +38,7 @@ describe('CSS style conversion', () => {
     expect(convert('padding: 1px')).toEqual({ paddingTop: '1px', paddingBottom: '1px', paddingLeft: '1px', paddingRight: '1px' })
     expect(convert('padding: 1px 2px 3px 4px')).toEqual({ paddingTop: '1px', paddingRight: '2px', paddingBottom: '3px', paddingLeft: '4px' })
     expect(convert('margin: 1px 2px')).toEqual({ marginTop: '1px', marginBottom: '1px', marginLeft: '2px', marginRight: '2px' })
+    expect(convert('margin: 1px auto')).toEqual({ marginTop: '1px', marginBottom: '1px', marginLeft: 'auto', marginRight: 'auto' })
     expect(convert('font: bold italic 1.2em "Rounded Mplus 1c", serif;')).toEqual({ fontWeight: 'bold', fontStyle: 'italic', fontSize: '1.2em', fontFamily: '"Rounded Mplus 1c", serif' })
     expect(convert('box-shadow: 2px 3px 4px rgba(0, 0, 0, 0.5)')).toEqual({ shadowOffset: { width: '2px', height: '3px' }, shadowRadius: '4px', shadowColor: 'rgba(0,0,0,0.5)' })
     expect(convert('text-shadow: 2vmin 3vmax 4vw blue')).toEqual({ textShadowOffset: { width: '2vmin', height: '3vmax' }, textShadowRadius: '4vw', textShadowColor: 'blue' })

@@ -1,12 +1,31 @@
 import type { Style, Transform } from '../types'
 
-/** Check if the value is a number. Numbers start with a digit, a decimal point or calc(, max( ou min( */
-function isNumber (value: string) {
+/**
+ * Check if the value is a number. Numbers start with a digit, a decimal point or calc(, max( ou min(.
+ * Optionally accept "auto" value (for margins)
+ * @param value The value to check
+ * @param acceptAuto true if auto is an accepted value
+ * @returns true if the value is a number
+ */
+function isNumber (value: string, acceptAuto?: boolean) {
+  if (acceptAuto && value === 'auto') return true
   return value.match(/^[+-]?(\.\d|\d|calc\(|max\(|min\()/mg)
 }
 
-/** Split the value into numbers values and non numbers values */
-function findNumbers (value: string) {
+/**
+ * Check if the value is a number. Numbers start with a digit, a decimal point or calc(, max( ou min(.
+ * Optionally accept "auto" value (for margins)
+ * @param value The value to check
+ * @param acceptAuto true if auto is an accepted value
+ * @returns true if the value is a number
+ */
+/**
+ * Split the value into numbers values and non numbers values
+ * @param value The value to check
+ * @param acceptAuto true if auto is an accepted value
+ * @returns An object containing the number and non number values as arrays.
+ */
+function findNumbers (value: string, acceptAuto?: boolean) {
   const result = {
     nonNumbers: [] as string[],
     numbers: [] as string[]
@@ -17,7 +36,7 @@ function findNumbers (value: string) {
     if (val.startsWith('"') || val.startsWith("'")) group = val.charAt(0)
     if (group && val.endsWith(group)) group = ''
     if (group) result.nonNumbers.push(val)
-    else result[isNumber(val) ? 'numbers' : 'nonNumbers'].push(val)
+    else result[isNumber(val, acceptAuto) ? 'numbers' : 'nonNumbers'].push(val)
   })
   return result
 }
@@ -188,7 +207,7 @@ export function font (value: string) {
 /** Parses a css value for the side of an element (border-width, margin, padding) */
 export function sideValue <T extends 'padding' | 'margin' | 'border'> (prefixKey: T, value: string, postFix: T extends 'border' ? 'Width' | 'Style' | 'Color' | '' : '' = ''): { [x: string]: string} {
   if (value === 'none') return sideValue(prefixKey, '0', postFix)
-  const [top = value, right = top, bottom = top, left = right] = findNumbers(value).numbers
+  const [top = value, right = top, bottom = top, left = right] = findNumbers(value, prefixKey === 'margin').numbers
   return {
     [prefixKey + 'Top' + postFix]: top,
     [prefixKey + 'Left' + postFix]: left,
