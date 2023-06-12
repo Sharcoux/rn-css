@@ -362,6 +362,29 @@ it('should handle hover', async () => {
     width: 200
   })
 })
+it('should handle active', async () => {
+  const Comp = styled.View`
+      width: 100px;
+      height: 100px;
+      &:active {
+        width: 200px;
+        height: 200px;
+      }
+    `
+
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp />)
+  })
+  await act(async () => {
+    wrapper.root.findByType('View').props.onFocus()
+  })
+
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
+    height: 200,
+    width: 200
+  })
+})
 // eslint-disable-next-line jest/no-focused-tests
 it('should handle media queries', async () => {
   const { width, height } = Dimensions.get('window')

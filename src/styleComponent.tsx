@@ -2,10 +2,10 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 import React, { MouseEvent } from 'react'
-import { FlatList, FlatListProps, LayoutChangeEvent, Platform, SectionList, SectionListProps, StyleProp, StyleSheet, ViewStyle, VirtualizedList, VirtualizedListProps } from 'react-native'
+import { FlatList, FlatListProps, LayoutChangeEvent, NativeSyntheticEvent, Platform, SectionList, SectionListProps, StyleProp, StyleSheet, TargetedEvent, ViewStyle, VirtualizedList, VirtualizedListProps } from 'react-native'
 import convertStyle from './convertStyle'
 import cssToStyle from './cssToRN'
-import { useFontSize, useHover, useLayout, useScreenSize, useMediaQuery } from './features'
+import { useFontSize, useHover, useLayout, useScreenSize, useMediaQuery, useActive } from './features'
 import type { AnyStyle, CompleteStyle, Style, Units } from './types'
 import generateHash from './generateHash'
 import rnToCSS from './rnToCss'
@@ -24,6 +24,8 @@ type Primitive = number | string | null | undefined | boolean | CompleteStyle
 type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown, theme: DefaultTheme }) => Primitive
 type OptionalProps = {
   rnCSS?: `${string};`;
+  onFocus?: (event: NativeSyntheticEvent<TargetedEvent>) => void;
+  onBlur?: (event: NativeSyntheticEvent<TargetedEvent>) => void;
   onMouseEnter?: (event: MouseEvent) => void;
   onMouseLeave?: (event: MouseEvent) => void;
   onLayout?: (event: LayoutChangeEvent) => void
@@ -70,22 +72,27 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
       // Store the style in RN format
       const rnStyle = React.useMemo(() => cssToStyle(css), [css])
 
-      const { needsLayout, needsHover } = React.useMemo(() => ({
+      const { needsLayout, needsHover, needsFocus } = React.useMemo(() => ({
         // needsFontSize: !!css.match(/\b(\d+)(\.\d+)?em\b/)
         // needsScreenSize: !!css.match(/\b(\d+)(\.\d*)?v([hw]|min|max)\b/) || !!rnStyle.media,
         needsLayout: !!css.match(/\d%/),
-        needsHover: !!rnStyle.hover
-      }), [css, rnStyle.hover])
+        needsHover: !!rnStyle.hover,
+        needsFocus: !!rnStyle.active
+      }), [css, rnStyle.active, rnStyle.hover])
 
       // Handle hover
       const { onMouseEnter, onMouseLeave, hover } = useHover(props.onMouseEnter, props.onMouseLeave, needsHover)
+      // Handle active
+      const { onFocus, onBlur, active } = useActive(props.onFocus, props.onBlur, needsFocus)
       const tempStyle = React.useMemo<Style>(() => {
         const style = { ...rnStyle }
         delete style.media
         delete style.hover
+        delete style.active
         if (hover) Object.assign(style, rnStyle.hover)
+        if (active) Object.assign(style, rnStyle.active)
         return style
-      }, [hover, rnStyle])
+      }, [active, hover, rnStyle])
 
       // Calculate current em unit for media-queries
       const parentEm = React.useContext(FontSizeContext)
@@ -127,12 +134,12 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
         return { style: getStyle<CompleteStyle>(hash, style), hash }
       }, [finalStyle, units])
       const newProps = React.useMemo(() => {
-        const newProps = { style: [styleConvertedFromCSS as StyleType, props.style], onMouseEnter, onMouseLeave, onLayout }
+        const newProps = { style: [styleConvertedFromCSS as StyleType, props.style], onMouseEnter, onMouseLeave, onLayout, onFocus, onBlur }
         if (finalStyle.textOverflow === 'ellipsis') {
           Object.assign(newProps, { numberOfLines: 1 })
         }
         return newProps
-      }, [finalStyle.textOverflow, onLayout, onMouseEnter, onMouseLeave, props.style, styleConvertedFromCSS])
+      }, [finalStyle.textOverflow, onBlur, onFocus, onLayout, onMouseEnter, onMouseLeave, props.style, styleConvertedFromCSS])
 
       React.useEffect(() => () => removeStyle(hash), [hash])
 

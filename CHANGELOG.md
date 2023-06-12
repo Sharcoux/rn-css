@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.9
+
+ * Add support for `&:active` pseudo selector
+
 ## Version 1.8
 
  * Accept returning an RN Style object in the tagged template string

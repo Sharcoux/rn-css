@@ -93,27 +93,30 @@ const Comp = ({ style, text }: { style?: ViewStyle; text: string }) => {
   </View>
 }
 const ExtendedComp = styled(Comp).attrs({ text: 'test' })``
-const ExtendedComp2 = styled(Comp)<{ small: boolean }>`
-  ${props => props.small ? 'font-size: 0.8em' : ''}
-`
+// const ExtendedComp2 = styled(Comp)<{ small: boolean }>`
+//   ${props => props.small ? 'font-size: 0.8em' : ''}
+// `
 
 const CustomTouchable = styled.TouchableOpacity.attrs<{ extra: string }>({ activeOpacity: 1 })``
 
 const Touchable = styled.TouchableOpacity<{pressed: boolean}>`
   background-color: ${props => props.pressed ? 'blue' : 'red'};
+  &:active {
+    background-color: purple;
+  }
 `
 
-const CustomSelectContainer = styled.TouchableOpacity.attrs({ activeOpacity: 1 })`
-  padding: 2px;
-  margin: 0.2em;
-  border-radius: 0.6em;
-  width: 8em;
-  height: 3.6em;
-  flex-direction: row;
-  background-color: white;
-  border-width: 1px;
-  border-style: solid;
-`
+// const CustomSelectContainer = styled.TouchableOpacity.attrs({ activeOpacity: 1 })`
+//   padding: 2px;
+//   margin: 0.2em;
+//   border-radius: 0.6em;
+//   width: 8em;
+//   height: 3.6em;
+//   flex-direction: row;
+//   background-color: white;
+//   border-width: 1px;
+//   border-style: solid;
+// `
 
 const Forward = React.forwardRef<typeof TouchableOpacity, TouchableOpacityProps>((props: TouchableOpacityProps, ref) => {
   return <Touchable ref={ref} {...props} pressed={true} />
@@ -143,13 +146,13 @@ const App = () => {
     []
   )
 
-  const LangDropdownItem = styled.View.attrs<{ label: string; value: number }>(
-    ({ label }) => ({
-      label: label + 2
-    })
-  )`
-    z-index: ${props => props.value + ''};
-  `
+  // const LangDropdownItem = styled.View.attrs<{ label: string; value: number }>(
+  //   ({ label }) => ({
+  //     label: label + 2
+  //   })
+  // )`
+  //   z-index: ${props => props.value + ''};
+  // `
 
   const touchableProps = { activeOpacity: 0 } as TouchableOpacityProps
 

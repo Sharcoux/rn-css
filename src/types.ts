@@ -73,6 +73,7 @@ export type PartialStyle = Partial<Record<keyof CompleteStyle, string>> & {
 
 export type Style = PartialStyle & {
   hover?: PartialStyle;
+  active?: PartialStyle;
   media?: MediaQuery[];
 }
 

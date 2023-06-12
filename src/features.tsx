@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { MouseEvent } from 'react'
 import type { Style, Units, MediaQuery, PartialStyle } from './types'
-import { useWindowDimensions, LayoutChangeEvent } from 'react-native'
+import { useWindowDimensions, LayoutChangeEvent, NativeSyntheticEvent, TargetedEvent } from 'react-native'
 import { parseValue } from './convertUnits'
 import { createContext } from './cssToRN/mediaQueries'
 
@@ -25,6 +25,20 @@ export const useHover = (onMouseEnter: undefined | ((event: MouseEvent) => void)
     setHover(false)
   } : undefined, [needsHover, onMouseLeave])
   return { hover, onMouseEnter: hoverStart || onMouseEnter, onMouseLeave: hoverStop || onMouseLeave }
+}
+
+/** Hook that will apply the style reserved for active state if needed */
+export const useActive = (onFocus: undefined | ((event: NativeSyntheticEvent<TargetedEvent>) => void), onBlur: undefined | ((event: NativeSyntheticEvent<TargetedEvent>) => void | undefined), needsFocus: boolean) => {
+  const [active, setActive] = React.useState(false)
+  const focusStart = React.useMemo(() => needsFocus ? (event: NativeSyntheticEvent<TargetedEvent>) => {
+    if (onFocus) onFocus(event)
+    setActive(true)
+  } : undefined, [needsFocus, onFocus])
+  const focusStop = React.useMemo(() => needsFocus ? (event: NativeSyntheticEvent<TargetedEvent>) => {
+    if (onBlur) onBlur(event)
+    setActive(false)
+  } : undefined, [needsFocus, onBlur])
+  return { active, onFocus: focusStart || onFocus, onBlur: focusStop || onBlur }
 }
 
 /** Hook that will apply the style provided in the media queries */

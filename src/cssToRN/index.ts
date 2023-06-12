@@ -29,7 +29,13 @@ function cssToStyle (css: string) {
     result.hover = cssChunkToStyle(hoverInstructions)
     return ''
   })
-  Object.assign(result, cssChunkToStyle(cssWithoutHover))
+  // Find active (we don't support active within media queries) (We use [\s\S] instead of . because dotall flag (s) is not supported by react-native-windows)
+  const cssWithoutActive = cssWithoutHover.replace(/&:active\s*{([\s\S]*?)}/gmi, res => {
+    const activeInstructions = res.substring(0, res.length - 1).replace(/&:active\s*{/mi, '')// We remove the `&:active {` and `}`
+    result.active = cssChunkToStyle(activeInstructions)
+    return ''
+  })
+  Object.assign(result, cssChunkToStyle(cssWithoutActive))
   return result
 }
 

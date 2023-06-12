@@ -18,6 +18,9 @@ const MyComponent = styled.View`
   &:hover {
     background: red;
   }
+  &:active {
+    background: blue;
+  }
   @media (min-width: 600px) {
     border: 1px solid rgb(128, 128, 128);
   }
@@ -240,6 +243,19 @@ You can add hover with `&:hover { <instructions> }`
 const Hoverable = styled.View`
   background: red;
   &:hover {
+    background: blue;
+  }
+`
+```
+
+### <ins>active:</ins>
+
+You can add active with `&:active { <instructions> }`. An element is considered `active` as long as it is focused.
+
+```javascript
+const Activable = styled.View`
+  background: red;
+  &:active {
     background: blue;
   }
 `

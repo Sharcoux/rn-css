@@ -58,6 +58,6 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "index.tsx"],
   "exclude": ["node_modules", "dist", "demo"]
 }
