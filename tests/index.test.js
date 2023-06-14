@@ -362,11 +362,57 @@ it('should handle hover', async () => {
     width: 200
   })
 })
-it('should handle active', async () => {
+it('should handle active on Touchable', async () => {
   const Comp = styled.View`
       width: 100px;
       height: 100px;
       &:active {
+        width: 200px;
+        height: 200px;
+      }
+    `
+
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp/>)
+  })
+  await act(async () => {
+    wrapper.root.findByType('View').props.onTouchStart()
+  })
+
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
+    height: 200,
+    width: 200
+  })
+})
+it('should handle active on View', async () => {
+  const Comp = styled.View`
+      width: 100px;
+      height: 100px;
+      &:active {
+        width: 200px;
+        height: 200px;
+      }
+    `
+
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp />)
+  })
+  await act(async () => {
+    wrapper.root.findByType('View').props.onResponderStart()
+  })
+
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
+    height: 200,
+    width: 200
+  })
+})
+it('should handle focus', async () => {
+  const Comp = styled.View`
+      width: 100px;
+      height: 100px;
+      &:focus {
         width: 200px;
         height: 200px;
       }

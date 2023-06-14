@@ -104,6 +104,12 @@ const Touchable = styled.TouchableOpacity<{pressed: boolean}>`
   &:active {
     background-color: purple;
   }
+  &:focus {
+    background-color: pink;
+  }
+  &:hover {
+    background-color: yellow;
+  }
 `
 
 // const CustomSelectContainer = styled.TouchableOpacity.attrs({ activeOpacity: 1 })`

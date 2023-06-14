@@ -2,10 +2,10 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 import React, { MouseEvent } from 'react'
-import { FlatList, FlatListProps, LayoutChangeEvent, NativeSyntheticEvent, Platform, SectionList, SectionListProps, StyleProp, StyleSheet, TargetedEvent, ViewStyle, VirtualizedList, VirtualizedListProps } from 'react-native'
+import { FlatList, FlatListProps, GestureResponderEvent, LayoutChangeEvent, NativeSyntheticEvent, Platform, SectionList, SectionListProps, StyleProp, StyleSheet, TargetedEvent, ViewStyle, VirtualizedList, VirtualizedListProps } from 'react-native'
 import convertStyle from './convertStyle'
 import cssToStyle from './cssToRN'
-import { useFontSize, useHover, useLayout, useScreenSize, useMediaQuery, useActive } from './features'
+import { useFontSize, useHover, useLayout, useScreenSize, useMediaQuery, useActive, useFocus } from './features'
 import type { AnyStyle, CompleteStyle, Style, Units } from './types'
 import generateHash from './generateHash'
 import rnToCSS from './rnToCss'
@@ -26,6 +26,11 @@ type OptionalProps = {
   rnCSS?: `${string};`;
   onFocus?: (event: NativeSyntheticEvent<TargetedEvent>) => void;
   onBlur?: (event: NativeSyntheticEvent<TargetedEvent>) => void;
+  onPressIn?: (event: GestureResponderEvent) => void;
+  onPressOut?: (event: GestureResponderEvent) => void;
+  onResponderStart?: (event: GestureResponderEvent) => void,
+  onResponderRelease?: (event: GestureResponderEvent) => void,
+  onResponderGrant?: (event: GestureResponderEvent) => boolean,
   onMouseEnter?: (event: MouseEvent) => void;
   onMouseLeave?: (event: MouseEvent) => void;
   onLayout?: (event: LayoutChangeEvent) => void
@@ -72,27 +77,36 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
       // Store the style in RN format
       const rnStyle = React.useMemo(() => cssToStyle(css), [css])
 
-      const { needsLayout, needsHover, needsFocus } = React.useMemo(() => ({
+      const { needsLayout, needsHover, needsFocus, needsTouch } = React.useMemo(() => ({
         // needsFontSize: !!css.match(/\b(\d+)(\.\d+)?em\b/)
         // needsScreenSize: !!css.match(/\b(\d+)(\.\d*)?v([hw]|min|max)\b/) || !!rnStyle.media,
         needsLayout: !!css.match(/\d%/),
         needsHover: !!rnStyle.hover,
-        needsFocus: !!rnStyle.active
-      }), [css, rnStyle.active, rnStyle.hover])
+        needsTouch: !!rnStyle.active,
+        needsFocus: !!rnStyle.focus
+      }), [css, rnStyle.active, rnStyle.focus, rnStyle.hover])
 
       // Handle hover
       const { onMouseEnter, onMouseLeave, hover } = useHover(props.onMouseEnter, props.onMouseLeave, needsHover)
       // Handle active
-      const { onFocus, onBlur, active } = useActive(props.onFocus, props.onBlur, needsFocus)
+      const { onPressIn, onPressOut, onResponderGrant, onResponderRelease, onResponderStart, active } = useActive(
+        props.onPressIn, props.onPressOut,
+        props.onResponderStart, props.onResponderRelease, props.onResponderGrant,
+        needsTouch
+      )
+      // Handle focus
+      const { onFocus, onBlur, focused } = useFocus(props.onFocus, props.onBlur, needsFocus)
       const tempStyle = React.useMemo<Style>(() => {
         const style = { ...rnStyle }
         delete style.media
         delete style.hover
         delete style.active
+        delete style.focus
+        if (focused) Object.assign(style, rnStyle.focus)
         if (hover) Object.assign(style, rnStyle.hover)
         if (active) Object.assign(style, rnStyle.active)
         return style
-      }, [active, hover, rnStyle])
+      }, [active, focused, hover, rnStyle])
 
       // Calculate current em unit for media-queries
       const parentEm = React.useContext(FontSizeContext)
@@ -134,12 +148,24 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
         return { style: getStyle<CompleteStyle>(hash, style), hash }
       }, [finalStyle, units])
       const newProps = React.useMemo(() => {
-        const newProps = { style: [styleConvertedFromCSS as StyleType, props.style], onMouseEnter, onMouseLeave, onLayout, onFocus, onBlur }
+        const newProps = {
+          style: [styleConvertedFromCSS as StyleType, props.style],
+          onMouseEnter,
+          onMouseLeave,
+          onLayout,
+          onFocus,
+          onBlur,
+          onPressIn,
+          onPressOut,
+          onResponderGrant,
+          onResponderStart,
+          onResponderRelease
+        }
         if (finalStyle.textOverflow === 'ellipsis') {
           Object.assign(newProps, { numberOfLines: 1 })
         }
         return newProps
-      }, [finalStyle.textOverflow, onBlur, onFocus, onLayout, onMouseEnter, onMouseLeave, props.style, styleConvertedFromCSS])
+      }, [finalStyle.textOverflow, onBlur, onFocus, onLayout, onMouseEnter, onMouseLeave, onPressIn, onPressOut, onResponderGrant, onResponderRelease, onResponderStart, props.style, styleConvertedFromCSS])
 
       React.useEffect(() => () => removeStyle(hash), [hash])
 

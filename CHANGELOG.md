@@ -3,6 +3,7 @@
 ## Version 1.9
 
  * Add support for `&:active` pseudo selector
+ * Add support for `&:focus` pseudo selector
 
 ## Version 1.8
 

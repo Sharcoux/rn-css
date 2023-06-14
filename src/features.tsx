@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { MouseEvent } from 'react'
 import type { Style, Units, MediaQuery, PartialStyle } from './types'
-import { useWindowDimensions, LayoutChangeEvent, NativeSyntheticEvent, TargetedEvent } from 'react-native'
+import { useWindowDimensions, LayoutChangeEvent, NativeSyntheticEvent, TargetedEvent, GestureResponderEvent } from 'react-native'
 import { parseValue } from './convertUnits'
 import { createContext } from './cssToRN/mediaQueries'
 
@@ -28,17 +28,51 @@ export const useHover = (onMouseEnter: undefined | ((event: MouseEvent) => void)
 }
 
 /** Hook that will apply the style reserved for active state if needed */
-export const useActive = (onFocus: undefined | ((event: NativeSyntheticEvent<TargetedEvent>) => void), onBlur: undefined | ((event: NativeSyntheticEvent<TargetedEvent>) => void | undefined), needsFocus: boolean) => {
+export const useActive = (
+  onPressIn: undefined | ((event: GestureResponderEvent) => void),
+  onPressOut: undefined | ((event: GestureResponderEvent) => void),
+  onResponderStart: undefined | ((event: GestureResponderEvent) => void),
+  onResponderRelease: undefined | ((event: GestureResponderEvent) => void),
+  onResponderGrant: undefined | ((event: GestureResponderEvent) => boolean),
+  needsTouch: boolean
+) => {
   const [active, setActive] = React.useState(false)
+  const touchStart = React.useMemo(() => needsTouch ? (event: GestureResponderEvent) => {
+    if (onPressIn) onPressIn(event)
+    else if (onResponderStart) onResponderStart(event)
+    setActive(true)
+  } : undefined, [needsTouch, onResponderStart, onPressIn])
+  const touchEnd = React.useMemo(() => needsTouch ? (event: GestureResponderEvent) => {
+    if (onPressOut) onPressOut(event)
+    else if (onResponderRelease) onResponderRelease(event)
+    setActive(false)
+  } : undefined, [needsTouch, onResponderRelease, onPressOut])
+  const grantTouch = React.useMemo(() =>
+    needsTouch ? onResponderGrant || (() => true) : undefined
+  , [needsTouch, onResponderGrant]
+  )
+  return {
+    active,
+    onPressIn: touchStart || onPressIn,
+    onPressOut: touchEnd || onPressOut,
+    onResponderStart: touchStart || onResponderStart,
+    onResponderRelease: touchEnd || onResponderRelease,
+    onResponderGrant: grantTouch || onResponderGrant
+  }
+}
+
+/** Hook that will apply the style reserved for active state if needed */
+export const useFocus = (onFocus: undefined | ((event: NativeSyntheticEvent<TargetedEvent>) => void), onBlur: undefined | ((event: NativeSyntheticEvent<TargetedEvent>) => void | undefined), needsFocus: boolean) => {
+  const [focused, setFocused] = React.useState(false)
   const focusStart = React.useMemo(() => needsFocus ? (event: NativeSyntheticEvent<TargetedEvent>) => {
     if (onFocus) onFocus(event)
-    setActive(true)
+    setFocused(true)
   } : undefined, [needsFocus, onFocus])
   const focusStop = React.useMemo(() => needsFocus ? (event: NativeSyntheticEvent<TargetedEvent>) => {
     if (onBlur) onBlur(event)
-    setActive(false)
+    setFocused(false)
   } : undefined, [needsFocus, onBlur])
-  return { active, onFocus: focusStart || onFocus, onBlur: focusStop || onBlur }
+  return { focused, onFocus: focusStart || onFocus, onBlur: focusStop || onBlur }
 }
 
 /** Hook that will apply the style provided in the media queries */

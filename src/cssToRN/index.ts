@@ -35,7 +35,13 @@ function cssToStyle (css: string) {
     result.active = cssChunkToStyle(activeInstructions)
     return ''
   })
-  Object.assign(result, cssChunkToStyle(cssWithoutActive))
+  // Find focus (we don't support focus within media queries) (We use [\s\S] instead of . because dotall flag (s) is not supported by react-native-windows)
+  const cssWithoutFocus = cssWithoutActive.replace(/&:focus\s*{([\s\S]*?)}/gmi, res => {
+    const activeInstructions = res.substring(0, res.length - 1).replace(/&:focus\s*{/mi, '')// We remove the `&:focus {` and `}`
+    result.focus = cssChunkToStyle(activeInstructions)
+    return ''
+  })
+  Object.assign(result, cssChunkToStyle(cssWithoutFocus))
   return result
 }
 

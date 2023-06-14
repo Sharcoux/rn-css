@@ -250,12 +250,25 @@ const Hoverable = styled.View`
 
 ### <ins>active:</ins>
 
-You can add active with `&:active { <instructions> }`. An element is considered `active` as long as it is focused.
+You can add styles on the element the user is interacting with by using `&:active { <instructions> }`. A button is considered `active` from the moment the touch start until the touch ends
 
 ```javascript
 const Activable = styled.View`
   background: red;
   &:active {
+    background: blue;
+  }
+`
+```
+
+### <ins>focus:</ins>
+
+You can add styles on the element if it owns the focus with `&:focus { <instructions> }`.
+
+```javascript
+const Activable = styled.View`
+  background: red;
+  &:focus {
     background: blue;
   }
 `
