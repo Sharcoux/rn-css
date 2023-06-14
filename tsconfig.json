@@ -56,8 +56,8 @@
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
   },
-  "include": ["src/**/*", "index.tsx"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "demo"]
 }
