@@ -1,7 +1,7 @@
 /* eslint-disable react/display-name */
 import React, { MouseEvent } from 'react'
 import type { Style, Units, MediaQuery, PartialStyle } from './types'
-import { useWindowDimensions, LayoutChangeEvent, NativeSyntheticEvent, TargetedEvent, GestureResponderEvent } from 'react-native'
+import { useWindowDimensions, LayoutChangeEvent, GestureResponderEvent, TouchableHighlightProps, TextInputProps } from 'react-native'
 import { parseValue } from './convertUnits'
 import { createContext } from './cssToRN/mediaQueries'
 
@@ -61,14 +61,16 @@ export const useActive = (
   }
 }
 
+export type FocusEventListener = TouchableHighlightProps['onFocus'] | TextInputProps['onFocus']
+export type BlurEventListener = TouchableHighlightProps['onBlur'] | TextInputProps['onBlur']
 /** Hook that will apply the style reserved for active state if needed */
-export const useFocus = (onFocus: undefined | ((event: NativeSyntheticEvent<TargetedEvent>) => void), onBlur: undefined | ((event: NativeSyntheticEvent<TargetedEvent>) => void | undefined), needsFocus: boolean) => {
+export const useFocus = (onFocus: undefined | FocusEventListener, onBlur: undefined | BlurEventListener, needsFocus: boolean) => {
   const [focused, setFocused] = React.useState(false)
-  const focusStart = React.useMemo(() => needsFocus ? (event: NativeSyntheticEvent<TargetedEvent>) => {
+  const focusStart = React.useMemo(() => needsFocus ? (event: any) => {
     if (onFocus) onFocus(event)
     setFocused(true)
   } : undefined, [needsFocus, onFocus])
-  const focusStop = React.useMemo(() => needsFocus ? (event: NativeSyntheticEvent<TargetedEvent>) => {
+  const focusStop = React.useMemo(() => needsFocus ? (event: any) => {
     if (onBlur) onBlur(event)
     setFocused(false)
   } : undefined, [needsFocus, onBlur])

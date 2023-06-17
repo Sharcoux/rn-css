@@ -5,7 +5,7 @@ import React, { MouseEvent } from 'react'
 import { FlatList, FlatListProps, Platform, SectionList, SectionListProps, StyleProp, StyleSheet, TouchableHighlightProps, ViewProps, ViewStyle, VirtualizedList, VirtualizedListProps } from 'react-native'
 import convertStyle from './convertStyle'
 import cssToStyle from './cssToRN'
-import { useFontSize, useHover, useLayout, useScreenSize, useMediaQuery, useActive, useFocus } from './features'
+import { useFontSize, useHover, useLayout, useScreenSize, useMediaQuery, useActive, useFocus, FocusEventListener, BlurEventListener } from './features'
 import type { AnyStyle, CompleteStyle, Style, Units } from './types'
 import generateHash from './generateHash'
 import rnToCSS from './rnToCss'
@@ -24,8 +24,8 @@ type Primitive = number | string | null | undefined | boolean | CompleteStyle
 type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown, theme: DefaultTheme }) => Primitive
 type OptionalProps = {
   rnCSS?: `${string};`;
-  onFocus?: TouchableHighlightProps['onFocus'];
-  onBlur?: TouchableHighlightProps['onBlur'];
+  onFocus?: FocusEventListener;
+  onBlur?: BlurEventListener;
   onPressIn?: TouchableHighlightProps['onPressIn'];
   onPressOut?: TouchableHighlightProps['onPressOut'];
   onResponderStart?: ViewProps['onResponderStart'];
