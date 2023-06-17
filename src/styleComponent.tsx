@@ -2,7 +2,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 import React, { MouseEvent } from 'react'
-import { FlatList, FlatListProps, GestureResponderEvent, LayoutChangeEvent, NativeSyntheticEvent, Platform, SectionList, SectionListProps, StyleProp, StyleSheet, TargetedEvent, ViewStyle, VirtualizedList, VirtualizedListProps } from 'react-native'
+import { FlatList, FlatListProps, Platform, SectionList, SectionListProps, StyleProp, StyleSheet, TouchableHighlightProps, ViewProps, ViewStyle, VirtualizedList, VirtualizedListProps } from 'react-native'
 import convertStyle from './convertStyle'
 import cssToStyle from './cssToRN'
 import { useFontSize, useHover, useLayout, useScreenSize, useMediaQuery, useActive, useFocus } from './features'
@@ -24,16 +24,16 @@ type Primitive = number | string | null | undefined | boolean | CompleteStyle
 type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown, theme: DefaultTheme }) => Primitive
 type OptionalProps = {
   rnCSS?: `${string};`;
-  onFocus?: (event: NativeSyntheticEvent<TargetedEvent>) => void;
-  onBlur?: (event: NativeSyntheticEvent<TargetedEvent>) => void;
-  onPressIn?: (event: GestureResponderEvent) => void;
-  onPressOut?: (event: GestureResponderEvent) => void;
-  onResponderStart?: (event: GestureResponderEvent) => void,
-  onResponderRelease?: (event: GestureResponderEvent) => void,
-  onResponderGrant?: (event: GestureResponderEvent) => boolean,
+  onFocus?: TouchableHighlightProps['onFocus'];
+  onBlur?: TouchableHighlightProps['onBlur'];
+  onPressIn?: TouchableHighlightProps['onPressIn'];
+  onPressOut?: TouchableHighlightProps['onPressOut'];
+  onResponderStart?: ViewProps['onResponderStart'];
+  onResponderRelease?: ViewProps['onResponderRelease'];
+  onStartShouldSetResponder?: ViewProps['onStartShouldSetResponder'];
   onMouseEnter?: (event: MouseEvent) => void;
   onMouseLeave?: (event: MouseEvent) => void;
-  onLayout?: (event: LayoutChangeEvent) => void
+  onLayout?: ViewProps['onLayout'];
   children?: React.ReactNode;
 }
 
@@ -89,9 +89,9 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
       // Handle hover
       const { onMouseEnter, onMouseLeave, hover } = useHover(props.onMouseEnter, props.onMouseLeave, needsHover)
       // Handle active
-      const { onPressIn, onPressOut, onResponderGrant, onResponderRelease, onResponderStart, active } = useActive(
+      const { onPressIn, onPressOut, onStartShouldSetResponder, onResponderRelease, onResponderStart, active } = useActive(
         props.onPressIn, props.onPressOut,
-        props.onResponderStart, props.onResponderRelease, props.onResponderGrant,
+        props.onResponderStart, props.onResponderRelease, props.onStartShouldSetResponder,
         needsTouch
       )
       // Handle focus
@@ -157,7 +157,7 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
           onBlur,
           onPressIn,
           onPressOut,
-          onResponderGrant,
+          onStartShouldSetResponder,
           onResponderStart,
           onResponderRelease
         }
@@ -165,7 +165,7 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
           Object.assign(newProps, { numberOfLines: 1 })
         }
         return newProps
-      }, [finalStyle.textOverflow, onBlur, onFocus, onLayout, onMouseEnter, onMouseLeave, onPressIn, onPressOut, onResponderGrant, onResponderRelease, onResponderStart, props.style, styleConvertedFromCSS])
+      }, [finalStyle.textOverflow, onBlur, onFocus, onLayout, onMouseEnter, onMouseLeave, onPressIn, onPressOut, onStartShouldSetResponder, onResponderRelease, onResponderStart, props.style, styleConvertedFromCSS])
 
       React.useEffect(() => () => removeStyle(hash), [hash])
 

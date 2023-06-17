@@ -33,7 +33,7 @@ export const useActive = (
   onPressOut: undefined | ((event: GestureResponderEvent) => void),
   onResponderStart: undefined | ((event: GestureResponderEvent) => void),
   onResponderRelease: undefined | ((event: GestureResponderEvent) => void),
-  onResponderGrant: undefined | ((event: GestureResponderEvent) => boolean),
+  onStartShouldSetResponder: undefined | ((event: GestureResponderEvent) => void),
   needsTouch: boolean
 ) => {
   const [active, setActive] = React.useState(false)
@@ -48,8 +48,8 @@ export const useActive = (
     setActive(false)
   } : undefined, [needsTouch, onResponderRelease, onPressOut])
   const grantTouch = React.useMemo(() =>
-    needsTouch ? onResponderGrant || (() => true) : undefined
-  , [needsTouch, onResponderGrant]
+    needsTouch ? onStartShouldSetResponder || (() => true) : undefined
+  , [needsTouch, onStartShouldSetResponder]
   )
   return {
     active,
@@ -57,7 +57,7 @@ export const useActive = (
     onPressOut: touchEnd || onPressOut,
     onResponderStart: touchStart || onResponderStart,
     onResponderRelease: touchEnd || onResponderRelease,
-    onResponderGrant: grantTouch || onResponderGrant
+    onStartShouldSetResponder: grantTouch || onStartShouldSetResponder
   }
 }
 
