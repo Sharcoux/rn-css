@@ -22,8 +22,8 @@ export function convertValue (key: keyof PartialStyle | keyof Transform, value: 
   const finalUnits = { ...units }
   if (value.includes('%')) {
     if (Platform.OS === 'web') return value
-    if (['marginTop', 'marginBottom', 'translateY'].includes(key)) finalUnits['%'] = units.height! / 100
-    else if (['marginLeft', 'marginRight', 'translateX'].includes(key)) finalUnits['%'] = units.width! / 100
+    if (['marginTop', 'marginBottom', 'translateY'].includes(key) || key.startsWith('borderTop') || key.startsWith('borderBottom')) finalUnits['%'] = units.height! / 100
+    else if (['marginLeft', 'marginRight', 'translateX'].includes(key) || key.startsWith('borderLeft') || key.startsWith('borderRight')) finalUnits['%'] = units.width! / 100
     else if (key.startsWith('border') && key.endsWith('Radius')) finalUnits['%'] = (units.width! + units.height!) / 200
     else if (['width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight', 'top', 'left', 'bottom', 'right', 'flexBasis', 'rotate3d'].includes(key)) {
       if (value.startsWith('calc') || value.startsWith('max') || value.startsWith('min')) {
