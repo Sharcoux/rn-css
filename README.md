@@ -61,6 +61,7 @@ There is only partial support for `%` units as I didn't find a way to retrieve t
  * left
  * right
  * flex-basis
+ * border
 
 **`%` with `calc`, `min`, `max`**: You can try using `%` inside `calc`, `min` or `max` with the following CSS props, it should work as expected:
 

@@ -21,7 +21,8 @@ export function convertValue (key: keyof PartialStyle | keyof Transform, value: 
   // Percentage values need to rely on an other unit as reference
   const finalUnits = { ...units }
   if (value.includes('%')) {
-    if (Platform.OS === 'web') return value
+    // Percentage is not supported on borders in web
+    if (Platform.OS === 'web' && (!key.toLowerCase().includes('border') || key.toLowerCase().includes('radius'))) return value
     if (['marginTop', 'marginBottom', 'translateY'].includes(key) || key.startsWith('borderTop') || key.startsWith('borderBottom')) finalUnits['%'] = units.height! / 100
     else if (['marginLeft', 'marginRight', 'translateX'].includes(key) || key.startsWith('borderLeft') || key.startsWith('borderRight')) finalUnits['%'] = units.width! / 100
     else if (key.startsWith('border') && key.endsWith('Radius')) finalUnits['%'] = (units.width! + units.height!) / 200

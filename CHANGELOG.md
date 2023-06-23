@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.10
+
+ * Add support for percentage units on border in web and native (useful for making responsive triangles)
+
 ## Version 1.9
 
  * Add support for `&:active` pseudo selector

@@ -112,6 +112,15 @@ const Touchable = styled.TouchableOpacity<{pressed: boolean}>`
   }
 `
 
+const Triangle = styled.View`
+  width: 30em;
+  height: 30em;
+  border-top: 50% solid blue;
+  border-left: 50% solid blue;
+  border-right: 50% solid transparent;
+  border-bottom: 50% solid transparent;
+`
+
 // const CustomSelectContainer = styled.TouchableOpacity.attrs({ activeOpacity: 1 })`
 //   padding: 2px;
 //   margin: 0.2em;
@@ -189,6 +198,7 @@ const App = () => {
       <StyledButton2 color='white' />
       <FlatList />
       <Box2 />
+      <Triangle />
       <ColorCircle color="#236AFF" onLayout={(e) => { console.log(e.nativeEvent.layout) }}/>
       <Dot style={dotStyle}/>
       <CustomTouchable style={{}} {...touchableProps} activeOpacity={0} extra='test'>
