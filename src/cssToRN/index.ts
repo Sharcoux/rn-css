@@ -1,4 +1,4 @@
-import { Dimensions } from 'react-native'
+import { Dimensions, Platform } from 'react-native'
 import convertStyle from '../convertStyle'
 import { CompleteStyle, Context, PartialStyle, Style, Units } from '../types'
 import { sideValue, border, borderLike, cornerValue, font, textDecoration, shadow, placeContent, flex, flexFlow, transform, background } from './convert'
@@ -123,8 +123,10 @@ function cssChunkToStyle (css: string) {
         break
       case 'boxShadow':
       case 'textShadow':
+        // To provide support for the 4th element (spread-radius) at least for web
+        if (Platform.OS === 'web') Object.assign(result, { [key]: value })
         // We need to replace boxShadow by shadow
-        Object.assign(result, shadow(key === 'boxShadow' ? 'shadow' : key, value))
+        else Object.assign(result, shadow(key === 'boxShadow' ? 'shadow' : key, value))
         break
       // Other keys don't require any special treatment
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
