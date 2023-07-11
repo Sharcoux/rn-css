@@ -49,6 +49,7 @@ const Popup = styled.View`
   position: absolute;
   top: calc(100% + 2px);
   background-color: black;
+  box-shadow: 2px 2px 2px red;
 `
 
 const Hoverable = styled.View`

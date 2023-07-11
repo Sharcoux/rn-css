@@ -42,8 +42,8 @@ const convertStyle = <T extends AnyStyle | Animated.WithAnimatedValue<AnyStyle> 
         height: convertValue(key, rnStyle.textShadowOffset!.height || '0', units) as number
       }
     }
-    // Font family should not be transformed (same as cursor for web in case of base64 value)
-    else if (['cursor', 'fontFamily'].includes(key)) {
+    // Font family should not be transformed (same as cursor for web in case of base64 value, and boxShadow/textShadow for web)
+    else if (['cursor', 'fontFamily', 'boxShadow', 'textShadow'].includes(key)) {
       convertedStyle[key as 'fontFamily'] = value
     }
     else {
