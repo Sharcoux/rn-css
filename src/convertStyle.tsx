@@ -1,5 +1,5 @@
 /* eslint-disable react/display-name */
-import { /* StyleSheet, */ Animated, TextStyle } from 'react-native'
+import type { /* StyleSheet, */ Animated, TextStyle } from 'react-native'
 import { convertValue } from './convertUnits'
 import type { AnyStyle, CompleteStyle, PartialStyle, Units } from './types'
 

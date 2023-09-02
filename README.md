@@ -2,7 +2,7 @@
 
 This is basically [styled-components](https://github.com/styled-components/styled-components) with a much better support for React-Native, and some awesome additional features. You can check the docs of [styled-components](https://github.com/styled-components/styled-components) for more details about the basic API. I'll focus here on the differences.
 
-**Current version: 1.8** [See the Changelog](./CHANGELOG.md)
+**Current version: 1.10** [See the Changelog](./CHANGELOG.md)
 
 ---
 
@@ -229,6 +229,8 @@ import { cssToRNStyle, FontSizeContext } from 'rn-css'
 const style = cssToRNStyle('width: 2em; margin: 10%;', { em: React.useContext(FontSizeContext), width: 100, height: 100 })
 const { width: 32, marginTop: 10, marginLeft: 10, marginRight: 10, marginBottom: 10 } = style
 ```
+
+If you want to use this feature in a non react project, you can use `import { cssToRNStyle } from 'rn-css/cssToRN'`.
 
 ---
 

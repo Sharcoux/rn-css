@@ -1,6 +1,6 @@
 import type { Units, Context, PartialStyle, Transform } from '../types'
 import { convertValue, parseValue } from '../convertUnits'
-import { PixelRatio, Platform } from 'react-native'
+import { PixelRatio, Platform } from '../react-native'
 
 type Constraint = {
   all?: undefined,

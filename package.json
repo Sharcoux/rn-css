@@ -1,9 +1,19 @@
 {
   "name": "rn-css",
   "version": "1.10.3",
+  "exports": {
+    ".": {
+      "import": "./dist/index.ts",
+      "types": "./dist/index.d.ts"
+    },
+    "./cssToRN": {
+      "import": "./demo/cssToRN.bundle.js",
+      "types": "./dist/cssToRN/index.d.ts"
+    }
+  },
   "scripts": {
     "test": "jest",
-    "prepare": "rm -rf dist && tsc",
+    "prepare": "rm -rf dist && tsc && webpack",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
@@ -12,7 +22,7 @@
     "release": "npm run prepare && release-it",
     "web": "webpack serve --open --mode development"
   },
-  "peerDependencies": {
+  "optionalDependencies": {
     "react": ">=16.13.1",
     "react-native": ">=0.62.2"
   },

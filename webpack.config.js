@@ -11,11 +11,14 @@ if (result.error) {
 module.exports = {
   mode: process.env.NODE_ENV || 'development',
   entry: {
-    app: path.resolve(__dirname, 'index.tsx')
+    index: path.resolve(__dirname, 'index.tsx'),
+    cssToRN: path.resolve(__dirname, 'src/cssToRN')
   },
   output: {
-    path: path.resolve(__dirname, 'demo'),
-    filename: 'index.bundle.js'
+    path: path.resolve(__dirname),
+    filename: chunkData => chunkData.chunk.name === 'index'
+      ? 'demo/index.bundle.js'
+      : 'dist/cssToRN.bundle.js'
   },
   watchOptions: {
     ignored: /node_modules/
@@ -49,7 +52,7 @@ module.exports = {
     ]
   },
   plugins: [
-    new HtmlWebPackPlugin({ title: displayName })
+    new HtmlWebPackPlugin({ title: displayName, filename: 'demo/index.html' })
   ],
   resolve: {
     extensions: [

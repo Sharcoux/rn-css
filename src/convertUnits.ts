@@ -1,6 +1,6 @@
 import type { PartialStyle, Transform, Units } from './types'
 import { calculate, min, max } from './cssToRN/maths'
-import { Platform } from 'react-native'
+import { Platform } from './react-native'
 
 /** Take a css value like 12em and return [12, 'em'] */
 export function parseValue (value: string): [number, string | undefined] {

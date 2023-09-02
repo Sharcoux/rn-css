@@ -1,4 +1,4 @@
-import { Dimensions, Platform } from 'react-native'
+import { Dimensions, Platform } from '../react-native'
 import convertStyle from '../convertStyle'
 import { CompleteStyle, Context, PartialStyle, Style, Units } from '../types'
 import { sideValue, border, borderLike, cornerValue, font, textDecoration, shadow, placeContent, flex, flexFlow, transform, background } from './convert'

@@ -1,4 +1,4 @@
-import { ViewStyle, TextStyle, ImageStyle } from 'react-native'
+import type { ViewStyle, TextStyle, ImageStyle } from 'react-native'
 
 export type Units = {
   '%'?: number;
