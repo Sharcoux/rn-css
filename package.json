@@ -16,7 +16,7 @@
     "release": "npm run prepare && release-it",
     "web": "webpack serve --open --mode development"
   },
-  "optionalDependencies": {
+  "peerDependencies": {
     "react": ">=16.13.1",
     "react-native": ">=0.62.2"
   },
