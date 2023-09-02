@@ -3,11 +3,11 @@
   "version": "1.11.0",
   "exports": {
     ".": {
-      "import": "./dist/index.ts",
+      "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./cssToRN": {
-      "import": "./demo/cssToRN.bundle.js",
+      "import": "./dist/cssToRN.bundle.js",
       "types": "./dist/cssToRN/index.d.ts"
     }
   },
@@ -100,5 +100,6 @@
     "type": "git",
     "url": "git@github.com:Sharcoux/rn-css.git"
   },
+  "sideEffects": false,
   "license": "ISC"
 }
