@@ -2,14 +2,8 @@
   "name": "rn-css",
   "version": "1.11.1",
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./cssToRN": {
-      "import": "./dist/cssToRN.bundle.js",
-      "types": "./dist/cssToRN/index.d.ts"
-    }
+    ".": "./dist/index.js",
+    "./cssToRN": "./dist/cssToRN.bundle.js"
   },
   "scripts": {
     "test": "jest",
