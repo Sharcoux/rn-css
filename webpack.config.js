@@ -11,14 +11,11 @@ if (result.error) {
 module.exports = {
   mode: process.env.NODE_ENV || 'development',
   entry: {
-    index: path.resolve(__dirname, 'index.tsx'),
-    cssToRN: path.resolve(__dirname, 'src/cssToRN')
+    index: path.resolve(__dirname, 'index.tsx')
   },
   output: {
     path: path.resolve(__dirname),
-    filename: chunkData => chunkData.chunk.name === 'index'
-      ? 'demo/index.bundle.js'
-      : 'dist/cssToRN.bundle.js'
+    filename: 'demo/index.bundle.js'
   },
   watchOptions: {
     ignored: /node_modules/
