@@ -2,14 +2,20 @@
   "name": "rn-css",
   "version": "1.11.5",
   "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
+    ".": "./dist/index.js",
     "./*": {
       "import": "./dist/*/index.js",
-      "require": "./dist/*/index.js",
-      "types": "./dist/*/index.d.ts"
+      "require": "./dist/*/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "dist/index.d.ts"
+      ],
+      "./*": [
+        "dist/*/index.d.ts"
+      ]
     }
   },
   "scripts": {
