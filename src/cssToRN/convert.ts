@@ -118,14 +118,11 @@ export function placeContent (value: string) {
 }
 
 export function background (value: string) {
+  const values = value.split(/\s+/mg)
+  const color = values.pop()
+  const backgroundColor = isColor(color) ? color : 'transparent'
   // We support everything on web
-  if (Platform.OS === 'web') return { background: value }
-  else {
-    const values = value.split(/\s+/mg)
-    const color = values.pop()
-    // The background-color is the only one that we support on RN and it's the last value
-    return { backgroundColor: isColor(color) ? color : 'transparent' }
-  }
+  return Platform.OS === 'web' ? { backgroundColor, background: value } : { backgroundColor }
 }
 
 export function textDecoration (value: string) {
