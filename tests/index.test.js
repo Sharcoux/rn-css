@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import React from 'react'
 import { Text, View, Dimensions, StyleSheet } from 'react-native'
+import { Platform } from '../src/react-native'
 import TestRenderer, { act } from 'react-test-renderer'
 import styled from '../src/index'
 
@@ -377,7 +378,7 @@ it('should handle active on Touchable', async () => {
     wrapper = TestRenderer.create(<Comp/>)
   })
   await act(async () => {
-    wrapper.root.findByType('View').props.onTouchStart()
+    wrapper.root.findByType('View').props.onResponderStart()
   })
 
   expect(getStyle(wrapper.root.findByType('View'))).toEqual({
@@ -606,4 +607,37 @@ it('Should accept functions returning RN Style in the tagged template', async ()
     width: 20,
     height: 20
   })
+})
+it('Partial style should overwrite general style', async () => {
+  const Comp = styled.View`
+    border-width: 2px;
+    outline-left-width: 2px;
+  `
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp style={{ borderLeftWidth: 10, outlineLeftWidth: 10 }} />)
+  })
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
+    borderLeftWidth: 10,
+    borderRightWidth: 2,
+    borderTopWidth: 2,
+    borderBottomWidth: 2,
+    outlineLeftWidth: 10
+  })
+})
+it('Should handle linear-gradient', async () => {
+  Platform.OS = 'web'
+  const Comp = styled.View`
+    background: linear-gradient(to right, red, blue);
+  `
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp />)
+  })
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
+    background: 'linear-gradient(to right, red, blue)',
+    backgroundColor: 'linear-gradient(to right, red, blue)',
+    zIndex: 'auto'
+  })
+  Platform.OS = 'ios'
 })

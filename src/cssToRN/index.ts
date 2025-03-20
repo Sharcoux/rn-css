@@ -93,6 +93,11 @@ function cssChunkToStyle (css: string) {
       case 'borderWidth':
         Object.assign(result, sideValue('border', value, key.split('border').pop() as '' | 'Width' | 'Style' | 'Color'))
         break
+      case 'outlineStyle':
+      case 'outlineColor':
+      case 'outlineWidth':
+        Object.assign(result, sideValue('outline', value, key.split('outline').pop() as '' | 'Width' | 'Style' | 'Color'))
+        break
       case 'background':
         Object.assign(result, background(value))
         break
@@ -127,6 +132,9 @@ function cssChunkToStyle (css: string) {
         if (Platform.OS === 'web') Object.assign(result, { [key]: value })
         // We need to replace boxShadow by shadow
         else Object.assign(result, shadow(key === 'boxShadow' ? 'shadow' : key, value))
+        break
+      case 'userSelect':
+        Object.assign(result, { userSelect: value, WebkitUserSelect: value })
         break
       // Other keys don't require any special treatment
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment

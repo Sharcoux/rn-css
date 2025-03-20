@@ -116,6 +116,7 @@ describe('CSS to RN style conversion', () => {
     expect(cssToRNStyle('flex: 1 1 100%')).toEqual({ flexGrow: 1, flexShrink: 1, flexBasis: '100%' })
     expect(cssToRNStyle('flex-flow: row-reverse wrap')).toEqual({ flexDirection: 'row-reverse', flexWrap: 'wrap' })
     expect(cssToRNStyle('place-content: space-around space-between')).toEqual({ alignContent: 'space-around', justifyContent: 'space-between' })
+    expect(cssToRNStyle('transition: all 0.3s ease;')).toEqual({ transition: 'all 0.3s ease' })
   })
   it('should merge props', () => {
     expect(cssToRNStyle('width: 10px; flex: 1;')).toEqual({ width: 10, flexGrow: 1, flexShrink: 0, flexBasis: 0 })

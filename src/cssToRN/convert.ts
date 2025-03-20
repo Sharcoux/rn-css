@@ -118,9 +118,8 @@ export function placeContent (value: string) {
 }
 
 export function background (value: string) {
-  const values = value.split(/\s+/mg)
-  const color = values.pop()
-  const backgroundColor = isColor(color) ? color : 'transparent'
+  const values = value.match(/(linear-gradient\(|url\().*?\)|[^\s]+/mg) || []
+  const backgroundColor = values.reverse().find(isColor) || 'transparent'
   // We support everything on web
   return Platform.OS === 'web' ? { backgroundColor, background: value } : { backgroundColor }
 }
@@ -207,7 +206,7 @@ export function font (value: string) {
 }
 
 /** Parses a css value for the side of an element (border-width, margin, padding) */
-export function sideValue <T extends 'padding' | 'margin' | 'border'> (prefixKey: T, value: string, postFix: T extends 'border' ? 'Width' | 'Style' | 'Color' | '' : '' = ''): { [x: string]: string} {
+export function sideValue <T extends 'padding' | 'margin' | 'border' | 'outline'> (prefixKey: T, value: string, postFix: T extends 'border' | 'outline' ? 'Width' | 'Style' | 'Color' | '' : '' = ''): { [x: string]: string} {
   if (value === 'none') return sideValue(prefixKey, '0', postFix)
   const [top = value, right = top, bottom = top, left = right] = findNumbers(value, prefixKey === 'margin').numbers
   return {
@@ -232,6 +231,7 @@ export function cornerValue (prefixKey: 'border', value: string, postFix: 'Radiu
 function isColor (value?: string) {
   if (!value) return false
   if (value.startsWith('#') || value.startsWith('rgb') || value.startsWith('hsl')) return true
+  if (Platform.OS === 'web' && value.match(/^\s*linear-gradient\(.*\)/s)) return true
   const CSS_COLOR_NAMES = [
     'aliceblue',
     'antiquewhite',
