@@ -9,7 +9,16 @@ import { createContext } from './cssToRN/mediaQueries'
 export const useScreenSize = () => {
   const { width, height } = useWindowDimensions()
   return React.useMemo(() => ({
-    vw: width / 100, vh: height / 100, vmin: Math.min(width, height) / 100, vmax: Math.max(width, height) / 100
+    vw: width / 100,
+    vh: height / 100,
+    vmin: Math.min(width, height) / 100,
+    vmax: Math.max(width, height) / 100,
+    dvw: width / 100,
+    dvh: height / 100,
+    lvw: width / 100,
+    lvh: height / 100,
+    svw: width / 100,
+    svh: height / 100
   }), [height, width])
 }
 

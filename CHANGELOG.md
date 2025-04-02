@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 1.11.8
+
+ * Improve background support for web
+ * Fix support for outlines
+ * Add support for dvh, dvw, lvw, lvh, svw, svh units
+
 ## Version 1.10
 
  * Add support for percentage units on border in web and native (useful for making responsive triangles)

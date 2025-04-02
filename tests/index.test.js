@@ -66,18 +66,30 @@ it('merges attrs when inheriting SC', () => {
 })
 
 describe('extended CSS support', () => {
-  it('should handle vh, vw, vmin, vmax and rem units', () => {
+  it('should handle lvh, lvw, svh, svw, dvh, dvw, vh, vw, vmin, vmax and rem units', () => {
     const Comp = styled(View)`
         width: 10vmin;
         height: 10vmax;
         padding: 10vw 10vh;
         flex: 1 1 10vh;
         outline: 1rem solid black;
+        max-width: 100dvw;
+        max-height: 100dvh;
+        min-width: 100svw;
+        min-height: 100svh;
+        margin-left: 100lvw;
+        margin-top: 100lvh;
       `
 
     const { width, height } = Dimensions.get('window')
     const vw = width / 10
     const vh = height / 10
+    const dvw = width
+    const dvh = height
+    const svw = width
+    const svh = height
+    const lvw = width
+    const lvh = height
     const vmin = Math.min(vw, vh)
     const vmax = Math.max(vw, vh)
 
@@ -93,6 +105,12 @@ describe('extended CSS support', () => {
       outlineColor: 'black',
       outlineStyle: 'solid',
       outlineWidth: 16,
+      maxWidth: dvw,
+      maxHeight: dvh,
+      minWidth: svw,
+      minHeight: svh,
+      marginLeft: lvw,
+      marginTop: lvh,
       flexGrow: 1,
       flexShrink: 1,
       flexBasis: vh

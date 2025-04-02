@@ -20,7 +20,7 @@ function cssToStyle (css: string) {
     const style = cssChunkToStyle(css)
     const mediaQuery = (context: Context) => isValid(context) && style
     if (!result.media) result.media = []
-    result.media!.push(mediaQuery)
+    result.media.push(mediaQuery)
     return ''
   })
   // Find hover (we don't support hover within media queries) (We use [\s\S] instead of . because dotall flag (s) is not supported by react-native-windows)
@@ -54,6 +54,12 @@ export function cssToRNStyle (css: string, units: { em?: number, width?: number,
     vh: height / 100,
     vmin: Math.min(width, height) / 100,
     vmax: Math.max(width, height) / 100,
+    lvw: width / 100,
+    lvh: height / 100,
+    svw: width / 100,
+    svh: height / 100,
+    dvw: width / 100,
+    dvh: height / 100,
     width: 100,
     height: 100,
     rem: 16,

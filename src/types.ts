@@ -4,6 +4,12 @@ export type Units = {
   '%'?: number;
   vw?: number;
   vh?: number;
+  dvw?: number;
+  dvh?: number;
+  lvw?: number;
+  lvh?: number;
+  svw?: number;
+  svh?: number;
   vmin?: number;
   vmax?: number;
   em: number;
