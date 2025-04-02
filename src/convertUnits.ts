@@ -23,8 +23,8 @@ export function convertValue (key: keyof PartialStyle | keyof Transform, value: 
   if (value.includes('%')) {
     // Percentage is not supported on borders in web
     if (Platform.OS === 'web' && (!key.toLowerCase().includes('border') || key.toLowerCase().includes('radius'))) return value
-    if (['marginTop', 'marginBottom', 'translateY'].includes(key) || key.startsWith('borderTop') || key.startsWith('borderBottom')) finalUnits['%'] = units.height! / 100
-    else if (['marginLeft', 'marginRight', 'translateX'].includes(key) || key.startsWith('borderLeft') || key.startsWith('borderRight')) finalUnits['%'] = units.width! / 100
+    if (['marginTop', 'marginBottom', 'translateY'].includes(key) || key.startsWith('borderTop') || key.startsWith('borderBottom')) finalUnits['%'] = (units.height || 0) / 100
+    else if (['marginLeft', 'marginRight', 'translateX'].includes(key) || key.startsWith('borderLeft') || key.startsWith('borderRight')) finalUnits['%'] = (units.width || 0) / 100
     else if (key.startsWith('border') && key.endsWith('Radius')) finalUnits['%'] = ((units.width || 0) + (units.height || 0)) / 200
     else if (['width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight', 'top', 'left', 'bottom', 'right', 'flexBasis', 'rotate3d'].includes(key)) {
       if (value.startsWith('calc') || value.startsWith('max') || value.startsWith('min')) {
@@ -43,7 +43,7 @@ export function convertValue (key: keyof PartialStyle | keyof Transform, value: 
     const [val, unit] = parseValue(occ)
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     if (['deg', 'rad', 'turn', 's'].includes(unit!)) return occ // We don't want to convert deg, rad, turn, second units
-    return val * (finalUnits[unit as keyof Units || 'px'] || 1) + ''
+    return val * (finalUnits[unit as keyof Units || 'px'] ?? 1) + ''
   })
 
   // We handle extra calculations (calc, min, max, parsing...)
