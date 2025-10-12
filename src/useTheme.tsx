@@ -12,16 +12,16 @@ export const ThemeProvider = ({ theme, children }: { theme: DefaultTheme; childr
  * Returns the Theme
  * @returns The Theme object
  */
-export const useTheme = () => React.useContext(SharedValue)
+export const useTheme = <T extends DefaultTheme = DefaultTheme>() => React.useContext(SharedValue) as T
 
 /**
  * Adds the theme prop to a non rn-css component
  * @param Component A non rn-css component
  * @returns A component with the theme prop
  */
-export const withTheme = <T, >(Component: React.ComponentType<T>) => {
+export const withTheme = <T extends DefaultTheme = DefaultTheme, >(Component: React.ComponentType<T>) => {
   const ThemedComponent = React.forwardRef<React.Component, T>((props, ref) => {
-    const theme = useTheme()
+    const theme = useTheme<T>()
     return <Component ref={ref} theme={theme} {...(props as unknown as T)} />
   })
   ThemedComponent.displayName = 'ThemedComponent'
