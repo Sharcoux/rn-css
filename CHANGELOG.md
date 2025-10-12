@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 2.0
+
+ * Add support to React 19+ and RN 0.82+
+
 ## Version 1.11.8
 
  * Improve background support for web
