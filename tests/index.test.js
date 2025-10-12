@@ -46,7 +46,7 @@ it('calls an attr-function with context', async () => {
     test
   })
 })
-it('merges attrs when inheriting SC', () => {
+it('merges attrs when inheriting SC', async () => {
   const Parent = styled.View.attrs(() => ({
     first: 'first'
   }))``
@@ -55,7 +55,10 @@ it('merges attrs when inheriting SC', () => {
     second: 'second'
   }))``
 
-  const wrapper = TestRenderer.create(<Child />)
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Child />)
+  })
   const view = wrapper.root.findByType('View')
 
   expect(view.props).toMatchObject({
@@ -66,7 +69,7 @@ it('merges attrs when inheriting SC', () => {
 })
 
 describe('extended CSS support', () => {
-  it('should handle lvh, lvw, svh, svw, dvh, dvw, vh, vw, vmin, vmax and rem units', () => {
+  it('should handle lvh, lvw, svh, svw, dvh, dvw, vh, vw, vmin, vmax and rem units', async () => {
     const Comp = styled(View)`
         width: 10vmin;
         height: 10vmax;
@@ -93,7 +96,10 @@ describe('extended CSS support', () => {
     const vmin = Math.min(vw, vh)
     const vmax = Math.max(vw, vh)
 
-    const wrapper = TestRenderer.create(<Comp />)
+    let wrapper
+    await act(async () => {
+      wrapper = TestRenderer.create(<Comp />)
+    })
     const view = wrapper.root.findByType('View')
     expect(getStyle(view)).toEqual({
       width: vmin,
@@ -296,6 +302,23 @@ it('should not convert % for supported values', async () => {
     right: '10%',
     bottom: '10%',
     flexBasis: '10%'
+  })
+})
+it('should handle negative values', async () => {
+  const Comp = styled.View`
+    padding: 0 -1px;
+  `
+
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp />)
+  })
+
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
+    paddingTop: 0,
+    paddingBottom: 0,
+    paddingLeft: -1,
+    paddingRight: -1
   })
 })
 it('should handle maths values', async () => {

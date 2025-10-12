@@ -105,6 +105,8 @@ describe('CSS to RN style conversion', () => {
     expect(cssToRNStyle('borderWidth: 2px 3em 4rem', { width: 100, height: 100 })).toEqual({ borderTopWidth: 2, borderBottomWidth: 64, borderLeftWidth: 48, borderRightWidth: 48 })
     expect(cssToRNStyle('border-radius: 1px')).toEqual({ borderTopLeftRadius: 1, borderTopRightRadius: 1, borderBottomLeftRadius: 1, borderBottomRightRadius: 1 })
     expect(cssToRNStyle('padding: 1px')).toEqual({ paddingTop: 1, paddingBottom: 1, paddingLeft: 1, paddingRight: 1 })
+    expect(cssToRNStyle('padding: -1px')).toEqual({ paddingTop: -1, paddingBottom: -1, paddingLeft: -1, paddingRight: -1 })
+    expect(cssToRNStyle('padding: 0 -1px')).toEqual({ paddingTop: 0, paddingBottom: 0, paddingLeft: -1, paddingRight: -1 })
     expect(cssToRNStyle('padding: 1px 2px 3px 4px')).toEqual({ paddingTop: 1, paddingRight: 2, paddingBottom: 3, paddingLeft: 4 })
     expect(cssToRNStyle('margin: 1px 2px 3%', { width: 100, height: 100 })).toEqual({ marginTop: 1, marginBottom: 3, marginLeft: 2, marginRight: 2 })
     expect(cssToRNStyle('font: bold italic 1.2em "Rounded Mplus 1c", serif;')).toEqual({ fontWeight: 'bold', fontStyle: 'italic', fontSize: 19.2, fontFamily: '"Rounded Mplus 1c", serif' })

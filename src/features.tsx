@@ -23,7 +23,7 @@ export const useScreenSize = () => {
 }
 
 /** Hook that will apply the style reserved for hover state if needed */
-export const useHover = (onMouseEnter: undefined | ((event: MouseEvent) => void), onMouseLeave: undefined | ((event: MouseEvent) => void | undefined), needsHover: boolean) => {
+export const useHover = (onMouseEnter: null | undefined | ((event: MouseEvent) => void), onMouseLeave: null | undefined | ((event: MouseEvent) => void | undefined), needsHover: boolean) => {
   const [hover, setHover] = React.useState(false)
   const hoverStart = React.useMemo(() => needsHover ? (event: MouseEvent) => {
     if (onMouseEnter) onMouseEnter(event)
@@ -38,11 +38,11 @@ export const useHover = (onMouseEnter: undefined | ((event: MouseEvent) => void)
 
 /** Hook that will apply the style reserved for active state if needed */
 export const useActive = (
-  onPressIn: undefined | ((event: GestureResponderEvent) => void),
-  onPressOut: undefined | ((event: GestureResponderEvent) => void),
-  onResponderStart: undefined | ((event: GestureResponderEvent) => void),
-  onResponderRelease: undefined | ((event: GestureResponderEvent) => void),
-  onStartShouldSetResponder: undefined | ((event: GestureResponderEvent) => void),
+  onPressIn: null | undefined | ((event: GestureResponderEvent) => void),
+  onPressOut: null | undefined | ((event: GestureResponderEvent) => void),
+  onResponderStart: null | undefined | ((event: GestureResponderEvent) => void),
+  onResponderRelease: null | undefined | ((event: GestureResponderEvent) => void),
+  onStartShouldSetResponder: null | undefined | ((event: GestureResponderEvent) => void),
   needsTouch: boolean
 ) => {
   const [active, setActive] = React.useState(false)
@@ -70,8 +70,8 @@ export const useActive = (
   }
 }
 
-export type FocusEventListener = TouchableHighlightProps['onFocus'] | TextInputProps['onFocus']
-export type BlurEventListener = TouchableHighlightProps['onBlur'] | TextInputProps['onBlur']
+export type FocusEventListener = TouchableHighlightProps['onFocus'] | TextInputProps['onFocus'] | null
+export type BlurEventListener = TouchableHighlightProps['onBlur'] | TextInputProps['onBlur'] | null
 /** Hook that will apply the style reserved for active state if needed */
 export const useFocus = (onFocus: undefined | FocusEventListener, onBlur: undefined | BlurEventListener, needsFocus: boolean) => {
   const [focused, setFocused] = React.useState(false)

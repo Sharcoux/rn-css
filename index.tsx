@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react'
-import { Animated, AppRegistry, Platform, StyleProp, Text, TextStyle, TouchableOpacity, TouchableOpacityProps, ViewStyle } from 'react-native'
+import { Animated, AppRegistry, Platform, StyleProp, Text, TextStyle, TouchableOpacityProps, View as RNView, ViewStyle } from 'react-native'
 import { name as appName } from './app.json'
 import styled from './src'
 
@@ -20,6 +20,7 @@ const Dot = styled(Animated.View)`
   margin: 2em;
   border-radius: 50%;
   z-index: 10;
+  background: red;
 `
 
 const StyledText = styled.Text<{col: string}>`
@@ -114,8 +115,8 @@ const Touchable = styled.TouchableOpacity<{pressed: boolean}>`
 `
 
 const Triangle = styled.View`
-  width: 30em;
-  height: 30em;
+  width: 10em;
+  height: 10em;
   border-top: 50% solid blue;
   border-left: 50% solid blue;
   border-right: 50% solid transparent;
@@ -134,7 +135,7 @@ const Triangle = styled.View`
 //   border-style: solid;
 // `
 
-const Forward = React.forwardRef<typeof TouchableOpacity, TouchableOpacityProps>((props: TouchableOpacityProps, ref) => {
+const Forward = React.forwardRef<RNView, TouchableOpacityProps>((props: TouchableOpacityProps, ref) => {
   return <Touchable ref={ref} {...props} pressed={true} />
 })
 Forward.displayName = 'Forward'

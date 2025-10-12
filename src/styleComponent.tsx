@@ -2,7 +2,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable react/display-name */
 import React, { MouseEvent } from 'react'
-import { FlatList, FlatListProps, Platform, SectionList, SectionListProps, StyleProp, StyleSheet, TouchableHighlightProps, ViewProps, ViewStyle, VirtualizedList, VirtualizedListProps } from 'react-native'
+import { FlatList, FlatListProps, Platform, PressableProps, SectionList, SectionListProps, StyleProp, StyleSheet, TouchableHighlightProps, ViewProps, ViewStyle, VirtualizedList, VirtualizedListProps } from 'react-native'
 import convertStyle from './convertStyle'
 import cssToStyle from './cssToRN'
 import { useFontSize, useHover, useLayout, useScreenSize, useMediaQuery, useActive, useFocus, FocusEventListener, BlurEventListener } from './features'
@@ -26,15 +26,15 @@ type OptionalProps = {
   rnCSS?: `${string};`;
   onFocus?: FocusEventListener;
   onBlur?: BlurEventListener;
-  onPressIn?: TouchableHighlightProps['onPressIn'];
-  onPressOut?: TouchableHighlightProps['onPressOut'];
-  onResponderStart?: ViewProps['onResponderStart'];
-  onResponderRelease?: ViewProps['onResponderRelease'];
-  onStartShouldSetResponder?: ViewProps['onStartShouldSetResponder'];
-  onMouseEnter?: (event: MouseEvent) => void;
-  onMouseLeave?: (event: MouseEvent) => void;
+  onPressIn?: TouchableHighlightProps['onPressIn'] | null;
+  onPressOut?: TouchableHighlightProps['onPressOut'] | null;
+  onResponderStart?: ViewProps['onResponderStart'] | null;
+  onResponderRelease?: ViewProps['onResponderRelease'] | null;
+  onStartShouldSetResponder?: ViewProps['onStartShouldSetResponder'] | null;
+  onMouseEnter?: ((event: MouseEvent) => void) | null;
+  onMouseLeave?: ((event: MouseEvent) => void) | null;
   onLayout?: ViewProps['onLayout'];
-  children?: React.ReactNode;
+  children?: PressableProps['children'];
 }
 
 /** Converts the tagged template string into a css string */
@@ -69,11 +69,11 @@ function removeStyle (hash: string) {
 
 const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }, Props extends InitialProps & OptionalProps = InitialProps & OptionalProps>(Component: React.ComponentType<InitialProps>) => {
   const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
-    const ForwardRefComponent = React.forwardRef<any, S & Props>((props: S & Props, ref) => {
+    const ForwardRefComponent = React.forwardRef<any, S & Props>((props, ref) => {
       const rem = React.useContext(RemContext)
       const shared = React.useContext(SharedValue)
       // Build the css string with the context
-      const css = React.useMemo(() => buildCSSString(chunks, functs, props, shared), [props, shared])
+      const css = React.useMemo(() => buildCSSString(chunks, functs, (props as unknown as S & Props), shared), [props, shared])
       // Store the style in RN format
       const rnStyle = React.useMemo(() => cssToStyle(css), [css])
 
@@ -172,11 +172,11 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
       // em !== parentEm alone is a bit dangerous as the component would rerender when the font size change
       if (em !== parentEm || finalStyle.fontSize !== undefined) {
         return <FontSizeContext.Provider value={em}>
-          <Component ref={ref} {...props} {...newProps} />
+          <Component ref={ref} {...(props as unknown as InitialProps)} {...(newProps as unknown as InitialProps)} />
         </FontSizeContext.Provider>
       }
       else {
-        return <Component ref={ref} {...props} {...newProps} />
+        return <Component ref={ref} {...(props as unknown as InitialProps)} {...(newProps as unknown as InitialProps)} />
       }
     })
     return ForwardRefComponent as React.ForwardRefExoticComponent<Props & S & { ref?: React.Ref<any> }>
@@ -187,8 +187,9 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
     const ComponentWithAttrs = styledComponent(chunks, ...functs)
     // We need to limit the props control to only Result https://www.typescriptlang.org/play?#code/GYVwdgxgLglg9mABBATgUwIZTQUQB7ZgAmaRAwnALYAOAPAAopzUDOAfABQU0BciH1Jqz6NmLAJSIAvG0QYwAT0kBvAFCJkCFlET5CJYt2rT+gsSKETpstRo3ooIFEiMDL49YgC+nvWmL+5FTUAHRYUCgsJrQASmgsIAA2OmgEgVH0GCiwGIkMlmyc4ZF8cQnJkjKItnYQWjqMaHVgwDAA5k5YpEYmbua6eBCJICT5YgA0iGVJUGyVNp52iA5OLsEcyiFbZqyTW2FQESxeHks+SyvOiI3NrR0oXUE0nufLaI5XfgGGwao+qqBILAEIgen1hNVENhtHxtCgYGA2pNtApEmhYREEW1vCpPJckDsWH9VM1tNd0Ld2j0pMh0F0viQntQuMFxAcjhsofEoHwAORwADWvJxqhuCDurmUiBRaL50KgwpOQA
     const ForwardRefComponent = React.forwardRef<any, Omit<Props, keyof Result> & Part & Partial<Pick<Props, Extract<keyof Props, keyof Result>>>>((props, ref) => {
-      const attrs = (opts instanceof Function) ? opts(props as Props & Part) : opts
-      return <ComponentWithAttrs ref={ref} {...(props as Props & Part)} {...attrs} />
+      const castProps = props as unknown as Props & Part
+      const attrs = (opts instanceof Function) ? opts(castProps) : opts
+      return <ComponentWithAttrs ref={ref} {...castProps} {...attrs} />
     })
     // TODO : Find a way to remove from the Props the properties affected by opts
     return ForwardRefComponent

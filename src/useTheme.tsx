@@ -20,9 +20,9 @@ export const useTheme = () => React.useContext(SharedValue)
  * @returns A component with the theme prop
  */
 export const withTheme = <T, >(Component: React.ComponentType<T>) => {
-  const ThemedComponent = React.forwardRef<React.Component, T>((props: T, ref) => {
+  const ThemedComponent = React.forwardRef<React.Component, T>((props, ref) => {
     const theme = useTheme()
-    return <Component ref={ref} theme={theme} {...props} />
+    return <Component ref={ref} theme={theme} {...(props as unknown as T)} />
   })
   ThemedComponent.displayName = 'ThemedComponent'
   return ThemedComponent
