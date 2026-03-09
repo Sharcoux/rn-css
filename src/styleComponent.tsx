@@ -44,7 +44,7 @@ function buildCSSString<T extends { rnCSS?: string }> (chunks: TemplateStringsAr
     .map((chunk, i) => ([chunk, (functs[i] instanceof Function) ? (functs[i] as Functs<T>)({ shared, theme: (shared as DefaultTheme), ...props }) : functs[i]]))
     .flat()
     // Convert the objects to string if the result is not a primitive
-    .map(chunk => typeof chunk === 'object' ? rnToCSS(chunk as Partial<CompleteStyle>) : chunk)
+    .map(chunk => chunk && typeof chunk === 'object' ? rnToCSS(chunk as Partial<CompleteStyle>) : chunk)
     .join('')
   if (props.rnCSS) computedString += props.rnCSS.replace(/=/gm, ':') + ';'
   return computedString

@@ -682,3 +682,17 @@ it('Should handle linear-gradient', async () => {
   })
   Platform.OS = 'ios'
 })
+
+it('Should handle wrong chunks gracefully', async () => {
+  Platform.OS = 'web'
+  const Comp = styled.View`opacity: ${() => null}`
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp/>)
+  })
+  expect(getStyle(wrapper.root.findByType('View'))).toEqual({
+    opacity: 0,
+    zIndex: 'auto'
+  })
+  Platform.OS = 'ios'
+})
