@@ -1,4 +1,4 @@
-import { Dimensions } from 'react-native'
+import { Dimensions, Platform } from 'react-native'
 import convert, { cssToRNStyle } from '../src/cssToRN'
 
 describe('CSS style conversion', () => {
@@ -129,9 +129,17 @@ describe('CSS to RN style conversion', () => {
   })
   it('should read colors', () => {
     expect(cssToRNStyle('background-color: #236AFF; color: #8030D0;')).toEqual({ backgroundColor: '#236AFF', color: '#8030D0' })
+    expect(cssToRNStyle('background: linear-gradient(to right, #236AFF, #8030D0);')).toEqual({ backgroundColor: '#236AFF' })
+    Platform.OS = 'web'
+    expect(cssToRNStyle('background: linear-gradient(to right, #236AFF, #8030D0);')).toEqual({ background: 'linear-gradient(to right, #236AFF, #8030D0)', backgroundColor: 'linear-gradient(to right, #236AFF, #8030D0)' })
+    Platform.OS = 'ios'
   })
   it('should alias background to backgroundColor', () => {
     expect(cssToRNStyle('background: #236AFF;')).toEqual({ backgroundColor: '#236AFF' })
+    expect(cssToRNStyle('background: linear-gradient(to right, #236AFF, #8030D0);')).toEqual({ backgroundColor: '#236AFF' })
+    Platform.OS = 'web'
+    expect(cssToRNStyle('background: linear-gradient(to right, #236AFF, #8030D0);')).toEqual({ background: 'linear-gradient(to right, #236AFF, #8030D0)', backgroundColor: 'linear-gradient(to right, #236AFF, #8030D0)' })
+    Platform.OS = 'ios'
   })
   it('should accept base64 urls', () => {
     expect(cssToRNStyle("cursor: url('data:image/x-icon;base64,/35///58P//8eB///HAP//xgB//8QAP//AAD//wAB//8AA///gAf//8AP///wD////C////5v///+7////x///w=='), auto")).toEqual({ cursor: "url('data:image/x-icon;base64,/35///58P//8eB///HAP//xgB//8QAP//AAD//wAB//8AA///gAf//8AP///wD////C////5v///+7////x///w=='), auto" })
