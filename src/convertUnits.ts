@@ -16,7 +16,7 @@ export function convertValue (key: keyof PartialStyle | keyof Transform, value: 
     return 0
   }
   // colors should be left untouched
-  if (value.startsWith('#')) return value
+  if (value.startsWith('#') || value.startsWith('linear-gradient')) return value
 
   // Percentage values need to rely on an other unit as reference
   const finalUnits = { ...units }

@@ -119,7 +119,9 @@ export function placeContent (value: string) {
 
 export function background (value: string) {
   const values = value.match(/(linear-gradient\(|url\().*?\)|[^\s]+/mg) || []
-  const backgroundColor = values.reverse().find(isColor) || 'transparent'
+  const backgroundColor = values.reverse().find(isColor) ||
+    (values[0]?.startsWith('linear-gradient') && values[0].split(',').map(val => val.trim()).find(isColor)) ||
+    'transparent'
   // We support everything on web
   return Platform.OS === 'web' ? { backgroundColor, background: value } : { backgroundColor }
 }
