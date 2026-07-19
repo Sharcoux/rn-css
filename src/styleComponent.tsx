@@ -187,8 +187,9 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
     const ComponentWithAttrs = styledComponent(chunks, ...functs)
     // We need to limit the props control to only Result https://www.typescriptlang.org/play?#code/GYVwdgxgLglg9mABBATgUwIZTQUQB7ZgAmaRAwnALYAOAPAAopzUDOAfABQU0BciH1Jqz6NmLAJSIAvG0QYwAT0kBvAFCJkCFlET5CJYt2rT+gsSKETpstRo3ooIFEiMDL49YgC+nvWmL+5FTUAHRYUCgsJrQASmgsIAA2OmgEgVH0GCiwGIkMlmyc4ZF8cQnJkjKItnYQWjqMaHVgwDAA5k5YpEYmbua6eBCJICT5YgA0iGVJUGyVNp52iA5OLsEcyiFbZqyTW2FQESxeHks+SyvOiI3NrR0oXUE0nufLaI5XfgGGwao+qqBILAEIgen1hNVENhtHxtCgYGA2pNtApEmhYREEW1vCpPJckDsWH9VM1tNd0Ld2j0pMh0F0viQntQuMFxAcjhsofEoHwAORwADWvJxqhuCDurmUiBRaL50KgwpOQA
     const ForwardRefComponent = React.forwardRef<any, Omit<Props, keyof Result> & Part & Partial<Pick<Props, Extract<keyof Props, keyof Result>>>>((props, ref) => {
-      const attrs = (opts instanceof Function) ? opts(props as Props & Part) : opts
-      return <ComponentWithAttrs ref={ref} {...(props as Props & Part)} {...attrs} />
+      const castProps = props as unknown as Props & Part
+      const attrs = (opts instanceof Function) ? opts(castProps) : opts
+      return <ComponentWithAttrs ref={ref} {...attrs} {...castProps} />
     })
     // TODO : Find a way to remove from the Props the properties affected by opts
     return ForwardRefComponent
@@ -206,6 +207,6 @@ styledSectionList.attrs = <S, Result extends Partial<S & SectionListProps<any> &
 export const styledVirtualizedList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & VirtualizedListProps<any> & OptionalProps>)[]) => <Type, >(props: S & OptionalProps & VirtualizedListProps<Type>) => invoke(styled<ViewStyle, VirtualizedListProps<Type>>(VirtualizedList)(chunks, ...functs), props)
 styledVirtualizedList.attrs = <S, Result extends Partial<S & VirtualizedListProps<any> & OptionalProps> = {} >(opts: Result | ((props: S & OptionalProps & VirtualizedListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: Omit<VirtualizedListProps<Props> & OptionalProps, keyof Result> & S & Partial<Result>) => invoke(styled<ViewStyle, VirtualizedListProps<Props>>(VirtualizedList).attrs<S>(opts)(chunks, ...functs), componentProps as any)
 
-function invoke<T> (Component: React.ComponentType<T>, props: T) {
+function invoke<T extends object> (Component: React.ComponentType<T>, props: T) {
   return <Component {...props} />
 }
