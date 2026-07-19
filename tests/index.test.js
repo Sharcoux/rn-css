@@ -67,6 +67,32 @@ it('merges attrs when inheriting SC', async () => {
     second: 'second'
   })
 })
+it('should let props override attrs defaults', async () => {
+  const Comp = styled.View.attrs({
+    accessibilityLabel: 'from-attrs'
+  })``
+
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp accessibilityLabel="from-props" />)
+  })
+  const view = wrapper.root.findByType('View')
+
+  expect(view.props.accessibilityLabel).toBe('from-props')
+})
+it('should let props override attrs defaults from a function', async () => {
+  const Comp = styled.View.attrs(() => ({
+    accessibilityLabel: 'from-attrs'
+  }))``
+
+  let wrapper
+  await act(async () => {
+    wrapper = TestRenderer.create(<Comp accessibilityLabel="from-props" />)
+  })
+  const view = wrapper.root.findByType('View')
+
+  expect(view.props.accessibilityLabel).toBe('from-props')
+})
 
 describe('extended CSS support', () => {
   it('should handle lvh, lvw, svh, svw, dvh, dvw, vh, vw, vmin, vmax and rem units', async () => {

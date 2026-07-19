@@ -189,7 +189,7 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
     const ForwardRefComponent = React.forwardRef<any, Omit<Props, keyof Result> & Part & Partial<Pick<Props, Extract<keyof Props, keyof Result>>>>((props, ref) => {
       const castProps = props as unknown as Props & Part
       const attrs = (opts instanceof Function) ? opts(castProps) : opts
-      return <ComponentWithAttrs ref={ref} {...castProps} {...attrs} />
+      return <ComponentWithAttrs ref={ref} {...attrs} {...castProps} />
     })
     // TODO : Find a way to remove from the Props the properties affected by opts
     return ForwardRefComponent
@@ -207,6 +207,6 @@ styledSectionList.attrs = <S, Result extends Partial<S & SectionListProps<any> &
 export const styledVirtualizedList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & VirtualizedListProps<any> & OptionalProps>)[]) => <Type, >(props: S & OptionalProps & VirtualizedListProps<Type>) => invoke(styled<ViewStyle, VirtualizedListProps<Type>>(VirtualizedList)(chunks, ...functs), props)
 styledVirtualizedList.attrs = <S, Result extends Partial<S & VirtualizedListProps<any> & OptionalProps> = {} >(opts: Result | ((props: S & OptionalProps & VirtualizedListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: Omit<VirtualizedListProps<Props> & OptionalProps, keyof Result> & S & Partial<Result>) => invoke(styled<ViewStyle, VirtualizedListProps<Props>>(VirtualizedList).attrs<S>(opts)(chunks, ...functs), componentProps as any)
 
-function invoke<T> (Component: React.ComponentType<T>, props: T) {
+function invoke<T extends object> (Component: React.ComponentType<T>, props: T) {
   return <Component {...props} />
 }
