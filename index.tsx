@@ -4,6 +4,8 @@ import React from 'react'
 import { Animated, AppRegistry, Platform, StyleProp, Text, TextStyle, TouchableOpacityProps, View as RNView, ViewStyle } from 'react-native'
 import { name as appName } from './app.json'
 import styled from './src'
+/** Consumer path (published .d.ts) — soft-union + attrs bugs show up here, not always via ./src */
+import styledDist from './dist'
 
 const value = 100
 
@@ -120,6 +122,66 @@ const StyledUnionOnly = styled(UnionAction)`padding: 0.5em;`
 const StyledUnionFwd = styled(UnionActionFwd)`padding: 0.5em;`
 const StyledUnionFwdAttrs = styled(UnionActionFwd).attrs({ style: { opacity: 1 } })`padding: 0.5em;`
 
+/**
+ * Soft union like cantoo AudioButton — the other discriminant is absent, not `?: never`.
+ * After a non-distributive Omit/Pick collapse, `never`-keyed props still appear in keyof
+ * (false green on asserts above). Soft unions lose the keys entirely → real assignability errors.
+ */
+type SoftUnionProps = {
+  name: string
+  template: string
+  customText?: string
+  iconSize?: string
+  focusable?: boolean
+  style?: ViewStyle
+} & ({ toRead: string; onReadingComplete?: () => void } | { onPress: () => void })
+
+const SoftUnionFwd = React.forwardRef<RNView, SoftUnionProps>((props, ref) => (
+  <RNView ref={ref} style={props.style}>
+    <StyledText col='black'>
+      {'toRead' in props ? props.toRead : 'soft onPress'}
+    </StyledText>
+  </RNView>
+))
+SoftUnionFwd.displayName = 'SoftUnionFwd'
+
+/**
+ * Mirrors cantoo withPulsation: infer props, then assert ForwardRefExoticComponent with
+ * RefAttributes embedded in the props type parameter (same shape that breaks .attrs()).
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const withPulse = <C extends React.ComponentType<any>>(Component: C) => {
+  type P = C extends React.ComponentType<infer Props> ? Props : never
+  // Cast: React 19 forwardRef + soft-union P trips PropsWithoutRef; this helper only shapes types for asserts below.
+  const Pulsed = React.forwardRef((() => null) as any)
+  Pulsed.displayName = 'WithPulse'
+  return Pulsed as React.ForwardRefExoticComponent<
+    P & { animated?: boolean } & React.RefAttributes<RNView>
+  >
+}
+
+const SoftPulsed = withPulse(SoftUnionFwd)
+
+const StyledSoftOnly = styled(SoftUnionFwd)`padding: 0.5em;`
+const StyledSoftAttrs = styled(SoftUnionFwd).attrs({ style: { opacity: 1 } })`padding: 0.5em;`
+/**
+ * Repro via published typings (./dist), matching cantoo's import of `rn-css`.
+ * ./src can preserve the union while the emitted .d.ts + .attrs() collapses it.
+ */
+const StyledSoftAttrsEmpty = styledDist(SoftPulsed).attrs({})`
+  padding: 0.5em;
+`
+/** Same attrs shape as cantoo PlayButton */
+const StyledSoftPlay = styledDist(SoftPulsed).attrs({
+  name: 'audioButton',
+  template: 'purpleButton',
+  customText: '',
+  iconSize: '4em',
+  focusable: false
+})`
+  border-radius: 50%;
+`
+
 /** Compile-time: both branches kept (FC + forwardRef), exclusive combo rejected. */
 type UnionBranches<P> = P extends unknown
   ? (P extends { toRead: string } ? 'toRead' : P extends { onPress: () => void } ? 'onPress' : 'other')
@@ -142,6 +204,28 @@ const _badAttrs: React.ComponentProps<typeof StyledUnionAction> = { toRead: 'x',
 const _badFwd: React.ComponentProps<typeof StyledUnionFwd> = { toRead: 'x', onPress: () => undefined }
 // @ts-expect-error exclusivity
 const _badFwdAttrs: React.ComponentProps<typeof StyledUnionFwdAttrs> = { toRead: 'x', onPress: () => undefined }
+
+/**
+ * Soft-union assignability (AudioButton / PlayButton-shaped).
+ * StyledSoftOnly should pass; StyledSoftAttrsEmpty / StyledSoftPlay currently fail when
+ * .attrs() return type goes through forwardRef's PropsWithoutRef without the styled() cast.
+ */
+const _softOnlyToRead: React.ComponentProps<typeof StyledSoftOnly> = { name: 'n', template: 't', toRead: 'x' }
+const _softOnlyOnPress: React.ComponentProps<typeof StyledSoftOnly> = { name: 'n', template: 't', onPress: () => undefined }
+const _softAttrsToRead: React.ComponentProps<typeof StyledSoftAttrs> = { name: 'n', template: 't', toRead: 'x' }
+const _softAttrsOnPress: React.ComponentProps<typeof StyledSoftAttrs> = { name: 'n', template: 't', onPress: () => undefined }
+const _softEmptyToRead: React.ComponentProps<typeof StyledSoftAttrsEmpty> = {
+  name: 'n',
+  template: 't',
+  toRead: 'x'
+}
+const _softEmptyOnPress: React.ComponentProps<typeof StyledSoftAttrsEmpty> = {
+  name: 'n',
+  template: 't',
+  onPress: () => undefined
+}
+const _softPlayToRead: React.ComponentProps<typeof StyledSoftPlay> = { toRead: 'x' }
+const _softPlayOnPress: React.ComponentProps<typeof StyledSoftPlay> = { onPress: () => undefined }
 
 const CustomTouchable = styled.TouchableOpacity.attrs<{ extra: string }>({ activeOpacity: 1 })``
 
