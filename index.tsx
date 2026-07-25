@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react'
-import { Animated, AppRegistry, Platform, StyleProp, Text, TextStyle, TouchableOpacity, TouchableOpacityProps, ViewStyle } from 'react-native'
+import { Animated, AppRegistry, Platform, StyleProp, Text, TextStyle, TouchableOpacity, TouchableOpacityProps, View as RNView, ViewStyle } from 'react-native'
 import { name as appName } from './app.json'
 import styled from './src'
 
@@ -23,7 +23,7 @@ const Dot = styled(Animated.View)`
 `
 
 const StyledText = styled.Text<{col: string}>`
-  color: ${props => props.col || 'black'}
+  color: ${props => props.col || 'black'};
   font-size: 1em;
   @media (max-width: 40em) {
     color: blue;
@@ -63,7 +63,7 @@ const Hoverable = styled.View`
 
 const HoverableText = styled.Text`
   &:hover {
-    fontSize: 2em
+    font-size: 2em
   }
 `
 const Options = styled.FlatList.attrs<{selected: boolean; pressed: boolean}>(props => ({ pressed: props.selected || props.pressed }))`
@@ -94,9 +94,27 @@ const Comp = ({ style, text }: { style?: ViewStyle; text: string }) => {
   </View>
 }
 const ExtendedComp = styled(Comp).attrs({ text: 'test' })``
-// const ExtendedComp2 = styled(Comp)<{ small: boolean }>`
-//   ${props => props.small ? 'font-size: 0.8em' : ''}
-// `
+
+/** Discriminated union: toRead | onPress — DistributiveOmit must keep both branches after .attrs() */
+type UnionActionProps = { style?: ViewStyle } & (
+  | { toRead: string }
+  | { onPress: () => void }
+)
+
+const UnionAction = (props: UnionActionProps) => {
+  if ('onPress' in props) {
+    return (
+      <RNView style={props.style}>
+        <StyledText col='black' onPress={props.onPress}>Union onPress</StyledText>
+      </RNView>
+    )
+  }
+  return <StyledText style={props.style} col='black'>{props.toRead}</StyledText>
+}
+
+const StyledUnionAction = styled(UnionAction).attrs({ style: { opacity: 1 } })`
+  padding: 0.5em;
+`
 
 const CustomTouchable = styled.TouchableOpacity.attrs<{ extra: string }>({ activeOpacity: 1 })``
 
@@ -205,6 +223,9 @@ const App = () => {
       <CustomTouchable style={{}} {...touchableProps} activeOpacity={0} extra='test'>
         <ExtendedComp style={{}} text='notest'/>
       </CustomTouchable>
+      {/* Both branches of the union must typecheck (toRead | onPress preserved after attrs) */}
+      <StyledUnionAction toRead='hello from union' />
+      <StyledUnionAction onPress={() => console.log('union press')} />
     </Box>
   )
 }
