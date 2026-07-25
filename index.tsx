@@ -96,31 +96,52 @@ const Comp = ({ style, text }: { style?: ViewStyle; text: string }) => {
 }
 const ExtendedComp = styled(Comp).attrs({ text: 'test' })``
 
-/** Discriminated union: toRead | onPress — DistributiveOmit must keep both branches after .attrs() */
-type UnionActionProps = { style?: ViewStyle } & (
-  | { toRead: string }
-  | { onPress: () => void }
-)
+/** Discriminated union — `never` keeps exclusivity checkable after styled()/attrs(). */
+type UnionActionProps =
+  | { toRead: string; onPress?: never; style?: ViewStyle }
+  | { toRead?: never; onPress: () => void; style?: ViewStyle }
 
 const UnionAction = (props: UnionActionProps) => {
-  if ('onPress' in props) {
-    return (
-      <RNView style={props.style}>
-        <StyledText col='black' onPress={props.onPress}>Union onPress</StyledText>
-      </RNView>
-    )
+  if ('onPress' in props && props.onPress) {
+    return <StyledText style={props.style} col='black' onPress={props.onPress}>Union onPress</StyledText>
   }
   return <StyledText style={props.style} col='black'>{props.toRead}</StyledText>
 }
 
-const StyledUnionAction = styled(UnionAction).attrs({ style: { opacity: 1 } })`
-  padding: 0.5em;
-`
+const UnionActionFwd = React.forwardRef<RNView, UnionActionProps>((props, ref) => (
+  <RNView ref={ref} style={props.style} onTouchEnd={'onPress' in props ? props.onPress : undefined}>
+    <StyledText col='black'>{'toRead' in props ? props.toRead : 'Union forwardRef onPress'}</StyledText>
+  </RNView>
+))
+UnionActionFwd.displayName = 'UnionActionFwd'
 
-/** Same union without attrs — styled() alone must preserve discriminants */
-const StyledUnionOnly = styled(UnionAction)`
-  padding: 0.5em;
-`
+const StyledUnionAction = styled(UnionAction).attrs({ style: { opacity: 1 } })`padding: 0.5em;`
+const StyledUnionOnly = styled(UnionAction)`padding: 0.5em;`
+const StyledUnionFwd = styled(UnionActionFwd)`padding: 0.5em;`
+const StyledUnionFwdAttrs = styled(UnionActionFwd).attrs({ style: { opacity: 1 } })`padding: 0.5em;`
+
+/** Compile-time: both branches kept (FC + forwardRef), exclusive combo rejected. */
+type UnionBranches<P> = P extends unknown
+  ? (P extends { toRead: string } ? 'toRead' : P extends { onPress: () => void } ? 'onPress' : 'other')
+  : never
+type AssertUnionPreserved<P> = UnionBranches<P> extends 'toRead' | 'onPress'
+  ? ('toRead' | 'onPress' extends UnionBranches<P> ? true : never)
+  : never
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AssertStyledUnion<C extends React.ComponentType<any>> = AssertUnionPreserved<React.ComponentProps<C>>
+
+const _assertOnly: AssertStyledUnion<typeof StyledUnionOnly> = true
+const _assertAttrs: AssertStyledUnion<typeof StyledUnionAction> = true
+const _assertFwd: AssertStyledUnion<typeof StyledUnionFwd> = true
+const _assertFwdAttrs: AssertStyledUnion<typeof StyledUnionFwdAttrs> = true
+// @ts-expect-error exclusivity — both discriminants together must be rejected
+const _badOnly: React.ComponentProps<typeof StyledUnionOnly> = { toRead: 'x', onPress: () => undefined }
+// @ts-expect-error exclusivity
+const _badAttrs: React.ComponentProps<typeof StyledUnionAction> = { toRead: 'x', onPress: () => undefined }
+// @ts-expect-error exclusivity
+const _badFwd: React.ComponentProps<typeof StyledUnionFwd> = { toRead: 'x', onPress: () => undefined }
+// @ts-expect-error exclusivity
+const _badFwdAttrs: React.ComponentProps<typeof StyledUnionFwdAttrs> = { toRead: 'x', onPress: () => undefined }
 
 const CustomTouchable = styled.TouchableOpacity.attrs<{ extra: string }>({ activeOpacity: 1 })``
 
@@ -146,7 +167,7 @@ const Triangle = styled.View`
   border-bottom: 50% solid transparent;
 `
 
-const Forward = React.forwardRef<RNView, TouchableOpacityProps>((props: TouchableOpacityProps, ref) => {
+const Forward = React.forwardRef<RNView, TouchableOpacityProps>((props, ref) => {
   return <Touchable ref={ref} {...props} pressed={true} />
 })
 Forward.displayName = 'Forward'
@@ -161,7 +182,7 @@ const StyledButton2 = styled(Button).attrs(({ color: 'black' }))``
 
 const App = () => {
   const ref = React.useRef<Text>(null)
-  const ref2 = React.useRef<typeof Box>(null)
+  const ref2 = React.useRef<RNView>(null)
   React.useLayoutEffect(() => console.log(ref), [])
   const dotLeft = React.useRef(new Animated.Value(0))
   const dotStyle: Animated.WithAnimatedValue<ViewStyle> = React.useMemo(
@@ -174,18 +195,9 @@ const App = () => {
     []
   )
 
-  // const LangDropdownItem = styled.View.attrs<{ label: string; value: number }>(
-  //   ({ label }) => ({
-  //     label: label + 2
-  //   })
-  // )`
-  //   z-index: ${props => props.value + ''};
-  // `
-
   const touchableProps = { activeOpacity: 0 } as TouchableOpacityProps
 
   return (
-
     <Box ref={ref2}>
       <View style={{ flexDirection: 'column' }}>
         <StyledText ref={ref} col={'black'} numberOfLines={1} style={{ flexGrow: 1, flexBasis: 'auto' }}>Welcome to ReactNativeStyledComponents</StyledText>
@@ -217,12 +229,14 @@ const App = () => {
       <CustomTouchable style={{}} {...touchableProps} activeOpacity={0} extra='test'>
         <ExtendedComp style={{}} text='notest'/>
       </CustomTouchable>
-      {/* Both branches of the union must typecheck (toRead | onPress preserved after attrs) */}
       <StyledUnionAction toRead='hello from union' />
       <StyledUnionAction onPress={() => console.log('union press')} />
-      {/* Same check without attrs — styled() must not collapse the union */}
       <StyledUnionOnly toRead='hello styled only' />
       <StyledUnionOnly onPress={() => console.log('styled only press')} />
+      <StyledUnionFwd toRead='hello forwardRef union' />
+      <StyledUnionFwd onPress={() => console.log('forwardRef union press')} />
+      <StyledUnionFwdAttrs toRead='hello forwardRef attrs' />
+      <StyledUnionFwdAttrs onPress={() => console.log('forwardRef attrs press')} />
     </Box>
   )
 }
