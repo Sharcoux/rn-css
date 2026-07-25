@@ -1,4 +1,3 @@
-import React from 'react'
 import * as RN from 'react-native'
 import './polyfill'
 import styledComponent, { styledFlatList, styledSectionList, styledVirtualizedList } from './styleComponent'
@@ -6,30 +5,37 @@ export { cssToRNStyle } from './cssToRN'
 export { SharedValue, FontSizeContext, RemContext, DefaultTheme } from './styleComponent'
 export * from './useTheme'
 
-const styled = <C extends React.ComponentType<any>>(Component: C) => styledComponent(Component)
+const styledMembers = {
+  ActivityIndicator: styledComponent(RN.ActivityIndicator),
+  DrawerLayoutAndroid: styledComponent(RN.DrawerLayoutAndroid),
+  Image: styledComponent(RN.Image),
+  ImageBackground: styledComponent(RN.ImageBackground),
+  KeyboardAvoidingView: styledComponent(RN.KeyboardAvoidingView),
+  Modal: styledComponent(RN.Modal),
+  NavigatorIOS: styledComponent(RN.NavigatorIOS),
+  ScrollView: styledComponent(RN.ScrollView),
+  SnapshotViewIOS: styledComponent(RN.SnapshotViewIOS),
+  Switch: styledComponent(RN.Switch),
+  RecyclerViewBackedScrollView: styledComponent(RN.RecyclerViewBackedScrollView),
+  RefreshControl: styledComponent(RN.RefreshControl),
+  SafeAreaView: styledComponent(RN.SafeAreaView),
+  Text: styledComponent(RN.Text),
+  TextInput: styledComponent(RN.TextInput),
+  TouchableHighlight: styledComponent(RN.TouchableHighlight),
+  TouchableNativeFeedback: styledComponent(RN.TouchableNativeFeedback),
+  TouchableOpacity: styledComponent(RN.TouchableOpacity),
+  TouchableWithoutFeedback: styledComponent(RN.TouchableWithoutFeedback),
+  View: styledComponent(RN.View),
+  FlatList: styledFlatList,
+  SectionList: styledSectionList,
+  VirtualizedList: styledVirtualizedList
+}
 
-styled.ActivityIndicator = styled(RN.ActivityIndicator)
-styled.DrawerLayoutAndroid = styled(RN.DrawerLayoutAndroid)
-styled.Image = styled(RN.Image)
-styled.ImageBackground = styled(RN.ImageBackground)
-styled.KeyboardAvoidingView = styled(RN.KeyboardAvoidingView)
-styled.Modal = styled(RN.Modal)
-styled.NavigatorIOS = styled(RN.NavigatorIOS)
-styled.ScrollView = styled(RN.ScrollView)
-styled.SnapshotViewIOS = styled(RN.SnapshotViewIOS)
-styled.Switch = styled(RN.Switch)
-styled.RecyclerViewBackedScrollView = styled(RN.RecyclerViewBackedScrollView)
-styled.RefreshControl = styled(RN.RefreshControl)
-styled.SafeAreaView = styled(RN.SafeAreaView)
-styled.Text = styled(RN.Text)
-styled.TextInput = styled(RN.TextInput)
-styled.TouchableHighlight = styled(RN.TouchableHighlight)
-styled.TouchableNativeFeedback = styled(RN.TouchableNativeFeedback)
-styled.TouchableOpacity = styled(RN.TouchableOpacity)
-styled.TouchableWithoutFeedback = styled(RN.TouchableWithoutFeedback)
-styled.View = styled(RN.View)
-styled.FlatList = styledFlatList
-styled.SectionList = styledSectionList
-styled.VirtualizedList = styledVirtualizedList
+Object.assign(styledComponent, styledMembers)
 
+/**
+ * Annotate with `typeof import(...)` so index.d.ts keeps a reference to styleComponent
+ * instead of inlining Omit/Pick (which collapses soft-union attrs props).
+ */
+const styled: typeof import('./styleComponent').default & typeof styledMembers = styledComponent as typeof styledComponent & typeof styledMembers
 export default styled

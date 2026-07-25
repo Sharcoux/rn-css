@@ -22,17 +22,26 @@ export interface DefaultTheme {}
 
 type Primitive = number | string | null | undefined | boolean | CompleteStyle
 type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown, theme: DefaultTheme }) => Primitive
-/** Omit that distributes over unions so discriminant keys are preserved. */
-type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never
-/** Intersect that distributes over unions so discriminants survive `& Extra`. */
-type DistributeIntersect<T, U> = T extends unknown ? T & U : never
+
+/** `T & U`, distributed over union members of T (keeps discriminants). */
+type Spread<T, U> = T extends unknown ? T & U : never
+
+/** Like Omit, but a no-op when K is `never` (`Omit<T, never>` breaks excess-property checks on unions). */
+type SafeOmit<T, K extends PropertyKey> = [K] extends [never] ? T : Omit<T, K>
+
 /**
- * Attrs keys become optional.
- * Value types come from Props (or Part for Part-only keys), never from Result literals like "black".
+ * After `.attrs(result)`, keys in Result become optional.
+ * Distributes over unions so soft/hard discriminants survive.
+ * Value types come from Props/Part (not Result literals like `"black"`).
+ * Keep as a top-level alias — inlining Omit in .d.ts collapses unions.
  */
-type OptionalAttrsKeys<Props, Part, Result> =
-  Partial<Pick<Props, Extract<keyof Result, keyof Props>>> &
-  Partial<Pick<Part, Exclude<Extract<keyof Result, keyof Part>, keyof Props>>>
+type AttrsProps<Props, Part, Result> = Props extends unknown
+  ? SafeOmit<Props, keyof Result> &
+    Partial<Pick<Props, Extract<keyof Result, keyof Props>>> &
+    SafeOmit<Part, keyof Result> &
+    Partial<Pick<Part, Exclude<Extract<keyof Result, keyof Part>, keyof Props>>>
+  : never
+
 type OptionalProps = {
   rnCSS?: `${string};`;
   onFocus?: FocusEventListener;
@@ -81,25 +90,32 @@ function removeStyle (hash: string) {
 /** Extract style value type from a props object's style prop, if present. */
 type StyleTypeFromProps<P> = P extends { style?: StyleProp<infer S> } ? S : unknown
 
-/**
- * Infer props from the component value (`C`), not via `ComponentType<InitialProps>`.
- * The latter can drop union branches for ForwardRefExoticComponent; ComponentPropsWithoutRef keeps them.
- */
+/** Strip ref/key without Omit (Omit/PropsWithoutRef collapse soft unions). */
+type NoRef<P> = P extends unknown
+  ? { [K in keyof P as Exclude<K, 'ref' | 'key'>]: P[K] }
+  : never
+
+/** Props of C; peels RefAttributes from ForwardRefExoticComponent without collapsing soft unions. */
+type PropsOf<C> = C extends React.ForwardRefExoticComponent<infer P>
+  ? NoRef<P>
+  : C extends React.ComponentType<infer P>
+    ? P
+    : never
+
 const styled = <C extends React.ComponentType<any>>(Component: C) => {
-  type InitialProps = React.ComponentPropsWithoutRef<C>
+  type InitialProps = PropsOf<C>
   type StyleType = StyleTypeFromProps<InitialProps>
-  type Props = DistributeIntersect<InitialProps, OptionalProps>
-  // Ref of the underlying component; `unknown` when C cannot receive refs (plain FC).
-  type InferredRef = React.ComponentRef<C>
+  type Props = Spread<InitialProps, OptionalProps>
+  type InferredRef = C extends React.ElementType ? React.ComponentRef<C> : unknown
   type HostRef = [InferredRef] extends [never] ? unknown : InferredRef
 
-  const styledComponent = <S extends object = {}>(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<DistributeIntersect<Props, S>>)[]) => {
-    type MergedProps = DistributeIntersect<Props, S>
+  const styledComponent = <S extends object = {}>(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<Spread<Props, S>>)[]) => {
+    type MergedProps = Spread<Props, S>
     const ForwardRefComponent = React.forwardRef<HostRef, MergedProps>((props, ref) => {
       const rem = React.useContext(RemContext)
       const shared = React.useContext(SharedValue)
       // Build the css string with the context
-      const css = React.useMemo(() => buildCSSString(chunks, functs, (props as unknown as DistributeIntersect<Props, S>), shared), [props, shared])
+      const css = React.useMemo(() => buildCSSString(chunks, functs, (props as unknown as Spread<Props, S>), shared), [props, shared])
       // Store the style in RN format
       const rnStyle = React.useMemo(() => cssToStyle(css), [css])
 
@@ -196,7 +212,7 @@ const styled = <C extends React.ComponentType<any>>(Component: C) => {
       React.useEffect(() => () => removeStyle(hash), [hash])
 
       // em !== parentEm alone is a bit dangerous as the component would rerender when the font size change
-      // Cast: generic C + ref is not assignable to LibraryManagedAttributes<C, _> under ComponentPropsWithoutRef.
+      // Cast: generic C + ref is not assignable to LibraryManagedAttributes under PropsOf.
       const RenderComponent = Component as React.ComponentType<any>
       if (em !== parentEm || finalStyle.fontSize !== undefined) {
         return <FontSizeContext.Provider value={em}>
@@ -211,17 +227,19 @@ const styled = <C extends React.ComponentType<any>>(Component: C) => {
   }
 
   // provide styled(Comp).attrs({} | () => {}) feature
-  styledComponent.attrs = <Part extends object = {}, Result extends Partial<DistributeIntersect<Props, Part>> = Partial<DistributeIntersect<Props, Part>>>(opts: Result | ((props: DistributeIntersect<Props, Part>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<DistributeIntersect<Props, Part>>)[]) => {
+  styledComponent.attrs = <Part extends object = {}, Result extends Partial<Spread<Props, Part>> = Partial<Spread<Props, Part>>>(opts: Result | ((props: Spread<Props, Part>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<Spread<Props, Part>>)[]) => {
     const ComponentWithAttrs = styledComponent(chunks, ...functs)
-    // DistributiveOmit keeps union discriminants. Omit Result keys from Part so inferred attrs
-    // literals (e.g. color: "black") don't override Props types. OptionalAttrsKeys restores those keys as optional.
-    type AttrsProps = DistributiveOmit<Props, keyof Result> & Omit<Part, keyof Result> & OptionalAttrsKeys<Props, Part, Result>
-    const ForwardRefComponent = React.forwardRef<HostRef, AttrsProps>((props, ref) => {
-      const castProps = props as unknown as DistributeIntersect<Props, Part>
+    // Attrs on InitialProps (before OptionalProps) so Omit distributes per union branch; then Spread OptionalProps.
+    type OutProps = Spread<AttrsProps<InitialProps, Part, Result>, OptionalProps>
+    const ForwardRefComponent = React.forwardRef<HostRef, OutProps>((props, ref) => {
+      const castProps = props as unknown as Spread<Props, Part>
       const attrs = (opts instanceof Function) ? opts(castProps) : opts
       return <ComponentWithAttrs ref={ref} {...attrs} {...castProps} />
     })
-    return ForwardRefComponent
+    // Keep AttrsProps/Spread by name in the cast so .d.ts preserves distributivity.
+    return ForwardRefComponent as React.ForwardRefExoticComponent<
+      Spread<AttrsProps<InitialProps, Part, Result>, OptionalProps> & React.RefAttributes<HostRef>
+    >
   }
 
   return styledComponent
@@ -230,11 +248,11 @@ const styled = <C extends React.ComponentType<any>>(Component: C) => {
 export default styled
 
 export const styledFlatList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & FlatListProps<any> & OptionalProps>)[]) => <Type, >(props: S & OptionalProps & FlatListProps<Type>) => invoke(styled(FlatList as React.ComponentType<FlatListProps<Type>>)(chunks, ...functs), props)
-styledFlatList.attrs = <S extends object = {}, Result extends Partial<S & FlatListProps<any> & OptionalProps> = {} > (opts: Result | ((props: S & OptionalProps & FlatListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: DistributiveOmit<FlatListProps<Props> & OptionalProps, keyof Result> & Omit<S, keyof Result> & OptionalAttrsKeys<FlatListProps<Props> & OptionalProps, S, Result>) => invoke(styled(FlatList as React.ComponentType<FlatListProps<Props>>).attrs<S>(opts)(chunks, ...functs), componentProps as any)
+styledFlatList.attrs = <S extends object = {}, Result extends Partial<S & FlatListProps<any> & OptionalProps> = {} > (opts: Result | ((props: S & OptionalProps & FlatListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: AttrsProps<FlatListProps<Props> & OptionalProps, S, Result>) => invoke(styled(FlatList as React.ComponentType<FlatListProps<Props>>).attrs<S>(opts)(chunks, ...functs), componentProps as any)
 export const styledSectionList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & SectionListProps<any> & OptionalProps>)[]) => <Type, >(props: S & OptionalProps & SectionListProps<Type>) => invoke(styled(SectionList as React.ComponentType<SectionListProps<Type>>)(chunks, ...functs), props)
-styledSectionList.attrs = <S extends object = {}, Result extends Partial<S & SectionListProps<any> & OptionalProps> = {} >(opts: Result | ((props: S & OptionalProps & SectionListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: DistributiveOmit<SectionListProps<Props> & OptionalProps, keyof Result> & Omit<S, keyof Result> & OptionalAttrsKeys<SectionListProps<Props> & OptionalProps, S, Result>) => invoke(styled(SectionList as React.ComponentType<SectionListProps<Props>>).attrs<S>(opts)(chunks, ...functs), componentProps as any)
+styledSectionList.attrs = <S extends object = {}, Result extends Partial<S & SectionListProps<any> & OptionalProps> = {} >(opts: Result | ((props: S & OptionalProps & SectionListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: AttrsProps<SectionListProps<Props> & OptionalProps, S, Result>) => invoke(styled(SectionList as React.ComponentType<SectionListProps<Props>>).attrs<S>(opts)(chunks, ...functs), componentProps as any)
 export const styledVirtualizedList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & VirtualizedListProps<any> & OptionalProps>)[]) => <Type, >(props: S & OptionalProps & VirtualizedListProps<Type>) => invoke(styled(VirtualizedList as React.ComponentType<VirtualizedListProps<Type>>)(chunks, ...functs), props)
-styledVirtualizedList.attrs = <S extends object = {}, Result extends Partial<S & VirtualizedListProps<any> & OptionalProps> = {} >(opts: Result | ((props: S & OptionalProps & VirtualizedListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: DistributiveOmit<VirtualizedListProps<Props> & OptionalProps, keyof Result> & Omit<S, keyof Result> & OptionalAttrsKeys<VirtualizedListProps<Props> & OptionalProps, S, Result>) => invoke(styled(VirtualizedList as React.ComponentType<VirtualizedListProps<Props>>).attrs<S>(opts)(chunks, ...functs), componentProps as any)
+styledVirtualizedList.attrs = <S extends object = {}, Result extends Partial<S & VirtualizedListProps<any> & OptionalProps> = {} >(opts: Result | ((props: S & OptionalProps & VirtualizedListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: AttrsProps<VirtualizedListProps<Props> & OptionalProps, S, Result>) => invoke(styled(VirtualizedList as React.ComponentType<VirtualizedListProps<Props>>).attrs<S>(opts)(chunks, ...functs), componentProps as any)
 
 function invoke<T extends object> (Component: React.ComponentType<T>, props: T) {
   return <Component {...props} />
