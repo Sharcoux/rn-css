@@ -116,6 +116,11 @@ const StyledUnionAction = styled(UnionAction).attrs({ style: { opacity: 1 } })`
   padding: 0.5em;
 `
 
+/** Same union without attrs — styled() alone must preserve discriminants */
+const StyledUnionOnly = styled(UnionAction)`
+  padding: 0.5em;
+`
+
 const CustomTouchable = styled.TouchableOpacity.attrs<{ extra: string }>({ activeOpacity: 1 })``
 
 const Touchable = styled.TouchableOpacity<{pressed: boolean}>`
@@ -226,6 +231,9 @@ const App = () => {
       {/* Both branches of the union must typecheck (toRead | onPress preserved after attrs) */}
       <StyledUnionAction toRead='hello from union' />
       <StyledUnionAction onPress={() => console.log('union press')} />
+      {/* Same check without attrs — styled() must not collapse the union */}
+      <StyledUnionOnly toRead='hello styled only' />
+      <StyledUnionOnly onPress={() => console.log('styled only press')} />
     </Box>
   )
 }
