@@ -1,6 +1,6 @@
 {
   "name": "rn-css",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "exports": {
     ".": {
       "import": "./dist/index.js",
