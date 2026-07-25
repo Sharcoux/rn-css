@@ -24,7 +24,7 @@ const Dot = styled(Animated.View)`
 `
 
 const StyledText = styled.Text<{col: string}>`
-  color: ${props => props.col || 'black'}
+  color: ${props => props.col || 'black'};
   font-size: 1em;
   @media (max-width: 40em) {
     color: blue;
@@ -64,7 +64,7 @@ const Hoverable = styled.View`
 
 const HoverableText = styled.Text`
   &:hover {
-    fontSize: 2em
+    font-size: 2em
   }
 `
 const Options = styled.FlatList.attrs<{selected: boolean; pressed: boolean}>(props => ({ pressed: props.selected || props.pressed }))`
@@ -95,9 +95,29 @@ const Comp = ({ style, text }: { style?: ViewStyle; text: string }) => {
   </View>
 }
 const ExtendedComp = styled(Comp).attrs({ text: 'test' })``
-// const ExtendedComp2 = styled(Comp)<{ small: boolean }>`
-//   ${props => props.small ? 'font-size: 0.8em' : ''}
-// `
+
+/** Discriminated union: toRead | onPress — DistributiveOmit must keep both branches after .attrs() */
+type UnionActionProps = { style?: ViewStyle } & (
+  | { toRead: string }
+  | { onPress: () => void }
+)
+
+const UnionAction = (props: UnionActionProps) => {
+  if ('onPress' in props) {
+    return (
+      <RNView style={props.style}>
+        <StyledText col='black' onPress={props.onPress}>Union onPress</StyledText>
+      </RNView>
+    )
+  }
+  else if ('toRead' in props) {
+    return <StyledText style={props.style} col='black'>{props.toRead}</StyledText>
+  }
+}
+
+const StyledUnionAction = styled(UnionAction).attrs({ style: { opacity: 1 } })`
+  padding: 0.5em;
+`
 
 const CustomTouchable = styled.TouchableOpacity.attrs<{ extra: string }>({ activeOpacity: 1 })``
 
@@ -122,18 +142,6 @@ const Triangle = styled.View`
   border-right: 50% solid transparent;
   border-bottom: 50% solid transparent;
 `
-
-// const CustomSelectContainer = styled.TouchableOpacity.attrs({ activeOpacity: 1 })`
-//   padding: 2px;
-//   margin: 0.2em;
-//   border-radius: 0.6em;
-//   width: 8em;
-//   height: 3.6em;
-//   flex-direction: row;
-//   background-color: white;
-//   border-width: 1px;
-//   border-style: solid;
-// `
 
 const Forward = React.forwardRef<RNView, TouchableOpacityProps>((props: TouchableOpacityProps, ref) => {
   return <Touchable ref={ref} {...props} pressed={true} />
@@ -206,6 +214,9 @@ const App = () => {
       <CustomTouchable style={{}} {...touchableProps} activeOpacity={0} extra='test'>
         <ExtendedComp style={{}} text='notest'/>
       </CustomTouchable>
+      {/* Both branches of the union must typecheck (toRead | onPress preserved after attrs) */}
+      <StyledUnionAction toRead='hello from union' />
+      <StyledUnionAction onPress={() => console.log('union press')} />
     </Box>
   )
 }

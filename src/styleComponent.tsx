@@ -22,6 +22,15 @@ export interface DefaultTheme {}
 
 type Primitive = number | string | null | undefined | boolean | CompleteStyle
 type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown, theme: DefaultTheme }) => Primitive
+/** Omit that distributes over unions so discriminant keys are preserved. */
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never
+/**
+ * Attrs keys become optional.
+ * Value types come from Props (or Part for Part-only keys), never from Result literals like "black".
+ */
+type OptionalAttrsKeys<Props, Part, Result> =
+  Partial<Pick<Props, Extract<keyof Result, keyof Props>>> &
+  Partial<Pick<Part, Exclude<Extract<keyof Result, keyof Part>, keyof Props>>>
 type OptionalProps = {
   rnCSS?: `${string};`;
   onFocus?: FocusEventListener;
@@ -183,15 +192,15 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
   }
 
   // provide styled(Comp).attrs({} | () => {}) feature
-  styledComponent.attrs = <Part, Result extends Partial<Props & Part> = Partial<Props & Part>>(opts: Result | ((props: Props & Part) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<Props & Part>)[]) => {
+  styledComponent.attrs = <Part extends object = {}, Result extends Partial<Props & Part> = Partial<Props & Part>>(opts: Result | ((props: Props & Part) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<Props & Part>)[]) => {
     const ComponentWithAttrs = styledComponent(chunks, ...functs)
-    // We need to limit the props control to only Result https://www.typescriptlang.org/play?#code/GYVwdgxgLglg9mABBATgUwIZTQUQB7ZgAmaRAwnALYAOAPAAopzUDOAfABQU0BciH1Jqz6NmLAJSIAvG0QYwAT0kBvAFCJkCFlET5CJYt2rT+gsSKETpstRo3ooIFEiMDL49YgC+nvWmL+5FTUAHRYUCgsJrQASmgsIAA2OmgEgVH0GCiwGIkMlmyc4ZF8cQnJkjKItnYQWjqMaHVgwDAA5k5YpEYmbua6eBCJICT5YgA0iGVJUGyVNp52iA5OLsEcyiFbZqyTW2FQESxeHks+SyvOiI3NrR0oXUE0nufLaI5XfgGGwao+qqBILAEIgen1hNVENhtHxtCgYGA2pNtApEmhYREEW1vCpPJckDsWH9VM1tNd0Ld2j0pMh0F0viQntQuMFxAcjhsofEoHwAORwADWvJxqhuCDurmUiBRaL50KgwpOQA
-    const ForwardRefComponent = React.forwardRef<any, Omit<Props, keyof Result> & Part & Partial<Pick<Props, Extract<keyof Props, keyof Result>>>>((props, ref) => {
+    // DistributiveOmit keeps union discriminants. Omit Result keys from Part so inferred attrs
+    // literals (e.g. color: "black") don't override Props types. OptionalAttrsKeys restores those keys as optional.
+    const ForwardRefComponent = React.forwardRef<any, DistributiveOmit<Props, keyof Result> & Omit<Part, keyof Result> & OptionalAttrsKeys<Props, Part, Result>>((props, ref) => {
       const castProps = props as unknown as Props & Part
       const attrs = (opts instanceof Function) ? opts(castProps) : opts
       return <ComponentWithAttrs ref={ref} {...attrs} {...castProps} />
     })
-    // TODO : Find a way to remove from the Props the properties affected by opts
     return ForwardRefComponent
   }
 
@@ -201,11 +210,11 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
 export default styled
 
 export const styledFlatList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & FlatListProps<any> & OptionalProps>)[]) => <Type, >(props: S & OptionalProps & FlatListProps<Type>) => invoke(styled<ViewStyle, FlatListProps<Type>>(FlatList)(chunks, ...functs), props)
-styledFlatList.attrs = <S, Result extends Partial<S & FlatListProps<any> & OptionalProps> = {} > (opts: Result | ((props: S & OptionalProps & FlatListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: Omit<FlatListProps<Props> & OptionalProps, keyof Result> & S & Partial<Result>) => invoke(styled<ViewStyle, FlatListProps<Props>>(FlatList).attrs<S>(opts)(chunks, ...functs), componentProps as any)
+styledFlatList.attrs = <S extends object = {}, Result extends Partial<S & FlatListProps<any> & OptionalProps> = {} > (opts: Result | ((props: S & OptionalProps & FlatListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: DistributiveOmit<FlatListProps<Props> & OptionalProps, keyof Result> & Omit<S, keyof Result> & OptionalAttrsKeys<FlatListProps<Props> & OptionalProps, S, Result>) => invoke(styled<ViewStyle, FlatListProps<Props>>(FlatList).attrs<S>(opts)(chunks, ...functs), componentProps as any)
 export const styledSectionList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & SectionListProps<any> & OptionalProps>)[]) => <Type, >(props: S & OptionalProps & SectionListProps<Type>) => invoke(styled<ViewStyle, SectionListProps<Type>>(SectionList)(chunks, ...functs), props)
-styledSectionList.attrs = <S, Result extends Partial<S & SectionListProps<any> & OptionalProps> = {} >(opts: Result | ((props: S & OptionalProps & SectionListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: Omit<SectionListProps<Props> & OptionalProps, keyof Result> & S & Partial<Result>) => invoke(styled<ViewStyle, SectionListProps<Props>>(SectionList).attrs<S>(opts)(chunks, ...functs), componentProps as any)
+styledSectionList.attrs = <S extends object = {}, Result extends Partial<S & SectionListProps<any> & OptionalProps> = {} >(opts: Result | ((props: S & OptionalProps & SectionListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: DistributiveOmit<SectionListProps<Props> & OptionalProps, keyof Result> & Omit<S, keyof Result> & OptionalAttrsKeys<SectionListProps<Props> & OptionalProps, S, Result>) => invoke(styled<ViewStyle, SectionListProps<Props>>(SectionList).attrs<S>(opts)(chunks, ...functs), componentProps as any)
 export const styledVirtualizedList = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & VirtualizedListProps<any> & OptionalProps>)[]) => <Type, >(props: S & OptionalProps & VirtualizedListProps<Type>) => invoke(styled<ViewStyle, VirtualizedListProps<Type>>(VirtualizedList)(chunks, ...functs), props)
-styledVirtualizedList.attrs = <S, Result extends Partial<S & VirtualizedListProps<any> & OptionalProps> = {} >(opts: Result | ((props: S & OptionalProps & VirtualizedListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: Omit<VirtualizedListProps<Props> & OptionalProps, keyof Result> & S & Partial<Result>) => invoke(styled<ViewStyle, VirtualizedListProps<Props>>(VirtualizedList).attrs<S>(opts)(chunks, ...functs), componentProps as any)
+styledVirtualizedList.attrs = <S extends object = {}, Result extends Partial<S & VirtualizedListProps<any> & OptionalProps> = {} >(opts: Result | ((props: S & OptionalProps & VirtualizedListProps<any>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S>)[]) => <Props, >(componentProps: DistributiveOmit<VirtualizedListProps<Props> & OptionalProps, keyof Result> & Omit<S, keyof Result> & OptionalAttrsKeys<VirtualizedListProps<Props> & OptionalProps, S, Result>) => invoke(styled<ViewStyle, VirtualizedListProps<Props>>(VirtualizedList).attrs<S>(opts)(chunks, ...functs), componentProps as any)
 
 function invoke<T extends object> (Component: React.ComponentType<T>, props: T) {
   return <Component {...props} />
