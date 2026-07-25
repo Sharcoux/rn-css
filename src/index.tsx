@@ -6,7 +6,7 @@ export { cssToRNStyle } from './cssToRN'
 export { SharedValue, FontSizeContext, RemContext, DefaultTheme } from './styleComponent'
 export * from './useTheme'
 
-const styled = <StyleType, InitialProps extends { style?: RN.StyleProp<StyleType> }>(Component: React.ComponentType<InitialProps>) => styledComponent<StyleType, InitialProps>(Component)
+const styled = <C extends React.ComponentType<any>>(Component: C) => styledComponent(Component)
 
 styled.ActivityIndicator = styled(RN.ActivityIndicator)
 styled.DrawerLayoutAndroid = styled(RN.DrawerLayoutAndroid)
