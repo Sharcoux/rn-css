@@ -24,6 +24,8 @@ type Primitive = number | string | null | undefined | boolean | CompleteStyle
 type Functs<T> = (arg: T & { rnCSS?: string; shared: unknown, theme: DefaultTheme }) => Primitive
 /** Omit that distributes over unions so discriminant keys are preserved. */
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never
+/** Intersect that distributes over unions so discriminants survive `& Extra`. */
+type DistributeIntersect<T, U> = T extends unknown ? T & U : never
 /**
  * Attrs keys become optional.
  * Value types come from Props (or Part for Part-only keys), never from Result literals like "black".
@@ -76,13 +78,14 @@ function removeStyle (hash: string) {
   if (styleMap[hash].usage <= 0) delete styleMap[hash]
 }
 
-const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }, Props extends InitialProps & OptionalProps = InitialProps & OptionalProps>(Component: React.ComponentType<InitialProps>) => {
-  const styledComponent = <S, >(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<S & Props>)[]) => {
-    const ForwardRefComponent = React.forwardRef<any, S & Props>((props, ref) => {
+const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }, Props extends DistributeIntersect<InitialProps, OptionalProps> = DistributeIntersect<InitialProps, OptionalProps>>(Component: React.ComponentType<InitialProps>) => {
+  const styledComponent = <S extends object = {}>(chunks: TemplateStringsArray, ...functs: (Primitive | Functs<DistributeIntersect<Props, S>>)[]) => {
+    type MergedProps = DistributeIntersect<Props, S>
+    const ForwardRefComponent = React.forwardRef<any, MergedProps>((props, ref) => {
       const rem = React.useContext(RemContext)
       const shared = React.useContext(SharedValue)
       // Build the css string with the context
-      const css = React.useMemo(() => buildCSSString(chunks, functs, (props as unknown as S & Props), shared), [props, shared])
+      const css = React.useMemo(() => buildCSSString(chunks, functs, (props as unknown as DistributeIntersect<Props, S>), shared), [props, shared])
       // Store the style in RN format
       const rnStyle = React.useMemo(() => cssToStyle(css), [css])
 
@@ -188,16 +191,16 @@ const styled = <StyleType, InitialProps extends { style?: StyleProp<StyleType> }
         return <Component ref={ref} {...(props as unknown as InitialProps)} {...(newProps as unknown as InitialProps)} />
       }
     })
-    return ForwardRefComponent as React.ForwardRefExoticComponent<Props & S & { ref?: React.Ref<any> }>
+    return ForwardRefComponent as React.ForwardRefExoticComponent<MergedProps & { ref?: React.Ref<any> }>
   }
 
   // provide styled(Comp).attrs({} | () => {}) feature
-  styledComponent.attrs = <Part extends object = {}, Result extends Partial<Props & Part> = Partial<Props & Part>>(opts: Result | ((props: Props & Part) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<Props & Part>)[]) => {
+  styledComponent.attrs = <Part extends object = {}, Result extends Partial<DistributeIntersect<Props, Part>> = Partial<DistributeIntersect<Props, Part>>>(opts: Result | ((props: DistributeIntersect<Props, Part>) => Result)) => (chunks: TemplateStringsArray, ...functs: (Primitive | Functs<DistributeIntersect<Props, Part>>)[]) => {
     const ComponentWithAttrs = styledComponent(chunks, ...functs)
     // DistributiveOmit keeps union discriminants. Omit Result keys from Part so inferred attrs
     // literals (e.g. color: "black") don't override Props types. OptionalAttrsKeys restores those keys as optional.
     const ForwardRefComponent = React.forwardRef<any, DistributiveOmit<Props, keyof Result> & Omit<Part, keyof Result> & OptionalAttrsKeys<Props, Part, Result>>((props, ref) => {
-      const castProps = props as unknown as Props & Part
+      const castProps = props as unknown as DistributeIntersect<Props, Part>
       const attrs = (opts instanceof Function) ? opts(castProps) : opts
       return <ComponentWithAttrs ref={ref} {...attrs} {...castProps} />
     })
